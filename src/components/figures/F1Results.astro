@@ -5,10 +5,10 @@ import data from '../../assets/projects/f1-ria/data.json';
 interface Props { n: number; compact?: boolean; bare?: boolean }
 const { n, compact = false, bare = false } = Astro.props;
 const metrics = [
-  { label: 'Tools bound to the agent', before: data.tools.before, after: data.tools.after, unit: 'tools' },
-  { label: 'Tool-schema tokens per request', before: data.schema_tokens.before, after: data.schema_tokens.after, unit: 'tokens' },
+  { label: 'Tools', before: data.tools.before, after: data.tools.after, unit: 'tools' },
+  { label: 'Size of the tool definitions', before: data.schema_tokens.before, after: data.schema_tokens.after, unit: 'tokens' },
 ];
-const summary = `Tools: ${data.tools.before} before, ${data.tools.after} after. Tool-schema tokens: ${data.schema_tokens.before} before, ${data.schema_tokens.after} after, a ${data.reduction_pct.tokens}% cut.`;
+const summary = `Tools: ${data.tools.before} before, ${data.tools.after} after. Tool-definition size: ${data.schema_tokens.before} tokens before, ${data.schema_tokens.after} after, a ${data.reduction_pct.tokens}% cut.`;
 ---
 
 {

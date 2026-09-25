@@ -6,19 +6,19 @@ order: 3
 featured: true
 year: 2026
 role: Solo — data, modelling, simulation
-summary: A tyre-degradation model and Monte Carlo pit-strategy simulator built on three seasons of real F1 data, 23.4% more accurate than a circuit-aware baseline.
-problem: Lap time is mostly fuel and circuit, not tyre wear. Choosing a pit strategy needs the tyre effect isolated first, then tested against what teams actually did.
+summary: A model of how much F1 tyres slow a car as they wear, used to test pit-stop plans against what real teams did.
+problem: Tyre wear is hard to see in lap times. Fuel burn and the track itself change lap times far more, so you have to separate them first.
 mechanisms:
   - label: Clean data
-    detail: 10 separately tested exclusion rules take 74,601 raw laps to 53,854 clean ones.
-  - label: Mixed-effects model
-    detail: Strips out fuel, circuit, season and driver, leaving a wear curve per compound.
-  - label: Monte Carlo strategy
-    detail: 2,000 simulated races per plan, backtested against 59 real ones.
-result: 1.31 s/lap out-of-sample error vs 1.71 for a baseline that already knows the circuit, 23.4% better, validated leave-one-race-out across 21 circuits.
+    detail: "Removed laps that would distort the picture: pit stops, safety cars and wet races."
+  - label: Isolate tyre wear
+    detail: A statistical model strips out fuel, track and driver, leaving only wear.
+  - label: Test strategies
+    detail: Played out 2,000 versions of each race to compare pit-stop plans.
+result: On races it never saw, its lap-time predictions were off by 1.31 seconds a lap, against 1.71 for a baseline that already knew the track, 23% less error.
 metric:
   value: "−23.4%"
-  label: lap-time error vs baseline
+  label: less prediction error than the baseline
 stack: [Python, statsmodels, FastF1, pandas, NumPy, Matplotlib]
 links:
   repo: https://github.com/Pranav1011/pitwall
@@ -37,9 +37,9 @@ import PitWallAccuracy from '../../components/figures/PitWallAccuracy.astro';
 
 ## TL;DR
 
-- **Problem:** estimate how each F1 tyre compound degrades once fuel and circuit effects are removed, then use that to pick pit strategies.
-- **Approach:** a mixed-effects degradation model on 53,854 clean laps, feeding a Monte Carlo simulator backtested against 59 real races.
-- **Result:** 1.31 s/lap out-of-sample error, 23.4% better than a baseline that already knows the circuit, and better on every compound.
+- **Problem:** tyre wear hides behind bigger effects in lap times.
+- **What I did:** cleaned three seasons of real laps, built a model that isolates wear, and simulated thousands of races.
+- **Result:** 23% less prediction error than a track-aware baseline, tested on races the model never saw.
 
 ## The problem
 

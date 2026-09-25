@@ -34,7 +34,7 @@ const person = {
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-no-motion={chrome ? undefined : ""}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -62,8 +62,24 @@ const person = {
 
     <script type="application/ld+json" set:html={JSON.stringify(person)} />
 
-    {/* Hidden animation states are scoped to .js, so content stays visible without JS. */}
-    <script is:inline>document.documentElement.classList.add('js');</script>
+    {/* `js` scopes enhanced UI. `motion-pending` briefly hides only the hero headline until
+        GSAP takes over; skipped under reduced motion, and a fail-safe clears it if the
+        motion bundle never runs. Without JS nothing is hidden. */}
+    <script is:inline>
+      (function () {
+        var r = document.documentElement;
+        r.classList.add('js');
+        if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          r.classList.add('motion-pending');
+          setTimeout(function () {
+            if (r.classList.contains('motion-pending')) {
+              r.classList.remove('motion-pending');
+              r.dataset.motionFallback = '1';
+            }
+          }, 2500);
+        }
+      })();
+    </script>
 
     <Font cssVariable="--font-sans" preload />
     <Font cssVariable="--font-mono" />
@@ -82,3 +98,8 @@ const person = {
     {chrome && <Footer />}
   </body>
 </html>
+{/* Motion bundle: Astro hoists and bundles this module script. The OG card (chrome=false)
+    sets data-no-motion so it renders its final state for the screenshot. */}
+<script>
+  if (!document.documentElement.hasAttribute('data-no-motion')) import('../scripts/motion/index.ts');
+</script>

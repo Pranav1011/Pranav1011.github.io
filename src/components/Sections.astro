@@ -11,6 +11,8 @@ const site = await getSite();
 
 <section class="section section--first container" aria-labelledby="experience">
   <SectionHead id="experience" title="Experience" />
+  <div class="timeline-wrap">
+  <span class="timeline__line" aria-hidden="true"></span>
   <ol class="timeline">
     {
       roles.map((r) => (
@@ -31,6 +33,7 @@ const site = await getSite();
       ))
     }
   </ol>
+  </div>
 </section>
 
 <section class="section container" aria-labelledby="research">
@@ -128,8 +131,36 @@ const site = await getSite();
     padding: 0;
   }
 
-  .timeline {
+  /* The rule on the left draws down as you scroll (motion/reveals.ts); static without JS. */
+  .timeline-wrap {
+    position: relative;
     margin-top: var(--s-8);
+    padding-left: var(--s-6);
+  }
+
+  .timeline__line {
+    position: absolute;
+    left: 0;
+    top: var(--s-6);
+    bottom: var(--s-6);
+    width: 2px;
+    background: var(--c-accent);
+  }
+
+  .timeline > li {
+    position: relative;
+  }
+
+  .timeline > li::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--s-6) * -1 - 4px);
+    top: calc(var(--s-6) + 0.35em);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--c-ground);
+    border: 2px solid var(--c-accent);
   }
 
   .education {

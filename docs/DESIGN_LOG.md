@@ -86,3 +86,28 @@
 - **QA:**
   - Lighthouse mobile: home 100/100/100/100 (169 KB total); PitWall case study 99/100/100/100.
   - 15 renders with no overflow and no console errors.
+
+## 2026-09-25 — Plain-language copy + Phase 4 motion
+- **Copy rule:** problem → what I did → result, in plain words; exact metrics live in result lines and case studies. Every rewrite was re-checked against the repos:
+  - "Handled correctly" replaces "task success". Correct escalations count as success, so "resolved" would be wrong.
+  - Aurora "0 forbidden actions in every test run, on both models" holds for every recorded run: two 43-ticket runs on the scripted stand-in, and the 8-ticket comparison on both models.
+  - F1 RIA says "tool definitions 85% smaller" everywhere. "Per request" is gone, because the planner reads a text tool list, not the schemas.
+  - Trace vs case study: the hero draws the two logged runs (62.1 s / 34.8 s). The case study also cites the error analysis's separate run (69.4 s / 40.5 s, no saved log). The logged run made 9 tool calls, 8 of them `get_order`; the old copy wrongly said "nine times get_order".
+  - The proposed end label "replied citing an order that didn't exist" is **not** supported by the log. The model guessed an order number that exists but belongs to another customer. Both runs ended with the ticket handed to a human, so the labels say that.
+- **Hero trace:** axis cropped to start at 18 s, just before the first tool call; the caption says the first 20 s of reading and planning are cropped. Labels fall back to right-aligning at the edge when neither side fits.
+- **Motion stack:** GSAP 3.15 (ScrollTrigger, SplitText) plus Lenis. The motion chunk is 51.7 KB gzipped, dynamically imported by a 1.4 KB loader.
+  - `motion-pending` hides only the hero h1 until GSAP runs; a 2.5 s inline fail-safe removes it. It isn't set under reduced motion.
+  - All animation runs inside `gsap.matchMedia('(prefers-reduced-motion: no-preference)')`. Lenis runs only on fine pointers at ≥1024px.
+  - The OG card sets `data-no-motion`, so its screenshot is the final state.
+- **Hero playback:** both runs share one clock, compressing real run time onto 2.8 s. It triggers at `top 70%`, plays once, and a Replay button (hidden without JS and under reduced motion) restarts it.
+  - Bug found and fixed: with `transformOrigin` in the *to* vars, GSAP measured the origin after `scale: 0` collapsed the box, and markers landed 9–12px off their lines. It now goes in the *from* vars. A pixel diff of the final state against the static render differs only at the Replay button.
+- **Scroll moments:**
+  - masked line reveals on section headings and figure titles
+  - covers unmask via clip-path from the top
+  - Flow stages arrive left to right
+  - dumbbell spans grow, then the dots land
+  - before/after bars grow in sequence
+  - degradation curves wipe in via clip-path (keeps the dash pattern; DrawSVG would turn the dashed line solid)
+  - the experience timeline rule draws with scroll (scrub)
+- **Cover video:** a styled Play/Pause toggle replaces the native controls when JS runs (WCAG 2.2.2). It pauses when off-screen, never auto-resumes after you pause it, and starts paused under reduced motion. Without JS it keeps native controls.
+- **Lighthouse mobile with motion:** home 98/100/100/100 (LCP 2.3s, TBT 90ms, 223 KB); PitWall case study 99/100/100/100.

@@ -6,25 +6,25 @@ order: 2
 featured: true
 year: 2026
 role: Solo — design, build, measurement
-summary: A LangGraph agent that answers natural-language questions over seven seasons of F1 data, grounded in retrieved race context rather than the model’s memory.
-problem: The agent had grown to 79 narrow tools, a large context tax and a harder tool-selection problem for the model on every question.
+summary: An AI assistant that answers plain-English questions about seven seasons of Formula 1, with answers built from the race data it retrieves.
+problem: The assistant had grown to 79 narrow, overlapping tools. That’s a lot for an AI to choose from, and a lot of definition text to carry around.
 mechanisms:
-  - label: Orchestration
-    detail: A LangGraph agent routes each question across TimescaleDB, Neo4j and Qdrant.
-  - label: Retrieval
-    detail: RAG over race reports, with HyDE in query understanding.
-  - label: Tool design
-    detail: 8 intent-level tools over 79 functions, plus guarded read-only text-to-SQL.
-result: Cut the tool surface from 79 to 8 and tool-schema tokens from 13,487 to 2,014 per request (−85%), with all 79 capabilities still reachable.
+  - label: Plans each question
+    detail: "An AI planner decides what data to pull: lap timing, a knowledge graph, or race reports."
+  - label: Answers from data
+    detail: Replies are built from the race data it retrieves.
+  - label: Fewer, clearer tools
+    detail: I regrouped the 79 tools into 8 without removing anything, and a test proves it.
+result: The tool definitions are 85% smaller, from 13,487 to 2,014 tokens, and all 79 original capabilities still work.
 metric:
   value: "−85%"
-  label: tool-schema tokens per request
+  label: smaller tool definitions
 stack: [LangGraph, FastAPI, TimescaleDB, Neo4j, Qdrant, Next.js]
 links:
   repo: https://github.com/Pranav1011/F1-Race-Intelligence-Agent
 cover:
   src: f1-results
-  alt: Bar chart. Tools bound to the agent fell from 79 to 8, and tool-schema tokens per request from 13,487 to 2,014.
+  alt: Bar chart. Tools fell from 79 to 8, and the size of their definitions from 13,487 to 2,014 tokens.
   kind: chart
 status: active
 ---
@@ -36,9 +36,9 @@ import F1Results from '../../components/figures/F1Results.astro';
 
 ## TL;DR
 
-- **Problem:** a conversational F1 analysis agent was paying for 79 tool schemas on every request.
-- **Approach:** a parameterized tool facade and dispatch layer, with guarded text-to-SQL for the long tail, verified by coverage tests.
-- **Result:** 79 tools down to 8, and 13,487 down to 2,014 schema tokens per request, an 85% cut with zero capability loss.
+- **Problem:** a Formula 1 question-answering agent had 79 overlapping tools.
+- **What I did:** regrouped them into 8 clear tools, with a test proving nothing was lost.
+- **Result:** tool definitions 85% smaller (13,487 → 2,014 tokens), all 79 capabilities intact.
 
 ## The problem
 
@@ -46,7 +46,7 @@ The agent answers questions like "Compare Verstappen and Norris's tyre degradati
 
 {/* src: F1 RIA/README.md Overview ("7 years of data (2018-2024)"), Architecture */}
 
-As features grew, so did the tool list. By the time I measured it, the agent was binding 79 TimescaleDB tools, and every one of their schemas went into the context on every request. That costs tokens, and it makes tool choice harder: the model has to pick one function out of 79 near-duplicates like "lap times by driver", "lap times by stint" and "lap times by compound."
+As features grew, so did the tool list. By the time I measured it, the agent had 79 TimescaleDB tools whose definitions came to 13,487 tokens. That’s a lot of surface for a model to choose from: the model has to pick one function out of 79 near-duplicates like "lap times by driver", "lap times by stint" and "lap times by compound."
 
 {/* src: CLAIMS.md (public in F1 RIA) scope note (79 TimescaleDB tools = 88% of original token tax) */}
 
@@ -54,7 +54,7 @@ As features grew, so did the tool list. By the time I measured it, the agent was
 
 ## Approach
 
-**Measure first.** Before changing anything, I wrote a measurement script that serializes the agent's tool schemas exactly as LangChain sends them and counts tokens with tiktoken. That gave a baseline of 13,487 tokens per request for the TimescaleDB tools alone.
+**Measure first.** Before changing anything, I wrote a measurement script that serializes the agent's tool definitions the way LangChain formats them for a model and counts tokens with tiktoken. That gave a baseline of 13,487 tokens for the TimescaleDB tools alone.
 
 {/* src: backend/eval/measure_consolidation.py; consolidation.json */}
 
@@ -66,7 +66,7 @@ As features grew, so did the tool list. By the time I measured it, the agent was
 
 {/* src: backend/agent/validation.py; tests/test_tools/test_sql_validation.py */}
 
-**Grounding.** A query-understanding step parses each question into entities, sub-questions and a HyDE-style hypothetical answer describing what a complete response should contain. The plan is built from that, and answers come from retrieved race data and telemetry, not from the model's memory of F1.
+**Grounding.** A query-understanding step parses each question into entities, sub-questions and a HyDE-style hypothetical answer describing what a complete response should contain. The plan is built from that, and answers are built from the race data and telemetry it retrieves.
 
 {/* src: HyDE — agent/prompts/understand.py:21, agent/nodes/understand.py:139 (main). NOTE: hypothetical_answer is generated but not yet passed to vector search; see docs/SOURCES.md */}
 
@@ -78,8 +78,8 @@ As features grew, so did the tool list. By the time I measured it, the agent was
 
 | | Before | After |
 |---|---|---|
-| Tools bound per request | 79 | 8 |
-| Tool-schema tokens per request | 13,487 | 2,014 |
+| Tools | 79 | 8 |
+| Tool-definition size (tokens) | 13,487 | 2,014 |
 | Underlying capabilities reachable | 79 | 79 |
 | Test suite | 57 passing | 63 passing |
 

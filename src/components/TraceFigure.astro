@@ -28,37 +28,51 @@ function summarise(run: Run) {
 
 const before = summarise(trace.before as Run);
 const after = summarise(trace.after as Run);
-/** Axis end: the later reply rounded up to 5 s, plus a little headroom for its marker. */
+/** Axis window: from just before the first tool call (the first ~20 s of reading the
+ *  ticket and planning are cropped, and the caption says so) to just past the later reply. */
+const T_MIN = Math.floor(Math.min(before.firstAct, after.firstAct) / 5) * 5 - 2;
 const T_MAX = Math.ceil(Math.max(before.reply, after.reply) / 5) * 5 + 3;
-const tickEvery = (step: number) => Array.from({ length: Math.floor(T_MAX / step) + 1 }, (_, i) => i * step);
+const tickEvery = (step: number) => {
+  const first = Math.ceil(T_MIN / step) * step;
+  return Array.from({ length: Math.floor((T_MAX - first) / step) + 1 }, (_, i) => first + i * step);
+};
 
 /** Build one layout of the figure, each drawn near 1:1 for its breakpoint:
  *  wide ≥ 1024px, medium 640–1023px, compact < 640px. */
 function layout(width: number, labelW: number, rowH: number, fs: number, stackReply = false) {
   const right = width - 8;
-  const x = (t: number) => labelW + (t / T_MAX) * (right - labelW);
+  const x = (t: number) => labelW + ((t - T_MIN) / (T_MAX - T_MIN)) * (right - labelW);
   const rows = [
-    { key: 'before', run: before, label: ['Without', 'loop-breaker'], tone: 'brass' },
-    { key: 'after', run: after, label: ['With', 'loop-breaker'], tone: 'accent' },
+    { key: 'before', run: before, label: ['Without', 'the check'], tone: 'brass' },
+    { key: 'after', run: after, label: ['With', 'the check'], tone: 'accent' },
   ].map((r, i) => ({ ...r, y: 48 + i * rowH }));
   const ticks = tickEvery(width > 500 ? 10 : 20);
   const height = 48 + (rows.length - 1) * rowH + (stackReply ? 88 : 72);
-  /** Place a label right of `at`, or flip it left when it would cross the right edge. */
+  /** Place a label right of `at`; flip it left if it would cross the right edge; and if
+   *  it fits neither side, right-align it to the chart edge. */
   const place = (at: number, text: string, gap = 10) => {
     const w = text.length * fs * 0.62;
-    return at + gap + w > right ? { x: at - gap, anchor: 'end' } : { x: at + gap, anchor: 'start' };
+    if (at + gap + w <= right) return { x: at + gap, anchor: 'start' };
+    if (at - gap - w >= labelW * 0.5) return { x: at - gap, anchor: 'end' };
+    return { x: right, anchor: 'end' };
   };
   return { width, height, x, rows, ticks, fs, place, replyDy: stackReply ? 28 + fs + 6 : 28 };
 }
 
 const wide = layout(1200, 176, 128, 16);
-const medium = layout(720, 124, 116, 14);
+const medium = layout(720, 124, 124, 14, true);
 const compact = layout(360, 86, 120, 12, true);
 const fmt = (t: number) => `${t.toFixed(1)} s`;
 ---
 
-<figure class="trace" aria-labelledby={`${idPrefix}-cap`}>
-  <p class="trace__title">Same ticket, same model. The only change is the loop-breaker.</p>
+<figure class="trace" aria-labelledby={`${idPrefix}-cap`} data-trace data-t-start={Math.min(before.firstAct, after.firstAct)} data-t-end={Math.max(before.reply, after.reply)}>
+  <div class="trace__head">
+    <p class="trace__title">Same ticket, same AI model. The only difference is a check that stops it repeating itself.</p>
+    <button type="button" class="trace__replay" hidden>
+      <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1.5a4.5 4.5 0 1 1-4.3 3.2" /><path d="M1.2 1.6v3.3h3.3" /></svg>
+      Replay<span class="visually-hidden"> the two runs</span>
+    </button>
+  </div>
   {
     [
       { l: wide, cls: 'trace__svg trace__svg--wide' },
@@ -71,7 +85,7 @@ const fmt = (t: number) => `${t.toFixed(1)} s`;
           {l.ticks.map((t) => (
             <g>
               <line x1={l.x(t)} x2={l.x(t)} y1={18} y2={l.height - 24} class="grid" />
-              <text x={l.x(t)} y={l.height - 8} text-anchor="middle">{t === 0 ? '0 s' : t}</text>
+              <text x={l.x(t)} y={l.height - 8} text-anchor="middle">{t === l.ticks[0] ? `${t} s` : t}</text>
             </g>
           ))}
         </g>
@@ -81,19 +95,18 @@ const fmt = (t: number) => `${t.toFixed(1)} s`;
           const y = row.y;
           const caught = row.key === 'after';
           return (
-            <g class={`row row--${row.tone}`} font-size={l.fs}>
+            <g class={`row row--${row.tone}`} font-size={l.fs} data-row={row.key}>
               <text x={0} y={y - 5} class="row__label">{row.label[0]}</text>
               <text x={0} y={y + l.fs + 4} class="row__label">{row.label[1]}</text>
 
-              {/* Phases: intake → plan → act → resolve */}
-              <line x1={l.x(0)} x2={l.x(r.plan)} y1={y} y2={y} class="phase phase--quiet" />
-              <line x1={l.x(r.plan)} x2={l.x(r.firstAct)} y1={y} y2={y} class="phase phase--quiet" />
-              <line x1={l.x(r.firstAct)} x2={l.x(r.guard)} y1={y} y2={y} class="phase phase--act" />
-              <line x1={l.x(r.guard)} x2={l.x(r.reply)} y1={y} y2={y} class="phase phase--quiet" />
+              {/* Before the first tool call: reading the ticket and planning (cropped) */}
+              <line x1={l.x(T_MIN)} x2={l.x(r.firstAct)} y1={y} y2={y} class="phase phase--quiet" />
+              <line x1={l.x(r.firstAct)} x2={l.x(r.guard)} y1={y} y2={y} class="phase phase--act" data-t0={r.firstAct} data-t1={r.guard} />
+              <line x1={l.x(r.guard)} x2={l.x(r.reply)} y1={y} y2={y} class="phase phase--quiet phase--post" data-t0={r.guard} data-t1={r.reply} />
 
               {/* Each get_order tool call */}
               {r.loops.map((t) => (
-                <line x1={l.x(t)} x2={l.x(t)} y1={y - 15} y2={y + 15} class="call" />
+                <line x1={l.x(t)} x2={l.x(t)} y1={y - 15} y2={y + 15} class="call" data-t={t} />
               ))}
 
               {/* The guard that ended the act loop */}
@@ -103,20 +116,21 @@ const fmt = (t: number) => `${t.toFixed(1)} s`;
                 width={16}
                 height={16}
                 class="guard"
+                data-t={r.guard}
                 transform={caught ? `rotate(45 ${l.x(r.guard)} ${y})` : undefined}
               />
-              <circle cx={l.x(r.reply)} cy={y} r={6} class="reply" />
+              <circle cx={l.x(r.reply)} cy={y} r={6} class="reply" data-t={r.reply} />
 
               {(() => {
-                const guardText = caught ? `loop-breaker, ${fmt(r.guard)}` : `iteration cap, ${fmt(r.guard)}`;
-                const replyText = `reply ${fmt(r.reply)}`;
+                const guardText = caught ? `caught repeating, ${fmt(r.guard)}` : `hit the step limit, ${fmt(r.guard)}`;
+                const replyText = `handed to a human, ${fmt(r.reply)}`;
                 const g = l.place(l.x(r.guard), guardText, 6);
                 const rp = l.place(l.x(r.reply), replyText, 8);
                 return (
                   <>
-                    <text x={g.x} y={y - 22} text-anchor={g.anchor} class="note">{guardText}</text>
-                    <text x={rp.x} y={y + l.replyDy} text-anchor={rp.anchor} class="note note--quiet">{replyText}</text>
-                    <text x={l.x(r.firstAct)} y={y + 28} class="note note--quiet">{r.loops.length} × get_order</text>
+                    <text x={g.x} y={y - 22} text-anchor={g.anchor} class="note note--guard" data-t={r.guard}>{guardText}</text>
+                    <text x={rp.x} y={y + l.replyDy} text-anchor={rp.anchor} class="note note--quiet note--reply" data-t={r.reply}>{replyText}</text>
+                    <text x={l.x(r.firstAct)} y={y + 28} class="note note--quiet note--count" data-t={r.loops[r.loops.length - 1]}>{r.loops.length === 1 ? '1 lookup of the order' : `${r.loops.length} lookups of the same order`}</text>
                   </>
                 );
               })()}
@@ -127,10 +141,12 @@ const fmt = (t: number) => `${t.toFixed(1)} s`;
     ))
   }
   <figcaption id={`${idPrefix}-cap`}>
-    Aurora on ticket TCK-000004 (a double charge) with Llama 3.1 8B, drawn from its run traces. Without the
-    loop-breaker, the agent called <code>get_order</code>&nbsp;{before.loops.length} times until the iteration cap
-    stopped it at {fmt(before.guard)}. With it, the repeat is caught at {fmt(after.guard)} and the ticket is escalated
-    to a human.
+    {
+      `Aurora handling a real test ticket (a customer charged twice) on Llama 3.1 8B, drawn from its run logs. ` +
+        `Without the check, it looked up the same order ${before.loops.length} times until a hard step limit stopped it at ${fmt(before.guard)}. ` +
+        `With the check, the repeat was caught at ${fmt(after.guard)}. Both runs ended with the ticket handed to a human. ` +
+        `The first ${T_MIN} seconds, reading the ticket and planning, are cropped from the chart.`
+    }
   </figcaption>
 </figure>
 
@@ -252,13 +268,57 @@ const fmt = (t: number) => `${t.toFixed(1)} s`;
     fill: var(--c-secondary);
   }
 
+  .trace__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--s-6);
+    margin-bottom: var(--s-8);
+  }
+
   .trace__title {
     font-size: var(--t-h3);
     font-weight: 600;
     letter-spacing: -0.015em;
     line-height: 1.2;
     max-width: 36ch;
-    margin-bottom: var(--s-8);
+  }
+
+  .trace__replay {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    min-height: 44px;
+    padding: 0 var(--s-4);
+    border: 1px solid var(--c-ink);
+    background: transparent;
+    color: var(--c-ink);
+    font: inherit;
+    font-size: var(--t-small);
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background-color var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+
+  .trace__replay[hidden] {
+    display: none;
+  }
+
+  .trace__replay:hover {
+    background: var(--c-ink);
+    color: var(--c-ground);
+  }
+
+  .trace__replay svg {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
   }
 
   figcaption {

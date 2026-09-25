@@ -6,19 +6,19 @@ order: 1
 featured: true
 year: 2026
 role: Solo — design, build, evaluation
-summary: An agent that resolves customer-ops tickets end to end, from refunds to escalations, with zero policy violations across 43 eval scenarios.
-problem: Most agent demos stop at the tool call. Aurora takes real actions against business systems, so it has to stay safe when the model is wrong or a worker dies halfway through.
+summary: An AI support agent that can issue refunds and cancel orders, built so it never takes an action the rules don’t allow, even when it’s wrong.
+problem: An AI agent that can refund money or cancel orders is risky. If it misreads a ticket, it can do real damage.
 mechanisms:
-  - label: Policy-gated writes
-    detail: A deterministic engine approves every refund, cancellation and credit before it runs.
-  - label: Idempotency
-    detail: Retried or duplicated tickets never double-fire an action.
-  - label: Crash recovery
-    detail: A Redis/RQ queue resumes work a killed worker left behind.
-result: 0 policy violations across 43 eval scenarios, including 6 prompt-injection attacks. Safety held at 100% even when a Llama 3.1 8B brain dropped task success to 25%.
+  - label: Checks before acting
+    detail: Every refund, cancellation and credit is approved by fixed rules before it happens.
+  - label: No double refunds
+    detail: If the same ticket arrives twice, the action still happens only once.
+  - label: Survives crashes
+    detail: If a worker dies mid-ticket, the job resumes without repeating anything.
+result: It never took a forbidden action across 43 test tickets, including 6 attempts to trick it. With a weaker AI model, it handled far fewer tickets correctly (2 of 8), but still took no forbidden actions.
 metric:
-  value: "0 / 43"
-  label: eval scenarios with a policy violation
+  value: "0"
+  label: forbidden actions in every test run, on both models
 stack: [Python, LangGraph, FastAPI, Redis/RQ, Chroma, MCP]
 links:
   repo: https://github.com/Pranav1011/customer-ops-agent
@@ -37,9 +37,9 @@ import AuroraResults from '../../components/figures/AuroraResults.astro';
 
 ## TL;DR
 
-- **Problem:** support agents that take real actions (refunds, cancellations, credits) have to stay safe even when the model is wrong.
-- **Approach:** a LangGraph agent wrapped in a deterministic policy engine and five layers of guardrails, measured by an eval harness I built alongside it.
-- **Result:** zero policy violations across 43 scenarios, including 6 prompt-injection attacks. Safety held at 100% even on a small local model.
+- **Problem:** AI agents that take real actions (refunds, cancellations) have to stay safe even when the model is wrong.
+- **What I did:** wrapped the agent in fixed rules and five safety checks, and built a test harness to measure it.
+- **Result:** 0 forbidden actions in 43 test tickets, run with a scripted stand-in model. On a real local AI model it handled only 2 of 8 correctly, and still took no forbidden actions.
 
 ## The problem
 
@@ -81,7 +81,7 @@ The same policy-gated tools are exposed through an MCP server, so Claude Desktop
 
 ## Evaluation
 
-I built the eval harness before I trusted any result. It runs a 43-scenario golden set ranging from easy to adversarial: tickets that must be escalated, tickets that try to touch another customer's account, and six prompt-injection attacks. It scores task success against a deterministic final-state check, tool-trajectory precision and recall, and action safety. Reply quality is scored by an LLM judge that I validated for position bias and consistency before relying on it. It all runs in GitHub Actions CI.
+I built the eval harness before I trusted any result. Run with a scripted stand-in model so results are reproducible, it runs a 43-scenario golden set ranging from easy to adversarial: tickets that must be escalated, tickets that try to touch another customer's account, and six prompt-injection attacks. It scores task success against a deterministic final-state check, tool-trajectory precision and recall, and action safety. Reply quality is scored by an LLM judge that I validated for position bias and consistency before relying on it. It all runs in GitHub Actions CI.
 
 | Metric | Result |
 |---|---|
@@ -107,9 +107,9 @@ I built the eval harness before I trusted any result. It runs a 43-scenario gold
 
 The harness paid for itself on its first run. It flagged two missed escalations: address-change tickets were being routed as "where's my order" because the intent classifier didn't match "update my shipping address." The guardrails were right; the routing was wrong.
 
-The local model surfaced a sharper failure. On a double-charge ticket it called `get_order` nine times in a row, burned the whole iteration budget in 69 seconds, and drafted a reply citing an order that didn't exist. I added a loop breaker that stops on an identical repeated call or a third non-progressing call to the same tool, and escalates. The same ticket now ends cleanly in two steps and about 40 seconds.
+The local model surfaced a sharper failure. On a double-charge ticket with no order number, Llama 3.1 8B guessed one and looked up that same order 8 times in a row (9 tool calls in all) until the iteration cap stopped it at 50.5 seconds; its reply went out at 62.1 seconds. I added a loop breaker that stops on an identical repeated call, or a third call to the same tool without progress, and hands the ticket to a human. On the same ticket it now catches the repeat at 25.1 seconds and escalates, with the reply out at 34.8 seconds. Those are the two logged runs drawn at the top of the home page; an earlier run recorded in the repo’s error analysis took 69.4 seconds before the fix and 40.5 after.
 
-{/* src: ERROR_ANALYSIS.md F1, F3, TCK-000004 table */}
+{/* src: data/traces/88ced744d9d1.json (before), 6f491c4bd4a0.json (after); ERROR_ANALYSIS.md F1, F3, TCK-000004 table (the 69.4 s / 40.5 s run) */}
 
 **Next:** replace the simulated backends with real ones (Stripe in test mode, webhooks), and move from keyword-based injection sanitization to a classifier, since the policy engine, not the blocklist, is what actually keeps writes safe today.
 

@@ -13,20 +13,31 @@ const { cover, slug } = Astro.props.project.data;
 <div class="cover">
   {
     cover.kind === 'video' && (
-      <video
-        class="cover__video"
-        src={cover.src}
-        poster={cover.poster}
-        width="1200"
-        height="654"
-        muted
-        loop
-        playsinline
-        controls
-        preload="none"
-        aria-label={cover.alt}
-        data-autoplay
-      />
+      <div class="cover__media" data-video>
+        <video
+          class="cover__video"
+          src={cover.src}
+          poster={cover.poster}
+          width="1200"
+          height="654"
+          muted
+          loop
+          playsinline
+          controls
+          preload="none"
+          aria-label={cover.alt}
+        />
+        <button type="button" class="cover__toggle" hidden>
+          <svg class="cover__icon cover__icon--play" viewBox="0 0 12 12" aria-hidden="true">
+            <path d="M3 1.5v9l7.5-4.5z" />
+          </svg>
+          <svg class="cover__icon cover__icon--pause" viewBox="0 0 12 12" aria-hidden="true">
+            <path d="M2.5 1.5h2.5v9H2.5zM7 1.5h2.5v9H7z" />
+          </svg>
+          <span class="cover__toggle-label">Play</span>
+          <span class="visually-hidden"> the Aurora console recording</span>
+        </button>
+      </div>
     )
   }
   {cover.kind === 'image' && <img src={cover.src} alt={cover.alt} loading="lazy" decoding="async" />}
@@ -43,28 +54,63 @@ const { cover, slug } = Astro.props.project.data;
 </div>
 
 <script>
-  // Covers autoplay (muted) only while on screen and never under reduced motion.
-  // Native controls stay on in every case: they are the pause control (WCAG 2.2.2)
-  // and the way to start playback if the browser refuses autoplay.
+  // Progressive enhancement for the cover recording (WCAG 2.2.2):
+  // - Without JS the video keeps native controls and never autoplays.
+  // - With JS, a styled play/pause toggle replaces the native controls. The video
+  //   autoplays (muted) only while on screen, never under reduced motion, and never
+  //   again once the visitor has paused it.
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const videos = document.querySelectorAll<HTMLVideoElement>('video[data-autoplay]');
-  const observer = new IntersectionObserver(
-    (entries) => {
-      for (const { target, isIntersecting } of entries) {
-        const v = target as HTMLVideoElement;
-        if (isIntersecting && !reduce.matches) {
-          v.preload = 'auto';
-          // Refused autoplay leaves the poster and native controls in place.
-          v.play().catch(() => {});
-        } else {
-          v.pause();
-        }
+
+  document.querySelectorAll<HTMLElement>('[data-video]').forEach((wrap) => {
+    const video = wrap.querySelector('video')!;
+    const button = wrap.querySelector<HTMLButtonElement>('.cover__toggle')!;
+    const label = button.querySelector<HTMLElement>('.cover__toggle-label')!;
+    let userPaused = false;
+    let visible = false;
+
+    const render = () => {
+      const playing = !video.paused;
+      // The label names the action, so no aria-pressed (it would double-announce).
+      label.textContent = playing ? 'Pause' : 'Play';
+      wrap.dataset.state = playing ? 'playing' : 'paused';
+    };
+
+    const play = () => {
+      video.preload = 'auto';
+      video.play().catch(() => render()); // refused autoplay: stay paused, toggle shows Play
+    };
+
+    video.controls = false;
+    button.hidden = false;
+    video.addEventListener('play', render);
+    video.addEventListener('pause', render);
+
+    button.addEventListener('click', () => {
+      if (video.paused) {
+        userPaused = false;
+        play();
+      } else {
+        userPaused = true;
+        video.pause();
       }
-    },
-    { threshold: 0.5 },
-  );
-  videos.forEach((v) => {
-    if (!reduce.matches) observer.observe(v);
+    });
+
+    new IntersectionObserver(
+      (entries) => {
+        // A fast scroll can batch enter+leave; the last entry is the current state.
+        visible = entries[entries.length - 1].isIntersecting;
+        if (visible && !userPaused && !reduce.matches) play();
+        if (!visible && !video.paused) video.pause();
+      },
+      { threshold: 0.5 },
+    ).observe(video);
+
+    reduce.addEventListener('change', () => {
+      if (reduce.matches) video.pause();
+      else if (visible && !userPaused) play();
+    });
+
+    render();
   });
 </script>
 
@@ -81,6 +127,56 @@ const { cover, slug } = Astro.props.project.data;
     aspect-ratio: 1200 / 654;
     background: var(--c-ink);
     border: 1px solid var(--c-rule);
+  }
+
+  .cover__media {
+    position: relative;
+  }
+
+  /* Small toggle over the recording's lower-left corner. 44px tall hit target. */
+  .cover__toggle {
+    position: absolute;
+    left: var(--s-3);
+    bottom: var(--s-3);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    min-height: 44px;
+    padding: 0 var(--s-4) 0 var(--s-3);
+    border: 1px solid var(--c-ink);
+    background: var(--c-ground);
+    color: var(--c-ink);
+    font: inherit;
+    font-size: var(--t-small);
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background-color var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+
+  .cover__toggle[hidden] {
+    display: none;
+  }
+
+  .cover__toggle:hover {
+    background: var(--c-ink);
+    color: var(--c-ground);
+  }
+
+  .cover__icon {
+    width: 12px;
+    height: 12px;
+    fill: currentColor;
+  }
+
+  .cover__icon--pause,
+  [data-state='playing'] .cover__icon--play {
+    display: none;
+  }
+
+  [data-state='playing'] .cover__icon--pause {
+    display: block;
   }
 
   .cover__chart {

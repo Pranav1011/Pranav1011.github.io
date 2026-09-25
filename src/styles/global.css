@@ -78,6 +78,10 @@ a:hover {
   border-radius: 2px;
 }
 
+.motion-pending #hero-title {
+  visibility: hidden;
+}
+
 .tnum {
   font-variant-numeric: tabular-nums;
 }
