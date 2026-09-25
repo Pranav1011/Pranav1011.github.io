@@ -1,0 +1,23 @@
+---
+import Ruler from './Ruler.astro';
+// Section opener: a full-width hairline with ruler ticks at the column lines, then a
+// plain sentence-case h2. The only section decoration on the site.
+interface Props {
+  id: string;
+  title: string;
+}
+const { id, title } = Astro.props;
+---
+
+<Ruler />
+<h2 id={id} class="section-title">{title}</h2>
+
+<style>
+
+  .section-title {
+    margin-top: var(--s-6);
+    font-size: var(--t-h2);
+    letter-spacing: -0.025em;
+    scroll-margin-top: var(--s-24);
+  }
+</style>

@@ -1,0 +1,195 @@
+{
+  "source": "Aurora run traces (github.com/Pranav1011/customer-ops-agent)",
+  "before": {
+    "run_id": "88ced744d9d1",
+    "ticket_id": "TCK-000004",
+    "intent": "double_charge",
+    "status": "escalated",
+    "models": [
+      "llama3.1:8b"
+    ],
+    "events": [
+      {
+        "t": 0.0,
+        "type": "tool_call",
+        "phase": "act",
+        "tool": "get_customer"
+      },
+      {
+        "t": 0.0,
+        "type": "intent",
+        "phase": "intake"
+      },
+      {
+        "t": 8.32,
+        "type": "plan",
+        "phase": "plan"
+      },
+      {
+        "t": 20.22,
+        "type": "decision",
+        "phase": "act"
+      },
+      {
+        "t": 20.23,
+        "type": "tool_call",
+        "phase": "act",
+        "tool": "get_order"
+      },
+      {
+        "t": 24.91,
+        "type": "decision",
+        "phase": "act"
+      },
+      {
+        "t": 24.91,
+        "type": "tool_call",
+        "phase": "act",
+        "tool": "get_order"
+      },
+      {
+        "t": 29.69,
+        "type": "decision",
+        "phase": "act"
+      },
+      {
+        "t": 29.69,
+        "type": "tool_call",
+        "phase": "act",
+        "tool": "get_order"
+      },
+      {
+        "t": 34.56,
+        "type": "decision",
+        "phase": "act"
+      },
+      {
+        "t": 34.56,
+        "type": "tool_call",
+        "phase": "act",
+        "tool": "get_order"
+      },
+      {
+        "t": 39.51,
+        "type": "decision",
+        "phase": "act"
+      },
+      {
+        "t": 39.51,
+        "type": "tool_call",
+        "phase": "act",
+        "tool": "get_order"
+      },
+      {
+        "t": 43.9,
+        "type": "decision",
+        "phase": "act"
+      },
+      {
+        "t": 43.9,
+        "type": "tool_call",
+        "phase": "act",
+        "tool": "get_order"
+      },
+      {
+        "t": 46.96,
+        "type": "decision",
+        "phase": "act"
+      },
+      {
+        "t": 46.96,
+        "type": "tool_call",
+        "phase": "act",
+        "tool": "get_order"
+      },
+      {
+        "t": 50.47,
+        "type": "decision",
+        "phase": "act"
+      },
+      {
+        "t": 50.47,
+        "type": "tool_call",
+        "phase": "act",
+        "tool": "get_order"
+      },
+      {
+        "t": 50.47,
+        "type": "guard",
+        "phase": "act",
+        "decision": "stop",
+        "reason": "max_iterations"
+      },
+      {
+        "t": 50.48,
+        "type": "escalation",
+        "phase": "resolve"
+      },
+      {
+        "t": 62.08,
+        "type": "reply",
+        "phase": "resolve"
+      }
+    ]
+  },
+  "after": {
+    "run_id": "6f491c4bd4a0",
+    "ticket_id": "TCK-000004",
+    "intent": "double_charge",
+    "status": "escalated",
+    "models": [
+      "llama3.1:8b"
+    ],
+    "events": [
+      {
+        "t": 0.0,
+        "type": "tool_call",
+        "phase": "act",
+        "tool": "get_customer"
+      },
+      {
+        "t": 0.0,
+        "type": "intent",
+        "phase": "intake"
+      },
+      {
+        "t": 8.07,
+        "type": "plan",
+        "phase": "plan"
+      },
+      {
+        "t": 20.48,
+        "type": "decision",
+        "phase": "act"
+      },
+      {
+        "t": 20.49,
+        "type": "tool_call",
+        "phase": "act",
+        "tool": "get_order"
+      },
+      {
+        "t": 25.13,
+        "type": "decision",
+        "phase": "act"
+      },
+      {
+        "t": 25.13,
+        "type": "guard",
+        "phase": "act",
+        "decision": "loop_break",
+        "reason": "repeated tool call without progress"
+      },
+      {
+        "t": 25.13,
+        "type": "escalation",
+        "phase": "resolve"
+      },
+      {
+        "t": 34.79,
+        "type": "reply",
+        "phase": "resolve"
+      }
+    ]
+  }
+}

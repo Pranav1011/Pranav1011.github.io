@@ -1,0 +1,131 @@
+---
+import Ruler from './Ruler.astro';
+import { getSite, getResumeHref } from '../lib/content';
+
+const s = await getSite();
+const resume = await getResumeHref();
+---
+
+<section id="contact" class="contact container" aria-labelledby="contact-title">
+  <Ruler />
+  <h2 id="contact-title">{s.cta.heading}</h2>
+
+  <div class="contact__email">
+    <a class="contact__address" href={`mailto:${s.email}`}>{s.email}</a>
+    <button type="button" class="contact__copy" data-copy={s.email} hidden>
+      <span data-label>Copy email</span>
+    </button>
+    <span class="visually-hidden" role="status" aria-live="polite" data-status></span>
+  </div>
+
+  <ul class="contact__links">
+    <li><a href={s.github}>GitHub</a></li>
+    <li><a href={s.linkedin}>LinkedIn</a></li>
+    {resume && <li><a href={resume}>Resume (PDF)</a></li>}
+  </ul>
+</section>
+
+<script>
+  // Progressive enhancement: the mailto link works without JS; the copy button only
+  // appears once this runs (it ships with the `hidden` attribute).
+  document.querySelectorAll<HTMLButtonElement>('.contact__copy').forEach((button) => {
+    const label = button.querySelector<HTMLElement>('[data-label]')!;
+    const status = button.parentElement!.querySelector<HTMLElement>('[data-status]')!;
+    button.hidden = false;
+    let timer: number | undefined;
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy ?? '');
+        label.textContent = 'Copied';
+        status.textContent = 'Email address copied';
+        button.dataset.state = 'copied';
+      } catch {
+        label.textContent = 'Select to copy';
+        status.textContent = 'Copy failed. Select the address to copy it.';
+      }
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        label.textContent = 'Copy email';
+        status.textContent = '';
+        delete button.dataset.state;
+      }, 2000);
+    });
+  });
+</script>
+
+<style>
+  .contact {
+    margin-top: var(--s-section);
+    padding-bottom: var(--s-24);
+  }
+
+
+  h2 {
+    margin-top: var(--s-12);
+    font-size: var(--t-display);
+    line-height: var(--lh-display);
+    letter-spacing: -0.035em;
+    font-weight: 620;
+    max-width: 14ch;
+  }
+
+  .contact__email {
+    margin-top: var(--s-12);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-3) var(--s-6);
+  }
+
+  .contact__address {
+    font-size: clamp(1.25rem, 1rem + 1.2vw, 2rem);
+    font-weight: 560;
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
+  }
+
+  .contact__copy {
+    display: none;
+    min-height: 44px;
+    padding-inline: var(--s-4);
+    border: 1px solid var(--c-accent);
+    background: transparent;
+    color: var(--c-accent);
+    font: inherit;
+    font-size: var(--t-small);
+    font-weight: 560;
+    cursor: pointer;
+    transition:
+      background-color var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+
+  :global(.js) .contact__copy:not([hidden]) {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .contact__copy:hover {
+    background: var(--c-accent-tint);
+  }
+
+  .contact__copy[data-state='copied'] {
+    background: var(--c-accent);
+    color: var(--c-ground);
+  }
+
+  .contact__links {
+    list-style: none;
+    padding: 0;
+    margin-top: var(--s-8);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--s-6);
+  }
+
+  .contact__links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+</style>

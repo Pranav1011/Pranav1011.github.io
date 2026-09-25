@@ -1,0 +1,200 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Headline from './Headline.astro';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+const p = Astro.props.project.data;
+const caseStudy = `/work/${p.slug}/`;
+const headingId = `work-${p.slug}`;
+---
+
+<article class="work-row" aria-labelledby={headingId}>
+  <div class="work-row__readout">
+    {
+      p.metric && (
+        <p>
+          <span class="work-row__value">{p.metric.value}</span>
+          <span class="work-row__unit">{p.metric.label}</span>
+        </p>
+      )
+    }
+    <p class="work-row__year tnum">{p.year}</p>
+  </div>
+
+  <div class="work-row__body">
+    <h3 id={headingId}>
+      <a href={caseStudy}><Headline text={p.headline} /></a>
+    </h3>
+    <p class="work-row__problem">{p.problem}</p>
+
+    <dl class="work-row__mechanisms">
+      {
+        p.mechanisms.map((m) => (
+          <div>
+            <dt>{m.label}</dt>
+            <dd>{m.detail}</dd>
+          </div>
+        ))
+      }
+    </dl>
+
+    <p class="work-row__result"><strong>Result.</strong> {p.result}</p>
+    <p class="work-row__stack">{p.stack.join(', ')}</p>
+
+    <ul class="work-row__links">
+      <li><a href={caseStudy}>Read the case study<span class="visually-hidden">: {p.title}</span></a></li>
+      {p.links.repo && <li><a href={p.links.repo}>Source on GitHub<span class="visually-hidden">: {p.title}</span></a></li>}
+      {p.links.demo && <li><a href={p.links.demo}>Live demo<span class="visually-hidden">: {p.title}</span></a></li>}
+    </ul>
+  </div>
+</article>
+
+<style>
+  .work-row {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+    padding-block: var(--s-12);
+    border-bottom: var(--hairline);
+  }
+
+  .work-row__readout,
+  .work-row__body {
+    grid-column: 1 / -1;
+  }
+
+  .work-row__readout {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--s-4);
+    margin-bottom: var(--s-6);
+  }
+
+  .work-row__value {
+    display: block;
+    font-variant-numeric: proportional-nums;
+    font-size: var(--t-readout);
+    line-height: 1;
+    font-weight: 540;
+    letter-spacing: -0.02em;
+    color: var(--c-accent);
+  }
+
+  .work-row__unit {
+    display: block;
+    margin-top: var(--s-2);
+    font-size: var(--t-small);
+    color: var(--c-secondary);
+    max-width: 18ch;
+  }
+
+  .work-row__year {
+    font-size: var(--t-small);
+    color: var(--c-secondary);
+  }
+
+  h3 {
+    font-size: var(--t-h3);
+    max-width: 36ch;
+  }
+
+  h3 a {
+    color: var(--c-ink);
+    text-decoration-color: var(--c-rule);
+    text-decoration-thickness: 2px;
+  }
+
+  h3 a:hover,
+  h3 a:focus-visible {
+    color: var(--c-accent);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+
+  .work-row__body > * {
+    max-width: 50rem;
+  }
+
+  .work-row__problem {
+    margin-top: var(--s-4);
+  }
+
+  .work-row__mechanisms {
+    margin-top: var(--s-6);
+    display: grid;
+    gap: var(--s-4);
+  }
+
+  .work-row__mechanisms dt {
+    font-size: var(--t-small);
+    font-weight: 600;
+  }
+
+  .work-row__mechanisms dd {
+    margin: var(--s-1) 0 0;
+    font-size: var(--t-small);
+    color: var(--c-secondary);
+  }
+
+  .work-row__result {
+    margin-top: var(--s-6);
+    padding-top: var(--s-4);
+    border-top: var(--hairline);
+    font-weight: 500;
+  }
+
+  .work-row__result strong {
+    font-weight: 640;
+    color: var(--c-accent);
+  }
+
+  .work-row__stack {
+    margin-top: var(--s-4);
+    font-size: var(--t-small);
+    color: var(--c-secondary);
+  }
+
+  .work-row__links {
+    list-style: none;
+    padding: 0;
+    margin-top: var(--s-4);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--s-6);
+  }
+
+  .work-row__links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: var(--t-small);
+    font-weight: 500;
+  }
+
+  @media (min-width: 768px) {
+    .work-row__readout {
+      grid-column: 1 / 4;
+      flex-direction: column;
+      justify-content: flex-start;
+      margin-bottom: 0;
+    }
+
+    .work-row__body {
+      grid-column: 4 / -1;
+    }
+
+    .work-row__mechanisms {
+      grid-template-columns: repeat(3, 1fr);
+      column-gap: var(--grid-gutter);
+    }
+  }
+
+  @media (min-width: 1100px) {
+    .work-row__body {
+      grid-column: 4 / 12;
+    }
+  }
+</style>

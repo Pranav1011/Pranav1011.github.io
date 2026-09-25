@@ -1,0 +1,166 @@
+---
+import TraceFigure from './TraceFigure.astro';
+import { getSite, getResumeHref } from '../lib/content';
+
+const s = await getSite();
+const resume = await getResumeHref();
+---
+
+<section class="hero container" aria-labelledby="hero-title">
+  <h1 id="hero-title">{s.headline}</h1>
+  <div class="hero__text">
+    {s.intro.map((p) => <p class="hero__intro">{p}</p>)}
+    <p class="hero__availability">
+      <span class="hero__dot" aria-hidden="true"></span>{s.availability}
+    </p>
+    <ul class="hero__links">
+      <li><a class="hero__primary" href="#work">See selected work</a></li>
+      {resume && <li><a href={resume}>Resume</a></li>}
+      <li><a href={s.github}>GitHub</a></li>
+      <li><a href={s.linkedin}>LinkedIn</a></li>
+      <li><a href={`mailto:${s.email}`}>Email</a></li>
+    </ul>
+  </div>
+
+  <dl class="hero__strip">
+    {
+      s.strip.map((cell) => (
+        <div>
+          <dt>{cell.label}</dt>
+          <dd>{cell.value}</dd>
+        </div>
+      ))
+    }
+  </dl>
+
+  <div class="hero__figure">
+    <TraceFigure />
+  </div>
+</section>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem) var(--s-16);
+  }
+
+  h1,
+  .hero__text,
+  .hero__strip,
+  .hero__figure {
+    grid-column: 1 / -1;
+  }
+
+  h1 {
+    font-size: var(--t-display);
+    line-height: var(--lh-display);
+    letter-spacing: -0.035em;
+    font-weight: 620;
+    max-width: 20ch;
+  }
+
+  .hero__intro {
+    margin-top: var(--s-8);
+    max-width: 58ch;
+    font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+    line-height: 1.55;
+  }
+
+  .hero__availability {
+    margin-top: var(--s-4);
+    color: var(--c-secondary);
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-2);
+  }
+
+  .hero__dot {
+    flex: none;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--c-accent);
+    transform: translateY(-0.05em);
+  }
+
+  .hero__links {
+    list-style: none;
+    padding: 0;
+    margin-top: var(--s-6);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-3) var(--s-6);
+  }
+
+  .hero__links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .hero__primary {
+    padding-inline: var(--s-4);
+    background: var(--c-accent);
+    color: var(--c-ground);
+    text-decoration: none;
+    font-weight: 560;
+  }
+
+  .hero__primary:hover {
+    background: var(--c-accent-hover);
+    color: var(--c-ground);
+  }
+
+  .hero__strip {
+    margin-top: var(--s-12);
+    border-top: 1px solid var(--c-ink);
+  }
+
+  .hero__strip > div {
+    padding-block: var(--s-3);
+    border-bottom: var(--hairline);
+    display: grid;
+    grid-template-columns: 8.5rem 1fr;
+    gap: var(--s-4);
+  }
+
+  .hero__strip dt {
+    font-size: var(--t-small);
+    color: var(--c-secondary);
+  }
+
+  .hero__strip dd {
+    margin: 0;
+    font-size: var(--t-small);
+    font-weight: 500;
+  }
+
+  .hero__figure {
+    margin-top: var(--s-12);
+  }
+
+  @media (min-width: 1024px) {
+    .hero__text {
+      grid-column: 1 / 8;
+    }
+
+    .hero__strip {
+      grid-column: 9 / -1;
+      grid-row: 2;
+      align-self: start;
+      margin-top: var(--s-8);
+    }
+
+    .hero__strip > div {
+      grid-template-columns: 1fr;
+      gap: var(--s-1);
+    }
+
+    .hero__figure {
+      margin-top: var(--s-12);
+    }
+  }
+</style>

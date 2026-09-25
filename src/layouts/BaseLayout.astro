@@ -1,14 +1,36 @@
 ---
 import { Font } from 'astro:assets';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { getSite } from '../lib/content';
 import '../styles/global.css';
 
 interface Props {
   title: string;
   description: string;
+  /** Absolute or root-relative path to a 1200×630 share image. */
+  image?: string;
+  noindex?: boolean;
+  /** Pages that render their own chrome (the OG card) turn this off. */
+  chrome?: boolean;
 }
 
-const { title, description } = Astro.props;
+const { title, description, image = '/og.png', noindex = false, chrome = true } = Astro.props;
+const site = await getSite();
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL(image, Astro.site);
+
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: site.name,
+  jobTitle: 'AI Engineer',
+  url: Astro.site?.href,
+  email: `mailto:${site.email}`,
+  address: { '@type': 'PostalAddress', addressLocality: 'Boston', addressRegion: 'MA', addressCountry: 'US' },
+  alumniOf: site.education.map((e) => ({ '@type': 'CollegeOrUniversity', name: e.school })),
+  sameAs: [site.github, site.linkedin],
+};
 ---
 
 <!doctype html>
@@ -19,23 +41,44 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
     <meta name="theme-color" content="#f1f2f0" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
 
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${site.name}: ${site.headline}`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(person)} />
 
     {/* Hidden animation states are scoped to .js, so content stays visible without JS. */}
     <script is:inline>document.documentElement.classList.add('js');</script>
 
     <Font cssVariable="--font-sans" preload />
+    <Font cssVariable="--font-mono" />
     <slot name="head" />
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    {
+      chrome && (
+        <>
+          <a class="skip-link" href="#main">Skip to content</a>
+          <Header />
+        </>
+      )
+    }
     <slot />
+    {chrome && <Footer />}
   </body>
 </html>

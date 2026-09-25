@@ -1,0 +1,146 @@
+---
+import { getResumeHref } from '../lib/content';
+
+interface Props {
+  /** Anchor links resolve against the home page from any route. */
+  home?: string;
+}
+const { home = '/' } = Astro.props;
+const links = [
+  { href: `${home}#work`, label: 'Work' },
+  { href: `${home}#experience`, label: 'Experience' },
+  { href: `${home}#research`, label: 'Research' },
+  { href: `${home}#contact`, label: 'Contact' },
+];
+const resume = await getResumeHref();
+---
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="site-header__name" href="/">Sai Pranav Krovvidi</a>
+
+    <nav aria-label="Primary" class="nav nav--wide">
+      <ul>
+        {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+        {resume && <li><a href={resume}>Resume</a></li>}
+      </ul>
+    </nav>
+
+    <details class="nav nav--menu">
+      <summary>Menu</summary>
+      <nav aria-label="Primary">
+        <ul>
+          {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+          {resume && <li><a href={resume}>Resume</a></li>}
+        </ul>
+      </nav>
+    </details>
+  </div>
+</header>
+
+<script>
+  // Same-page anchors don't navigate, so close the mobile menu explicitly on tap.
+  document.querySelectorAll<HTMLDetailsElement>('.nav--menu').forEach((menu) => {
+    menu.addEventListener('click', (event) => {
+      if ((event.target as HTMLElement).closest('a')) menu.open = false;
+    });
+  });
+</script>
+
+<style>
+  .site-header {
+    border-bottom: var(--hairline);
+    background: var(--c-ground);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 3.5rem;
+    position: relative;
+  }
+
+  .site-header__name {
+    color: var(--c-ink);
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .nav ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: var(--s-8);
+  }
+
+  .nav a {
+    color: var(--c-ink);
+    text-decoration: none;
+    font-size: var(--t-small);
+    font-weight: 500;
+  }
+
+  .nav a:hover,
+  .nav a:focus-visible {
+    color: var(--c-accent);
+    text-decoration: underline;
+  }
+
+  .nav--menu {
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    .nav--wide {
+      display: none;
+    }
+
+    .nav--menu {
+      display: block;
+    }
+
+    .nav--menu summary {
+      list-style: none;
+      cursor: pointer;
+      font-size: var(--t-small);
+      font-weight: 500;
+      padding: var(--s-2) 0;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav--menu summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .nav--menu[open] summary {
+      color: var(--c-accent);
+    }
+
+    .nav--menu nav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      z-index: 10;
+      background: var(--c-ground);
+      border-bottom: var(--hairline);
+      padding: var(--s-2) var(--grid-margin) var(--s-4);
+    }
+
+    .nav--menu ul {
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .nav--menu a {
+      display: flex;
+      align-items: center;
+      min-height: 44px;
+      font-size: var(--t-body);
+    }
+  }
+</style>

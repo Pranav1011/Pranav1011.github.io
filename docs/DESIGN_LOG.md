@@ -28,3 +28,23 @@
   - **Deploy:** withastro/action@v6, actions/deploy-pages@v5, actions/checkout@v7, Node 24.
 - Focus ring is a `box-shadow` pair: 2px ground, then 2px petrol. Verified in the browser.
 - Frontmatter strings bypass the markdown processor's smart punctuation, so apostrophes in frontmatter are typed as ’ directly.
+
+## 2026-09-25 — Phase 2 static build
+- **Hero:**
+  - Headline at `max-width: 20ch` (3 lines at 1440); intro, availability and links in cols 1–7, with the strip stacked in cols 9–12.
+  - The trace now starts inside the first screen (it was below the fold in the first pass).
+- **Trace figure:** three SVG layouts, each drawn near 1:1 for its breakpoint: 1200 (≥1024), 720 (640–1023) and 360 (<640).
+  - A single scaled SVG gave 4–8px labels on tablets and phones.
+  - Labels flip to the left of their marker when they would cross the edge.
+  - Data comes from two real traces via `scripts/extract-aurora-trace.py`.
+- **Rejected:**
+  - A coloured left border on the result line (the side-stripe cliché). Replaced with a hairline plus a petrol "Result." label.
+  - A 6px petrol top bar on the OG card, for the same reason.
+- **Readout figures** use proportional numerals, because Schibsted's tabular figures give "." a full digit width ("−23 . 4%"). Tables also dropped tabular figures for the same reason.
+- **Astro scoping gotcha:** `.parent > *` compiles to `.parent[data-astro-cid] > [data-astro-cid]`, which out-ranks `.child[data-astro-cid]` inside media queries. This broke the case-study grid. The fix is explicit per-child defaults at equal specificity.
+- **Hyphen breaks:** headlines render through `Headline.astro`, which wraps hyphenated words in `white-space: nowrap`, so "customer-ops" never splits at the hyphen.
+- **Reading progress** is CSS scroll-driven (`animation-timeline: scroll(root)`) with no JS. It's hidden without support and under reduced motion.
+- **Copy-email** ships as `hidden` and is revealed by JS; it announces through `role="status"`. The mailto link works without JS.
+- **OG image:** `/og-card/` (noindex, excluded from the sitemap) is screenshotted at 1200×630 into `public/og.png`.
+- **Resume link** renders only once `public/resume.pdf` exists (Phase 5).
+- **Lighthouse mobile:** 100 / 100 / 100 / 100 on home and `/work/aurora/`, CLS 0, LCP 1.5–1.7s.

@@ -1,0 +1,255 @@
+---
+// Home-page sections after Selected work. One file keeps the shared two-column
+// "label | content" rhythm in one place.
+import SectionHead from './SectionHead.astro';
+import { getAlsoBuilt, getExperience, getPublication, getSite, formatMonth } from '../lib/content';
+
+const alsoBuilt = await getAlsoBuilt();
+const roles = await getExperience();
+const pub = await getPublication();
+const site = await getSite();
+---
+
+<section class="also container" aria-labelledby="also-title">
+  <h3 id="also-title" class="split__label">Also built</h3>
+  <ul class="split__content also__list">
+    {
+      alsoBuilt.map((item) => (
+        <li>
+          <a href={item.repo}>{item.title}</a>
+          <span class="also__line"> — {item.line}</span>
+          {item.demo && (
+            <>
+              {' '}
+              <a href={item.demo} class="also__demo">
+                Live demo<span class="visually-hidden">: {item.title}</span>
+              </a>
+            </>
+          )}
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<section class="section container" aria-labelledby="experience">
+  <SectionHead id="experience" title="Experience" />
+  <ol class="timeline">
+    {
+      roles.map((r) => (
+        <li class="split">
+          <p class="split__label tnum">
+            <time datetime={r.start}>{formatMonth(r.start)}</time> – <time datetime={r.end}>{formatMonth(r.end)}</time>
+          </p>
+          <div class="split__content">
+            <h3>
+              {r.title}, {r.company}
+            </h3>
+            <p class="meta">{r.location}</p>
+            <ul class="points">
+              {r.points.map((pt) => <li>{pt}</li>)}
+            </ul>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<section class="section container" aria-labelledby="research">
+  <SectionHead id="research" title="Research" />
+  <div class="split">
+    <p class="split__label tnum">{pub.year}</p>
+    <div class="split__content">
+      <h3><a href={pub.url}>{pub.title}</a></h3>
+      <p class="meta">
+        {pub.venue}, vol. {pub.volume}, pp. {pub.pages}. {pub.role}. DOI {pub.doi}
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="section container" aria-labelledby="toolkit">
+  <SectionHead id="toolkit" title="Toolkit" />
+  <dl class="toolkit">
+    {
+      site.toolkit.map((g) => (
+        <div>
+          <dt>{g.group}</dt>
+          <dd>{g.items.join(', ')}</dd>
+        </div>
+      ))
+    }
+  </dl>
+</section>
+
+<section class="section container" aria-labelledby="education">
+  <SectionHead id="education" title="Education" />
+  <ul class="education">
+    {
+      site.education.map((e) => (
+        <li class="split">
+          <p class="split__label tnum">{e.dates}</p>
+          <div class="split__content">
+            <h3>{e.degree}</h3>
+            <p class="meta">
+              {e.school}. {e.detail}
+            </p>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .section {
+    margin-top: var(--s-section);
+  }
+
+  .split {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+    padding-block: var(--s-6);
+  }
+
+  .split + .split {
+    border-top: var(--hairline);
+  }
+
+  .split__label {
+    grid-column: 1 / -1;
+    font-size: var(--t-small);
+    color: var(--c-secondary);
+    margin-bottom: var(--s-2);
+  }
+
+  .split__content {
+    grid-column: 1 / -1;
+  }
+
+  @media (min-width: 768px) {
+    .split__label {
+      grid-column: 1 / 4;
+      margin-bottom: 0;
+      padding-top: 0.2em;
+    }
+
+    .split__content {
+      grid-column: 4 / 12;
+    }
+  }
+
+  ol,
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .timeline,
+  .education {
+    margin-top: var(--s-8);
+  }
+
+  h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+
+  h3 a {
+    color: var(--c-ink);
+    text-decoration-color: var(--c-rule);
+    text-decoration-thickness: 2px;
+  }
+
+  h3 a:hover {
+    color: var(--c-accent);
+  }
+
+  .meta {
+    margin-top: var(--s-1);
+    font-size: var(--t-small);
+    color: var(--c-secondary);
+  }
+
+  .points {
+    margin-top: var(--s-3);
+    display: grid;
+    gap: var(--s-2);
+    max-width: 66ch;
+  }
+
+  .points li {
+    padding-left: 1.1em;
+    position: relative;
+  }
+
+  .points li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.7em;
+    width: 0.45em;
+    height: 1px;
+    background: var(--c-secondary);
+  }
+
+  /* Also built */
+  .also {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+    padding-block: var(--s-8);
+    border-bottom: var(--hairline);
+  }
+
+  .also h3.split__label {
+    font-size: var(--t-small);
+    font-weight: 600;
+    color: var(--c-ink);
+  }
+
+  .also__list {
+    display: grid;
+    gap: var(--s-4);
+    max-width: 72ch;
+  }
+
+  .also__list a {
+    font-weight: 560;
+  }
+
+  .also__line {
+    color: var(--c-secondary);
+  }
+
+  .also__demo {
+    font-size: var(--t-small);
+  }
+
+  /* Toolkit */
+  .toolkit {
+    margin-top: var(--s-8);
+    display: grid;
+    gap: var(--s-6) var(--grid-gutter);
+  }
+
+  .toolkit dt {
+    font-size: var(--t-small);
+    font-weight: 600;
+  }
+
+  .toolkit dd {
+    margin: var(--s-1) 0 0;
+    color: var(--c-secondary);
+  }
+
+  @media (min-width: 768px) {
+    .toolkit {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

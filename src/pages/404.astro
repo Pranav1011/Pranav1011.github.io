@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getFeatured } from '../lib/content';
+
+const featured = await getFeatured();
+---
+
+<BaseLayout title="Page not found | Sai Pranav Krovvidi" description="This page doesn’t exist. Start from the home page or one of the case studies." noindex>
+  <main id="main" class="container missing">
+    <p class="missing__code tnum">404</p>
+    <h1>No page at this address.</h1>
+    <p class="missing__lead">It may have moved when the site was rebuilt. These still exist:</p>
+    <ul>
+      <li><a href="/">Home</a></li>
+      {featured.map((p) => <li><a href={`/work/${p.data.slug}/`}>{p.data.headline}</a></li>)}
+    </ul>
+  </main>
+</BaseLayout>
+
+<style>
+  .missing {
+    padding-block: var(--s-24);
+    min-height: 60vh;
+  }
+
+  .missing__code {
+    font-size: var(--t-small);
+    color: var(--c-secondary);
+  }
+
+  h1 {
+    margin-top: var(--s-4);
+    font-size: var(--t-h2);
+    max-width: 20ch;
+  }
+
+  .missing__lead {
+    margin-top: var(--s-4);
+    color: var(--c-secondary);
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin-top: var(--s-6);
+  }
+
+  li a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+</style>

@@ -1,0 +1,15 @@
+---
+// Renders a headline so hyphenated words ("customer-ops") never break at the hyphen.
+interface Props {
+  text: string;
+}
+const parts = Astro.props.text.split(/(\S+-\S+)/);
+---
+
+{parts.map((part) => (part.includes('-') ? <span class="nowrap">{part}</span> : part))}
+
+<style>
+  .nowrap {
+    white-space: nowrap;
+  }
+</style>

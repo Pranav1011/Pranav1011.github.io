@@ -1,0 +1,58 @@
+---
+// Source for public/og.png (1200×630). Not linked anywhere and excluded from the sitemap.
+// Regenerate: build, preview, open /og-card/ at a 1200×630 viewport, screenshot to public/og.png.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TraceFigure from '../components/TraceFigure.astro';
+import { getSite } from '../lib/content';
+
+const site = await getSite();
+---
+
+<BaseLayout title="Share card" description={site.description} noindex chrome={false}>
+  <main class="card">
+    <p class="card__name">{site.name}</p>
+    <h1>{site.headline}</h1>
+    <div class="card__figure"><TraceFigure idPrefix="og" /></div>
+    <p class="card__url">pranav1011.github.io</p>
+  </main>
+</BaseLayout>
+
+<style>
+  .card {
+    width: 1200px;
+    height: 630px;
+    padding: 64px 72px 56px;
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    overflow: hidden;
+  }
+
+  .card__name {
+    font-size: 26px;
+    font-weight: 600;
+  }
+
+  h1 {
+    margin-top: 20px;
+    font-size: 64px;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    font-weight: 620;
+    max-width: 18ch;
+  }
+
+  .card__figure {
+    margin-top: 28px;
+    align-self: end;
+  }
+
+  .card__figure :global(figcaption) {
+    display: none;
+  }
+
+  .card__url {
+    margin-top: 12px;
+    font-size: 20px;
+    color: var(--c-secondary);
+  }
+</style>

@@ -1,0 +1,17 @@
+---
+// Full-width hairline with ruler ticks at the column lines.
+---
+
+<div class="ruler" aria-hidden="true"></div>
+
+<style>
+  .ruler {
+    height: 9px;
+    border-top: 1px solid var(--c-ink);
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--c-rule) 0 1px,
+      transparent 1px calc((100% + var(--grid-gutter)) / var(--grid-cols))
+    );
+  }
+</style>

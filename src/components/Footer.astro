@@ -1,0 +1,26 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <p>Sai Pranav Krovvidi, Boston, MA. {year}.</p>
+    <p>Built with Astro. <a href="https://github.com/Pranav1011/Pranav1011.github.io">Source on GitHub</a>.</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: var(--hairline);
+    font-size: var(--t-small);
+    color: var(--c-secondary);
+  }
+
+  .site-footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--s-2) var(--s-8);
+    padding-block: var(--s-8);
+  }
+</style>

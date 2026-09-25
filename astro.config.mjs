@@ -15,7 +15,7 @@ const stripComments = {
 
 export default defineConfig({
   site: 'https://pranav1011.github.io',
-  integrations: [sitemap()],
+  integrations: [sitemap({ filter: (page) => !page.includes('/og-card') })],
   markdown: {
     processor: satteri({ mdastPlugins: [stripComments] }),
   },

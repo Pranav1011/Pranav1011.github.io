@@ -48,7 +48,7 @@
   --s-24: 6rem;
   --s-32: 8rem;
   --s-48: 12rem;
-  --s-section: clamp(6rem, 4rem + 8vw, 12rem);
+  --s-section: clamp(5rem, 3.5rem + 5vw, 8.5rem);
 
   /* Grid */
   --grid-max: 1320px;

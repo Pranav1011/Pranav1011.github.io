@@ -12,7 +12,7 @@ const { title, description } = Astro.props;
 
 <BaseLayout title={title} description={description}>
   <Fragment slot="head">
-    <Font cssVariable="--font-serif" preload={[{ weight: "400", style: "normal" }]} />
+    <Font cssVariable="--font-serif" preload={[{ weight: '400', style: 'normal' }]} />
   </Fragment>
   <slot />
 </BaseLayout>
@@ -32,6 +32,76 @@ const { title, description } = Astro.props;
   .prose h2 {
     font-family: var(--f-sans);
     font-size: var(--t-h3);
-    margin-top: 2.2em;
+    line-height: 1.2;
+    margin-top: 2.4em;
+  }
+
+  .prose h2 + * {
+    margin-top: 0.75em;
+  }
+
+  /* The first section of every case study is the TL;DR: set it as a plate. */
+  .prose > h2:first-child {
+    margin-top: 0;
+    font-size: var(--t-small);
+    font-weight: 620;
+    letter-spacing: 0;
+  }
+
+  .prose > h2:first-child + ul {
+    font-family: var(--f-sans);
+    font-size: var(--t-body);
+    line-height: 1.5;
+    list-style: none;
+    padding: var(--s-4) 0;
+    border-block: var(--hairline);
+    display: grid;
+    gap: var(--s-3);
+  }
+
+  .prose ul,
+  .prose ol {
+    padding-left: 1.2em;
+  }
+
+  .prose li + li {
+    margin-top: 0.35em;
+  }
+
+  .prose strong {
+    font-weight: 700;
+  }
+
+  .prose code {
+    font-family: var(--f-mono);
+    font-size: 0.85em;
+    background: var(--c-code);
+    padding: 0.1em 0.3em;
+    overflow-wrap: anywhere;
+  }
+
+  /* Tables are data: sans, hairline rules, horizontal scroll on narrow screens.
+     (Schibsted's tabular figures widen . and , so tables keep proportional figures.) */
+  .prose table {
+    display: block;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-family: var(--f-sans);
+    font-size: var(--t-small);
+    line-height: 1.4;
+    margin-block: 1.5em;
+  }
+
+  .prose th,
+  .prose td {
+    text-align: left;
+    padding: var(--s-2) var(--s-4) var(--s-2) 0;
+    border-bottom: var(--hairline);
+    vertical-align: top;
+  }
+
+  .prose th {
+    font-weight: 620;
+    border-bottom-color: var(--c-ink);
   }
 </style>

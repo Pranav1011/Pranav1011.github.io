@@ -49,6 +49,7 @@ const site = defineCollection({
   schema: z.object({
     name: z.string(),
     shortName: z.string(),
+    description: realText.refine((d) => d.length <= 155, 'Meta description must be 155 characters or fewer'),
     headline: realText.refine(words(12), 'Headline must be 12 words or fewer'),
     intro: z.array(realText).min(1),
     availability: realText,

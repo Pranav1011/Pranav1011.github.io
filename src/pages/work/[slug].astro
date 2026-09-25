@@ -1,44 +1,221 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { render } from 'astro:content';
 import WorkLayout from '../../layouts/WorkLayout.astro';
+import Headline from '../../components/Headline.astro';
+import { getFeatured } from '../../lib/content';
 
 export async function getStaticPaths() {
-  const projects = await getCollection('projects', ({ data }) => data.featured);
-  return projects.map((entry) => ({ params: { slug: entry.data.slug }, props: { entry } }));
+  const featured = await getFeatured();
+  return featured.map((entry, i) => ({
+    params: { slug: entry.data.slug },
+    props: { entry, next: featured[(i + 1) % featured.length] },
+  }));
 }
 
-const { entry } = Astro.props;
+const { entry, next } = Astro.props;
 const { Content } = await render(entry);
 const p = entry.data;
 ---
 
-<WorkLayout title={`${p.title} — Sai Pranav Krovvidi`} description={p.summary}>
-  <main id="main" class="container">
-    <p><a href="/">Home</a></p>
-    <h1>{p.headline}</h1>
-    <p class="summary">{p.summary}</p>
-    <article class="prose">
+<WorkLayout title={`${p.title}: ${p.headline} | Sai Pranav Krovvidi`} description={p.summary}>
+  <div class="progress" aria-hidden="true"></div>
+  <main id="main" class="container case">
+    <nav class="case__back" aria-label="Breadcrumb">
+      <a href="/#work">Selected work</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{p.title}</span>
+    </nav>
+
+    <header class="case__header">
+      <h1><Headline text={p.headline} /></h1>
+      <p class="case__summary">{p.summary}</p>
+    </header>
+
+    <aside class="case__sheet" aria-label="Project details">
+      <dl>
+        <div><dt>Role</dt><dd>{p.role}</dd></div>
+        <div><dt>Year</dt><dd class="tnum">{p.year}</dd></div>
+        <div><dt>Stack</dt><dd>{p.stack.join(', ')}</dd></div>
+        <div>
+          <dt>Links</dt>
+          <dd>
+            <ul>
+              {p.links.repo && <li><a href={p.links.repo}>Source on GitHub</a></li>}
+              {p.links.demo && <li><a href={p.links.demo}>Live demo</a></li>}
+              {p.links.paper && <li><a href={p.links.paper}>Paper</a></li>}
+            </ul>
+          </dd>
+        </div>
+      </dl>
+    </aside>
+
+    <article class="case__body prose">
       <Content />
     </article>
+
+    <footer class="case__next">
+      <p>Next project</p>
+      <a href={`/work/${next.data.slug}/`}><Headline text={next.data.headline} /></a>
+    </footer>
   </main>
 </WorkLayout>
 
 <style>
-  main {
-    padding-block: var(--s-16);
+  /* Reading progress: CSS scroll-driven, no JS. Browsers without support show nothing. */
+  .progress {
+    display: none;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .progress {
+      display: block;
+      position: fixed;
+      inset: 0 0 auto;
+      height: 2px;
+      background: var(--c-accent);
+      transform-origin: 0 50%;
+      transform: scaleX(0);
+      animation: progress linear both;
+      animation-timeline: scroll(root);
+      z-index: 20;
+    }
+
+    @keyframes progress {
+      to {
+        transform: scaleX(1);
+      }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .progress {
+      display: none;
+    }
+  }
+
+  .case {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+    padding-block: var(--s-8) var(--s-24);
+  }
+
+  /* Explicit per-child defaults (same specificity as the desktop rules below).
+     A `.case > *` catch-all would out-rank them once Astro adds its scope attribute. */
+  .case__back,
+  .case__header,
+  .case__sheet,
+  .case__body,
+  .case__next {
+    grid-column: 1 / -1;
+  }
+
+  .case__back {
+    display: flex;
+    gap: var(--s-2);
+    font-size: var(--t-small);
+    color: var(--c-secondary);
+  }
+
+  .case__back a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .case__back span {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .case__header {
+    margin-top: var(--s-8);
   }
 
   h1 {
     font-size: var(--t-display);
     line-height: var(--lh-display);
     letter-spacing: -0.035em;
-    margin-top: var(--s-8);
-    max-width: 18ch;
+    font-weight: 620;
+    max-width: 17ch;
   }
 
-  .summary {
-    margin-block: var(--s-6) var(--s-12);
-    max-width: 60ch;
+  .case__summary {
+    margin-top: var(--s-6);
+    max-width: 58ch;
+    font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+    line-height: 1.5;
     color: var(--c-secondary);
+  }
+
+  .case__sheet {
+    margin-top: var(--s-12);
+    border-top: 1px solid var(--c-ink);
+  }
+
+  .case__sheet dl > div {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+    gap: var(--s-4);
+    padding-block: var(--s-3);
+    border-bottom: var(--hairline);
+    font-size: var(--t-small);
+  }
+
+  .case__sheet dt {
+    color: var(--c-secondary);
+  }
+
+  .case__sheet dd {
+    margin: 0;
+  }
+
+  .case__sheet ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .case__body {
+    margin-top: var(--s-12);
+  }
+
+  .case__next {
+    margin-top: var(--s-24);
+    padding-top: var(--s-6);
+    border-top: 1px solid var(--c-ink);
+  }
+
+  .case__next p {
+    font-size: var(--t-small);
+    color: var(--c-secondary);
+  }
+
+  .case__next a {
+    display: inline-block;
+    margin-top: var(--s-2);
+    font-size: var(--t-h2);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    text-decoration-thickness: 2px;
+  }
+
+  @media (min-width: 1024px) {
+    .case__sheet {
+      grid-column: 1 / 4;
+      grid-row: 3;
+      align-self: start;
+      position: sticky;
+      top: var(--s-8);
+    }
+
+    .case__body {
+      grid-column: 4 / 11;
+      grid-row: 3;
+    }
+
+    .case__next {
+      grid-column: 4 / -1;
+    }
   }
 </style>

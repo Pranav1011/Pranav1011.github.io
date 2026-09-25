@@ -1,0 +1,257 @@
+---
+// The hero instrument: two real Aurora runs of the same ticket on the same model,
+// drawn as a timing sheet. Data: src/data/aurora-trace.json (scripts/extract-aurora-trace.py).
+import trace from '../data/aurora-trace.json';
+
+interface Props {
+  /** Adds an id prefix so the figure can appear twice on a page (e.g. the OG card). */
+  idPrefix?: string;
+}
+const { idPrefix = 'trace' } = Astro.props;
+
+type Ev = { t: number; type: string; phase: string; tool?: string; decision?: string; reason?: string };
+type Run = { events: Ev[] };
+
+function summarise(run: Run) {
+  const ev = run.events;
+  const find = (type: string) => {
+    const e = ev.find((x) => x.type === type);
+    if (!e) throw new Error(`aurora-trace.json: run is missing a "${type}" event`);
+    return e;
+  };
+  const at = (type: string) => find(type).t;
+  const loops = ev.filter((e) => e.type === 'tool_call' && e.tool === 'get_order').map((e) => e.t);
+  if (loops.length === 0) throw new Error('aurora-trace.json: run has no get_order tool calls');
+  const guard = find('guard');
+  return { plan: at('plan'), firstAct: loops[0], loops, guard: guard.t, decision: guard.decision, reply: at('reply') };
+}
+
+const before = summarise(trace.before as Run);
+const after = summarise(trace.after as Run);
+/** Axis end: the later reply rounded up to 5 s, plus a little headroom for its marker. */
+const T_MAX = Math.ceil(Math.max(before.reply, after.reply) / 5) * 5 + 3;
+const tickEvery = (step: number) => Array.from({ length: Math.floor(T_MAX / step) + 1 }, (_, i) => i * step);
+
+/** Build one layout of the figure, each drawn near 1:1 for its breakpoint:
+ *  wide ≥ 1024px, medium 640–1023px, compact < 640px. */
+function layout(width: number, labelW: number, rowH: number, fs: number, stackReply = false) {
+  const right = width - 8;
+  const x = (t: number) => labelW + (t / T_MAX) * (right - labelW);
+  const rows = [
+    { key: 'before', run: before, label: ['Without', 'loop-breaker'], tone: 'brass' },
+    { key: 'after', run: after, label: ['With', 'loop-breaker'], tone: 'accent' },
+  ].map((r, i) => ({ ...r, y: 40 + i * rowH }));
+  const ticks = tickEvery(width > 500 ? 10 : 20);
+  const height = 40 + (rows.length - 1) * rowH + (stackReply ? 72 : 58);
+  /** Place a label right of `at`, or flip it left when it would cross the right edge. */
+  const place = (at: number, text: string, gap = 10) => {
+    const w = text.length * fs * 0.62;
+    return at + gap + w > right ? { x: at - gap, anchor: 'end' } : { x: at + gap, anchor: 'start' };
+  };
+  return { width, height, x, rows, ticks, fs, place, replyDy: stackReply ? 22 + fs + 4 : 22 };
+}
+
+const wide = layout(1200, 150, 84, 13);
+const medium = layout(720, 110, 88, 12);
+const compact = layout(360, 78, 100, 11, true);
+const fmt = (t: number) => `${t.toFixed(1)} s`;
+---
+
+<figure class="trace" aria-labelledby={`${idPrefix}-cap`}>
+  {
+    [
+      { l: wide, cls: 'trace__svg trace__svg--wide' },
+      { l: medium, cls: 'trace__svg trace__svg--medium' },
+      { l: compact, cls: 'trace__svg trace__svg--compact' },
+    ].map(({ l, cls }) => (
+      <svg class={cls} viewBox={`0 0 ${l.width} ${l.height}`} role="img" aria-labelledby={`${idPrefix}-cap`}>
+        {/* Time axis */}
+        <g class="axis" font-size={l.fs}>
+          {l.ticks.map((t) => (
+            <g>
+              <line x1={l.x(t)} x2={l.x(t)} y1={18} y2={l.height - 24} class="grid" />
+              <text x={l.x(t)} y={l.height - 8} text-anchor="middle">{t === 0 ? '0 s' : t}</text>
+            </g>
+          ))}
+        </g>
+
+        {l.rows.map((row) => {
+          const r = row.run;
+          const y = row.y;
+          const caught = row.key === 'after';
+          return (
+            <g class={`row row--${row.tone}`} font-size={l.fs}>
+              <text x={0} y={y - 6} class="row__label">{row.label[0]}</text>
+              <text x={0} y={y + l.fs + 2} class="row__label">{row.label[1]}</text>
+
+              {/* Phases: intake → plan → act → resolve */}
+              <line x1={l.x(0)} x2={l.x(r.plan)} y1={y} y2={y} class="phase phase--quiet" />
+              <line x1={l.x(r.plan)} x2={l.x(r.firstAct)} y1={y} y2={y} class="phase phase--quiet" />
+              <line x1={l.x(r.firstAct)} x2={l.x(r.guard)} y1={y} y2={y} class="phase phase--act" />
+              <line x1={l.x(r.guard)} x2={l.x(r.reply)} y1={y} y2={y} class="phase phase--quiet" />
+
+              {/* Each get_order tool call */}
+              {r.loops.map((t) => (
+                <line x1={l.x(t)} x2={l.x(t)} y1={y - 11} y2={y + 11} class="call" />
+              ))}
+
+              {/* The guard that ended the act loop */}
+              <rect
+                x={l.x(r.guard) - 6}
+                y={y - 6}
+                width={12}
+                height={12}
+                class="guard"
+                transform={caught ? `rotate(45 ${l.x(r.guard)} ${y})` : undefined}
+              />
+              <circle cx={l.x(r.reply)} cy={y} r={4.5} class="reply" />
+
+              {(() => {
+                const guardText = caught ? `loop-breaker, ${fmt(r.guard)}` : `iteration cap, ${fmt(r.guard)}`;
+                const replyText = `reply ${fmt(r.reply)}`;
+                const g = l.place(l.x(r.guard), guardText, 6);
+                const rp = l.place(l.x(r.reply), replyText, 8);
+                return (
+                  <>
+                    <text x={g.x} y={y - 14} text-anchor={g.anchor} class="note">{guardText}</text>
+                    <text x={rp.x} y={y + l.replyDy} text-anchor={rp.anchor} class="note note--quiet">{replyText}</text>
+                    <text x={l.x(r.firstAct)} y={y + 22} class="note note--quiet">{r.loops.length} × get_order</text>
+                  </>
+                );
+              })()}
+            </g>
+          );
+        })}
+      </svg>
+    ))
+  }
+  <figcaption id={`${idPrefix}-cap`}>
+    Aurora on ticket TCK-000004 (a double charge) with Llama 3.1 8B, drawn from its run traces. Without the
+    loop-breaker, the agent called <code>get_order</code>&nbsp;{before.loops.length} times until the iteration cap
+    stopped it at {fmt(before.guard)}. With it, the repeat is caught at {fmt(after.guard)} and the ticket is escalated
+    to a human.
+  </figcaption>
+</figure>
+
+<style>
+  .trace {
+    margin: 0;
+  }
+
+  .trace__svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    font-family: var(--f-mono);
+  }
+
+  .trace__svg--medium,
+  .trace__svg--compact {
+    display: none;
+  }
+
+  @media (max-width: 1023px) {
+    .trace__svg--wide {
+      display: none;
+    }
+    .trace__svg--medium {
+      display: block;
+    }
+  }
+
+  @media (max-width: 639px) {
+    .trace__svg--medium {
+      display: none;
+    }
+    .trace__svg--compact {
+      display: block;
+    }
+  }
+
+  .grid {
+    stroke: var(--c-rule);
+    stroke-width: 1;
+  }
+
+  .axis text {
+    fill: var(--c-secondary);
+  }
+
+  .row__label {
+    font-family: var(--f-sans);
+    font-weight: 560;
+    fill: var(--c-ink);
+  }
+
+  .phase {
+    stroke-linecap: round;
+  }
+
+  .phase--quiet {
+    stroke: var(--c-secondary);
+    stroke-width: 1.5;
+    stroke-dasharray: 2 4;
+  }
+
+  .phase--act {
+    stroke-width: 3;
+  }
+
+  .row--brass .phase--act,
+  .row--brass .call {
+    stroke: var(--c-brass);
+  }
+
+  .row--accent .phase--act,
+  .row--accent .call {
+    stroke: var(--c-accent);
+  }
+
+  .call {
+    stroke-width: 2;
+  }
+
+  .row--brass .guard {
+    fill: var(--c-brass);
+  }
+
+  .row--accent .guard {
+    fill: var(--c-accent);
+  }
+
+  .reply {
+    fill: var(--c-ground);
+    stroke: var(--c-ink);
+    stroke-width: 1.5;
+  }
+
+  .note {
+    fill: var(--c-ink);
+  }
+
+  .row--brass .note:not(.note--quiet) {
+    fill: var(--c-brass-text);
+  }
+
+  .row--accent .note:not(.note--quiet) {
+    fill: var(--c-accent);
+    font-weight: 500;
+  }
+
+  .note--quiet {
+    fill: var(--c-secondary);
+  }
+
+  figcaption {
+    margin-top: var(--s-4);
+    max-width: 70ch;
+    font-size: var(--t-small);
+    line-height: 1.5;
+    color: var(--c-secondary);
+  }
+
+  figcaption code {
+    font-family: var(--f-mono);
+    font-size: 0.95em;
+  }
+</style>
