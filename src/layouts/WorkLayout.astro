@@ -1,0 +1,37 @@
+---
+import { Font } from 'astro:assets';
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <Fragment slot="head">
+    <Font cssVariable="--font-serif" preload={[{ weight: "400", style: "normal" }]} />
+  </Fragment>
+  <slot />
+</BaseLayout>
+
+<style is:global>
+  .prose {
+    font-family: var(--f-serif);
+    font-size: var(--t-prose);
+    line-height: var(--lh-prose);
+    max-width: var(--measure-prose);
+  }
+
+  .prose > * + * {
+    margin-top: 1em;
+  }
+
+  .prose h2 {
+    font-family: var(--f-sans);
+    font-size: var(--t-h3);
+    margin-top: 2.2em;
+  }
+</style>

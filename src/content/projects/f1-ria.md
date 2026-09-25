@@ -1,0 +1,91 @@
+---
+title: F1 Race Intelligence Agent
+headline: Ask seven seasons of Formula 1 anything
+slug: f1-ria
+order: 2
+featured: true
+year: 2026
+role: Solo — design, build, measurement
+summary: A LangGraph agent that answers natural-language questions over seven seasons of F1 data, grounded in retrieved race context rather than the model’s memory.
+problem: The agent had grown to 79 narrow tools, a large context tax and a harder tool-selection problem for the model on every question.
+mechanisms:
+  - label: Orchestration
+    detail: A LangGraph agent routes each question across TimescaleDB, Neo4j and Qdrant.
+  - label: Retrieval
+    detail: RAG over race reports, with HyDE in query understanding.
+  - label: Tool design
+    detail: 8 intent-level tools over 79 functions, plus guarded read-only text-to-SQL.
+result: Cut the tool surface from 79 to 8 and tool-schema tokens from 13,487 to 2,014 per request (−85%), with all 79 capabilities still reachable.
+metric:
+  value: "−85%"
+  label: tool-schema tokens per request
+stack: [LangGraph, FastAPI, TimescaleDB, Neo4j, Qdrant, Next.js]
+links:
+  repo: https://github.com/Pranav1011/F1-Race-Intelligence-Agent
+cover:
+  src: ../../assets/projects/f1-ria/cover.png
+  alt: F1 Race Intelligence Agent interface answering a tyre-degradation question with a generated chart
+  kind: image
+status: active
+---
+
+<!-- src (frontmatter): backend/eval/results/consolidation.json; backend/tests/test_tools/test_consolidated.py -->
+
+## TL;DR
+
+- **Problem:** a conversational F1 analysis agent was paying for 79 tool schemas on every request.
+- **Approach:** a parameterized tool facade and dispatch layer, with guarded text-to-SQL for the long tail, verified by coverage tests.
+- **Result:** 79 tools down to 8, and 13,487 down to 2,014 schema tokens per request, an 85% cut with zero capability loss.
+
+## The problem
+
+The agent answers questions like "Compare Verstappen and Norris's tyre degradation in Singapore 2024" or "What if Max had pitted on lap 33 instead of 38?" It covers seven seasons, 2018 to 2024. To do that it sits on a polyglot store: TimescaleDB for lap and telemetry time series, Neo4j for the knowledge graph of drivers, teams and races, and a Qdrant vector index for retrieval.
+
+<!-- src: F1 RIA/README.md Overview ("7 years of data (2018-2024)"), Architecture -->
+
+As features grew, so did the tool list. By the time I measured it, the agent was binding 79 TimescaleDB tools, and every one of their schemas went into the context on every request. That costs tokens, and it makes tool choice harder: the model has to pick one function out of 79 near-duplicates like "lap times by driver", "lap times by stint" and "lap times by compound."
+
+<!-- src: CLAIMS.md (public in F1 RIA) scope note (79 TimescaleDB tools = 88% of original token tax) -->
+
+## Approach
+
+**Measure first.** Before changing anything, I wrote a measurement script that serializes the agent's tool schemas exactly as LangChain sends them and counts tokens with tiktoken. That gave a baseline of 13,487 tokens per request for the TimescaleDB tools alone.
+
+<!-- src: backend/eval/measure_consolidation.py; consolidation.json -->
+
+**Consolidate by intent, not by table.** The 79 tools collapsed naturally into a few questions people actually ask: race analysis, driver stats, standings, comparisons and what-if scenarios. I built eight parameterized dispatchers on those lines. Each one routes to the original underlying function and filters arguments to that function's signature, so none of the originals had to change.
+
+<!-- src: backend/agent/tools/consolidated_tools.py; test_dispatch_routes_and_filters_args -->
+
+**A guarded escape hatch.** For questions the dispatchers don't cover, the agent falls back to text-to-SQL that is validated as read-only before it runs. The model gets flexibility without write access to the database.
+
+<!-- src: backend/agent/validation.py; tests/test_tools/test_sql_validation.py -->
+
+**Grounding.** A query-understanding step parses each question into entities, sub-questions and a HyDE-style hypothetical answer describing what a complete response should contain. The plan is built from that, and answers come from retrieved race data and telemetry, not from the model's memory of F1.
+
+<!-- src: HyDE — agent/prompts/understand.py:21, agent/nodes/understand.py:139 (main). NOTE: hypothetical_answer is generated but not yet passed to vector search; see docs/SOURCES.md -->
+
+**The rest of the system.** The agent runs on LangGraph behind FastAPI, with a multi-provider LLM router (Groq's Llama 3.3 70B, falling back to Gemini, then a local Ollama model). It serves sub-second responses on million-row datasets, and a Next.js front end adapts its layout to the question: speed traces for telemetry, timelines for strategy, side-by-side views for comparisons.
+
+<!-- src: README Tech Stack, Features (private: SOURCES.md for latency) -->
+
+## Results
+
+| | Before | After |
+|---|---|---|
+| Tools bound per request | 79 | 8 |
+| Tool-schema tokens per request | 13,487 | 2,014 |
+| Underlying capabilities reachable | 79 | 79 |
+| Test suite | 57 passing | 63 passing |
+
+<!-- src: consolidation.json; CLAIMS.md (public in F1 RIA) rows 1–3, 6 -->
+
+The zero-loss claim is enforced by a test, not asserted: `test_every_timescale_tool_is_covered_exactly_once` fails if any of the 79 original functions becomes unreachable or is covered twice. The token numbers come from the same measurement script before and after, so anyone can reproduce them with one command.
+
+<!-- src: CLAIMS.md (public in F1 RIA) row 3 -->
+
+## What's next
+
+The consolidation covers the TimescaleDB tools, which were 88% of the original token cost. The 13 Neo4j and vector tools are next. The bigger open question is accuracy: fewer, better-named tools should improve tool selection, and I want to prove that with a labelled question set scored end to end, rather than assume it.
+
+<!-- src: CLAIMS.md (public in F1 RIA) scope note -->

@@ -1,0 +1,44 @@
+---
+import { getCollection, render } from 'astro:content';
+import WorkLayout from '../../layouts/WorkLayout.astro';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects', ({ data }) => data.featured);
+  return projects.map((entry) => ({ params: { slug: entry.data.slug }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const p = entry.data;
+---
+
+<WorkLayout title={`${p.title} — Sai Pranav Krovvidi`} description={p.summary}>
+  <main id="main" class="container">
+    <p><a href="/">Home</a></p>
+    <h1>{p.headline}</h1>
+    <p class="summary">{p.summary}</p>
+    <article class="prose">
+      <Content />
+    </article>
+  </main>
+</WorkLayout>
+
+<style>
+  main {
+    padding-block: var(--s-16);
+  }
+
+  h1 {
+    font-size: var(--t-display);
+    line-height: var(--lh-display);
+    letter-spacing: -0.035em;
+    margin-top: var(--s-8);
+    max-width: 18ch;
+  }
+
+  .summary {
+    margin-block: var(--s-6) var(--s-12);
+    max-width: 60ch;
+    color: var(--c-secondary);
+  }
+</style>

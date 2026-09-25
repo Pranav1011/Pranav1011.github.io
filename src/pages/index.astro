@@ -1,0 +1,49 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const site = await getEntry('site', 'site');
+if (!site) throw new Error('src/content/site.md is missing');
+const s = site.data;
+---
+
+<BaseLayout title={`${s.name} — AI engineer`} description={s.intro[0]}>
+  <main id="main" class="container">
+    <h1>{s.headline}</h1>
+    {s.intro.map((p) => <p class="intro">{p}</p>)}
+    <p class="intro">{s.availability}</p>
+    <ul class="links">
+      <li><a href={`mailto:${s.email}`}>Email</a></li>
+      <li><a href={s.github}>GitHub</a></li>
+      <li><a href={s.linkedin}>LinkedIn</a></li>
+    </ul>
+  </main>
+</BaseLayout>
+
+<style>
+  main {
+    padding-block: var(--s-24);
+  }
+
+  h1 {
+    font-size: var(--t-display);
+    line-height: var(--lh-display);
+    letter-spacing: -0.035em;
+    font-weight: 650;
+    max-width: 16ch;
+  }
+
+  .intro {
+    margin-top: var(--s-6);
+    max-width: 60ch;
+    color: var(--c-secondary);
+  }
+
+  .links {
+    display: flex;
+    gap: var(--s-6);
+    list-style: none;
+    padding: 0;
+    margin-top: var(--s-8);
+  }
+</style>

@@ -1,0 +1,108 @@
+---
+title: Aurora
+headline: Aurora, a customer-ops agent that fails safely
+slug: aurora
+order: 1
+featured: true
+year: 2026
+role: Solo — design, build, evaluation
+summary: An agent that resolves customer-ops tickets end to end, from refunds to escalations, with zero policy violations across 43 eval scenarios.
+problem: Most agent demos stop at the tool call. Aurora takes real actions against business systems, so it has to stay safe when the model is wrong or a worker dies halfway through.
+mechanisms:
+  - label: Policy-gated writes
+    detail: A deterministic engine approves every refund, cancellation and credit before it runs.
+  - label: Idempotency
+    detail: Retried or duplicated tickets never double-fire an action.
+  - label: Crash recovery
+    detail: A Redis/RQ queue resumes work a killed worker left behind.
+result: 0 policy violations across 43 eval scenarios, including 6 prompt-injection attacks. Safety held at 100% even when a Llama 3.1 8B brain dropped task success to 25%.
+metric:
+  value: "0"
+  label: policy violations in 43 scenarios
+stack: [Python, LangGraph, FastAPI, Redis/RQ, Chroma, MCP]
+links:
+  repo: https://github.com/Pranav1011/customer-ops-agent
+cover:
+  src: ../../assets/projects/aurora/cover.mp4
+  alt: Aurora operations console resolving a ticket, showing the plan, tool calls and guardrail decisions in the run trace
+  kind: video
+status: complete
+---
+
+<!-- src (frontmatter): Customer-agentic ai/README.md "Evaluation results"; eval_results via `make eval` -->
+
+## TL;DR
+
+- **Problem:** support agents that take real actions (refunds, cancellations, credits) have to stay safe even when the model is wrong.
+- **Approach:** a LangGraph agent wrapped in a deterministic policy engine and five layers of guardrails, measured by an eval harness I built alongside it.
+- **Result:** zero policy violations across 43 scenarios, including 6 prompt-injection attacks. Safety held at 100% even on a small local model.
+
+## The problem
+
+A customer writes in: "I think I was charged twice." To resolve that, an agent has to look up the account, read the payment history, decide whether a refund is justified, issue it, and write back. Each step is a place where a language model can pick the wrong tool, loop, invent an order number, or follow instructions hidden in the ticket itself.
+
+I wanted to build the version of this that a support team could actually turn on. That meant two things from day one. The agent takes real actions, not just drafts replies. And every claim about how well it works comes from a harness, not a demo.
+
+<!-- src: Customer-agentic ai/README.md intro; ERROR_ANALYSIS.md TCK-000004 -->
+
+## Approach
+
+**The loop.** Aurora runs a LangGraph graph with four stages: intake, plan, act, resolve. It works across 16 schema-validated read and write tools spanning five simulated backend systems (customers, orders, subscriptions, payments, tickets), grounded by a 36-article Chroma knowledge base plus episodic and semantic memory.
+
+<!-- src: agent/graph.py, tools/registry.py (16 tools); backend/kb.py (36 docs); backend/models.py tables Customer, Order, Subscription, Payment, Ticket -->
+
+**The guardrails.** The model is allowed to be wrong; the machinery around it is not. Five layers sit between the model and anything that changes state:
+
+1. Prompt-injection sanitization on untrusted ticket text
+2. Policy-gated writes: a deterministic engine approves or blocks every consequential action
+3. A loop breaker that stops repeated or non-progressing tool calls
+4. A per-ticket cost ceiling
+5. Reply grounding, so the answer can only cite facts that came back from a tool
+
+<!-- src: policy/, nodes.py:85,225-241,262-293,306-309,343-370) -->
+
+**Swappable brains.** The reasoning sits behind one interface. A single environment variable switches between a deterministic mock (for reproducible evals), a local Llama 3.1 8B through Ollama, and Claude. The loop, tools, guardrails, evals and UI never change.
+
+<!-- src: README "Three interchangeable brains" -->
+
+**Production plumbing.** Tickets run through an async FastAPI job queue backed by Redis/RQ, with retries, timeouts and a dead-letter queue. Idempotency keys make every consequential write exactly-once, so a duplicate delivery never issues a second refund. A job orphaned by a killed worker resumes on restart without double-acting. On an I/O-bound workload the worker pool reaches 3.69× throughput at four workers (8.2 → 30.3 tickets/s).
+
+<!-- src: reliability/idempotency.py, api/queue_redis.py, reliability/reconcile.py, benchmarks/results/concurrency-2026-09-05.json -->
+
+The same policy-gated tools are exposed through an MCP server, so Claude Desktop can drive them. A React and TypeScript console shows the queue, a replayable run trace for every ticket, and an escalation inbox.
+
+<!-- src: README "The console" -->
+
+## Evaluation
+
+I built the eval harness before I trusted any result. It runs a 43-scenario golden set ranging from easy to adversarial: tickets that must be escalated, tickets that try to touch another customer's account, and six prompt-injection attacks. It scores task success against a deterministic final-state check, tool-trajectory precision and recall, and action safety. Reply quality is scored by an LLM judge that I validated for position bias and consistency before relying on it. It all runs in GitHub Actions CI.
+
+| Metric | Result |
+|---|---|
+| Task success | 100% |
+| Action safety | 100% (no forbidden action; escalates every time it must) |
+| Should-escalate / injection / cross-customer | 100% / 100% / 100% |
+| Cost and latency per ticket | ~$0.006, ~320 ms |
+
+<!-- src: README "Evaluation results" table; eval_results/latest.json -->
+
+**The result that matters most** came from swapping in a weaker brain. On Llama 3.1 8B, task success fell to 25%, but action safety stayed at 100%. The small model looped, picked the wrong tools and drafted replies around orders that didn't exist, and the guardrails caught every one of those before it became an action. Safety is decoupled from model quality, which is the point of the design.
+
+| Brain | Task success | Action safety | Avg tokens | Avg latency |
+|---|---|---|---|---|
+| Deterministic mock | 100% | 100% | 1,482 | 0.3 s |
+| Llama 3.1 8B (local) | 25% | 100% | 9,489 | 37.3 s |
+
+<!-- src: README "Model comparison"; docs/model-comparison.md -->
+
+## What broke, and what I changed
+
+The harness paid for itself on its first run. It flagged two missed escalations: address-change tickets were being routed as "where's my order" because the intent classifier didn't match "update my shipping address." The guardrails were right; the routing was wrong.
+
+The local model surfaced a sharper failure. On a double-charge ticket it called `get_order` nine times in a row, burned the whole iteration budget in 69 seconds, and drafted a reply citing an order that didn't exist. I added a loop breaker that stops on an identical repeated call or a third non-progressing call to the same tool, and escalates. The same ticket now ends cleanly in two steps and about 40 seconds.
+
+<!-- src: ERROR_ANALYSIS.md F1, F3, TCK-000004 table -->
+
+**Next:** replace the simulated backends with real ones (Stripe in test mode, webhooks), and move from keyword-based injection sanitization to a classifier, since the policy engine, not the blocklist, is what actually keeps writes safe today.
+
+<!-- src: README; ENGINEERING_LOG.md -->
