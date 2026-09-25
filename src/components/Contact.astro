@@ -1,13 +1,12 @@
 ---
-import Ruler from './Ruler.astro';
 import { getSite, getResumeHref } from '../lib/content';
 
 const s = await getSite();
 const resume = await getResumeHref();
 ---
 
-<section id="contact" class="contact container" aria-labelledby="contact-title">
-  <Ruler />
+<section id="contact" class="contact" aria-labelledby="contact-title">
+  <div class="container">
   <h2 id="contact-title">{s.cta.heading}</h2>
 
   <div class="contact__email">
@@ -23,6 +22,7 @@ const resume = await getResumeHref();
     <li><a href={s.linkedin}>LinkedIn</a></li>
     {resume && <li><a href={resume}>Resume (PDF)</a></li>}
   </ul>
+  </div>
 </section>
 
 <script>
@@ -54,14 +54,32 @@ const resume = await getResumeHref();
 </script>
 
 <style>
+  /* Full-bleed ink band. Colours are the on-dark variants (see tokens.css). */
   .contact {
-    margin-top: var(--s-section);
-    padding-bottom: var(--s-24);
+    --c-rule: var(--c-rule-on-dark);
+    --focus-ring: 0 0 0 2px var(--c-ink), 0 0 0 4px var(--c-accent-on-dark);
+    margin-top: var(--s-section-lg);
+    padding-block: var(--s-section) var(--s-section-lg);
+    background: var(--c-ink);
+    color: var(--c-ground);
+  }
+
+  .contact a {
+    color: var(--c-accent-on-dark);
+  }
+
+  .contact a:hover {
+    color: var(--c-ground);
+  }
+
+  .contact ::selection {
+    background: var(--c-accent-on-dark);
+    color: var(--c-ink);
   }
 
 
   h2 {
-    margin-top: var(--s-12);
+    margin-top: 0;
     font-size: var(--t-display);
     line-height: var(--lh-display);
     letter-spacing: -0.035em;
@@ -88,9 +106,9 @@ const resume = await getResumeHref();
     display: none;
     min-height: 44px;
     padding-inline: var(--s-4);
-    border: 1px solid var(--c-accent);
+    border: 1px solid var(--c-accent-on-dark);
     background: transparent;
-    color: var(--c-accent);
+    color: var(--c-accent-on-dark);
     font: inherit;
     font-size: var(--t-small);
     font-weight: 560;
@@ -106,12 +124,12 @@ const resume = await getResumeHref();
   }
 
   .contact__copy:hover {
-    background: var(--c-accent-tint);
+    background: var(--c-rule-on-dark);
   }
 
   .contact__copy[data-state='copied'] {
-    background: var(--c-accent);
-    color: var(--c-ground);
+    background: var(--c-accent-on-dark);
+    color: var(--c-ink);
   }
 
   .contact__links {

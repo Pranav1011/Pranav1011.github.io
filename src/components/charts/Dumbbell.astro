@@ -1,0 +1,241 @@
+---
+// Dot-on-track comparison, one row per item. HTML (not SVG) so labels stay real text
+// at every width. Tones follow the palette rules: petrol = the value that matters,
+// brass = the reference or the failure. Shape and direct labels carry the same
+// meaning as colour.
+interface Point {
+  value: number;
+  label: string;
+  tone: 'accent' | 'brass';
+}
+interface Row {
+  label: string;
+  sub?: string;
+  points: Point[];
+}
+interface Props {
+  rows: Row[];
+  domain: [number, number];
+  ticks: number[];
+  format: 'pct' | 'seconds';
+  /** Plain-language summary for screen readers. */
+  summary: string;
+}
+
+const { rows, domain, ticks, format, summary } = Astro.props;
+const pos = (v: number) => ((v - domain[0]) / (domain[1] - domain[0])) * 100;
+const fmt = (v: number) => (format === 'pct' ? `${Math.round(v)}%` : `${v.toFixed(2)} s`);
+const tickFmt = (v: number) => (format === 'pct' ? `${v}%` : `${v} s`);
+---
+
+<div class="dumbbell" role="img" aria-label={summary}>
+  {
+    rows.map((row) => {
+      const values = row.points.map((p) => p.value);
+      const lo = Math.min(...values);
+      const hi = Math.max(...values);
+      const merged = lo === hi;
+      return (
+        <div class="dumbbell__row" aria-hidden="true">
+          <div class="dumbbell__label">
+            <span>{row.label}</span>
+            {row.sub && <span class="dumbbell__sub">{row.sub}</span>}
+          </div>
+          <div class="dumbbell__track">
+            <span class="dumbbell__span" style={`left:${pos(lo)}%;width:${pos(hi) - pos(lo)}%`} />
+            {merged ? (
+              <span class="dumbbell__point dumbbell__point--accent" style={`left:${pos(hi)}%`}>
+                <span class="dumbbell__value dumbbell__value--end">
+                  {row.points.map((p) => p.label).join(' and ')}: {fmt(hi)}
+                </span>
+              </span>
+            ) : (
+              row.points.map((p) => (
+                <span class={`dumbbell__point dumbbell__point--${p.tone}`} style={`left:${pos(p.value)}%`}>
+                  <span class:list={['dumbbell__value', p.value === lo ? 'dumbbell__value--start' : 'dumbbell__value--end']}>
+                    {p.label} {fmt(p.value)}
+                  </span>
+                </span>
+              ))
+            )}
+          </div>
+          <p class="dumbbell__values">
+            {row.points.map((p, i) => (
+              <span class={`dumbbell__v dumbbell__v--${p.tone}`}>
+                {p.label} {fmt(p.value)}
+                {i < row.points.length - 1 ? ', ' : ''}
+              </span>
+            ))}
+          </p>
+        </div>
+      );
+    })
+  }
+  <div class="dumbbell__row dumbbell__axis" aria-hidden="true">
+    <div></div>
+    <div class="dumbbell__track dumbbell__track--axis">
+      {ticks.map((t, i) => (
+        <span
+          class:list={[i === 0 && 'tick--first', i === ticks.length - 1 && 'tick--last']}
+          style={`left:${pos(t)}%`}
+        >
+          {tickFmt(t)}
+        </span>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .dumbbell {
+    display: grid;
+    gap: var(--s-2);
+    font-size: var(--t-meta);
+  }
+
+  .dumbbell__row {
+    display: grid;
+    grid-template-columns: minmax(6.5rem, 11rem) 1fr;
+    gap: var(--s-4);
+    align-items: center;
+    min-height: 4.25rem;
+  }
+
+  .dumbbell__label {
+    display: grid;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .dumbbell__sub {
+    font-weight: 450;
+    color: var(--c-secondary);
+    font-size: var(--t-small);
+  }
+
+  .dumbbell__track {
+    position: relative;
+    height: 2px;
+    background: var(--c-rule);
+    margin-inline: 0.5rem 2.5rem;
+  }
+
+  .dumbbell__span {
+    position: absolute;
+    top: -1px;
+    height: 4px;
+    background: var(--c-ink);
+    opacity: 0.35;
+  }
+
+  .dumbbell__point {
+    position: absolute;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    translate: -50% -50%;
+    border-radius: 50%;
+    background: var(--c-accent);
+  }
+
+  /* Brass reads as the reference: a hollow square, so shape repeats the colour cue. */
+  .dumbbell__point--brass {
+    border-radius: 2px;
+    background: var(--c-ground);
+    border: 3px solid var(--c-brass);
+  }
+
+  .dumbbell__value {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    white-space: nowrap;
+    font-weight: 560;
+  }
+
+  .dumbbell__point--accent .dumbbell__value {
+    color: var(--c-accent);
+  }
+
+  .dumbbell__point--brass .dumbbell__value {
+    color: var(--c-brass-text);
+  }
+
+  /* Higher value: label above its dot, growing left. Lower value: label beside its
+     dot on the left, at track height, so the two labels can never collide. */
+  .dumbbell__value--end {
+    right: -4px;
+  }
+
+  .dumbbell__value--start {
+    bottom: auto;
+    top: 50%;
+    right: calc(100% + 8px);
+    translate: 0 -50%;
+  }
+
+  .dumbbell__axis {
+    min-height: 2rem;
+  }
+
+  .dumbbell__track--axis {
+    background: none;
+    height: auto;
+  }
+
+  .dumbbell__values {
+    display: none;
+  }
+
+  /* Phones: label on its own line, a full-width track, and the values listed as text
+     under it (positioned labels would clip at the 0% and 100% ends). */
+  @media (max-width: 639px) {
+    .dumbbell__row {
+      grid-template-columns: 1fr;
+      gap: var(--s-3);
+      min-height: 0;
+      padding-bottom: var(--s-4);
+    }
+
+    .dumbbell__track {
+      margin-inline: 8px;
+    }
+
+    .dumbbell__value {
+      display: none;
+    }
+
+    .dumbbell__values {
+      display: block;
+      font-weight: 560;
+    }
+
+    .dumbbell__v--accent {
+      color: var(--c-accent);
+    }
+
+    .dumbbell__v--brass {
+      color: var(--c-brass-text);
+    }
+
+    .dumbbell__axis > div:first-child {
+      display: none;
+    }
+  }
+
+  .dumbbell__track--axis .tick--first {
+    translate: -8px 0;
+  }
+
+  .dumbbell__track--axis .tick--last {
+    translate: calc(-100% + 8px) 0;
+  }
+
+  .dumbbell__track--axis span {
+    position: absolute;
+    white-space: nowrap;
+    translate: -50% 0;
+    font-size: var(--t-small);
+    color: var(--c-secondary);
+    font-family: var(--f-mono);
+  }
+</style>

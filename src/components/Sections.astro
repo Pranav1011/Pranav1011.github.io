@@ -2,37 +2,14 @@
 // Home-page sections after Selected work. One file keeps the shared two-column
 // "label | content" rhythm in one place.
 import SectionHead from './SectionHead.astro';
-import { getAlsoBuilt, getExperience, getPublication, getSite, formatMonth } from '../lib/content';
+import { getExperience, getPublication, getSite, formatMonth } from '../lib/content';
 
-const alsoBuilt = await getAlsoBuilt();
 const roles = await getExperience();
 const pub = await getPublication();
 const site = await getSite();
 ---
 
-<section class="also container" aria-labelledby="also-title">
-  <h3 id="also-title" class="split__label">Also built</h3>
-  <ul class="split__content also__list">
-    {
-      alsoBuilt.map((item) => (
-        <li>
-          <a href={item.repo}>{item.title}</a>
-          <span class="also__line"> — {item.line}</span>
-          {item.demo && (
-            <>
-              {' '}
-              <a href={item.demo} class="also__demo">
-                Live demo<span class="visually-hidden">: {item.title}</span>
-              </a>
-            </>
-          )}
-        </li>
-      ))
-    }
-  </ul>
-</section>
-
-<section class="section container" aria-labelledby="experience">
+<section class="section section--first container" aria-labelledby="experience">
   <SectionHead id="experience" title="Experience" />
   <ol class="timeline">
     {
@@ -57,7 +34,7 @@ const site = await getSite();
 </section>
 
 <section class="section container" aria-labelledby="research">
-  <SectionHead id="research" title="Research" />
+  <SectionHead id="research" title="Research" size="sm" />
   <div class="split">
     <p class="split__label tnum">{pub.year}</p>
     <div class="split__content">
@@ -70,7 +47,7 @@ const site = await getSite();
 </section>
 
 <section class="section container" aria-labelledby="toolkit">
-  <SectionHead id="toolkit" title="Toolkit" />
+  <SectionHead id="toolkit" title="Toolkit" size="sm" />
   <dl class="toolkit">
     {
       site.toolkit.map((g) => (
@@ -84,7 +61,7 @@ const site = await getSite();
 </section>
 
 <section class="section container" aria-labelledby="education">
-  <SectionHead id="education" title="Education" />
+  <SectionHead id="education" title="Education" size="sm" />
   <ul class="education">
     {
       site.education.map((e) => (
@@ -104,7 +81,11 @@ const site = await getSite();
 
 <style>
   .section {
-    margin-top: var(--s-section);
+    margin-top: var(--s-section-sm);
+  }
+
+  .section--first {
+    margin-top: var(--s-section-lg);
   }
 
   .split {
@@ -120,7 +101,7 @@ const site = await getSite();
 
   .split__label {
     grid-column: 1 / -1;
-    font-size: var(--t-small);
+    font-size: var(--t-meta);
     color: var(--c-secondary);
     margin-bottom: var(--s-2);
   }
@@ -147,9 +128,12 @@ const site = await getSite();
     padding: 0;
   }
 
-  .timeline,
-  .education {
+  .timeline {
     margin-top: var(--s-8);
+  }
+
+  .education {
+    margin-top: var(--s-4);
   }
 
   h3 {
@@ -171,7 +155,7 @@ const site = await getSite();
 
   .meta {
     margin-top: var(--s-1);
-    font-size: var(--t-small);
+    font-size: var(--t-meta);
     color: var(--c-secondary);
   }
 
@@ -197,42 +181,9 @@ const site = await getSite();
     background: var(--c-secondary);
   }
 
-  /* Also built */
-  .also {
-    display: grid;
-    grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
-    column-gap: var(--grid-gutter);
-    padding-block: var(--s-8);
-    border-bottom: var(--hairline);
-  }
-
-  .also h3.split__label {
-    font-size: var(--t-small);
-    font-weight: 600;
-    color: var(--c-ink);
-  }
-
-  .also__list {
-    display: grid;
-    gap: var(--s-4);
-    max-width: 72ch;
-  }
-
-  .also__list a {
-    font-weight: 560;
-  }
-
-  .also__line {
-    color: var(--c-secondary);
-  }
-
-  .also__demo {
-    font-size: var(--t-small);
-  }
-
   /* Toolkit */
   .toolkit {
-    margin-top: var(--s-8);
+    margin-top: var(--s-6);
     display: grid;
     gap: var(--s-6) var(--grid-gutter);
   }

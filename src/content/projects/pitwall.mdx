@@ -23,13 +23,17 @@ stack: [Python, statsmodels, FastF1, pandas, NumPy, Matplotlib]
 links:
   repo: https://github.com/Pranav1011/pitwall
 cover:
-  src: ../../assets/projects/pitwall/cover.png
-  alt: Tyre degradation curves for soft, medium and hard compounds, showing lap-time loss rising with tyre age
-  kind: image
+  src: pitwall-degradation
+  alt: Line chart of fitted tyre degradation. Soft, medium and hard tyres lose about one second per lap by the end of their typical stints.
+  kind: chart
 status: complete
 ---
 
-<!-- src (frontmatter): pitwall/README.md Tier 2 table; results/model_metrics.json -->
+import PitWallPipeline from '../../components/figures/PitWallPipeline.astro';
+import PitWallDegradation from '../../components/figures/PitWallDegradation.astro';
+import PitWallAccuracy from '../../components/figures/PitWallAccuracy.astro';
+
+{/* src (frontmatter): pitwall/README.md Tier 2 table; results/model_metrics.json */}
 
 ## TL;DR
 
@@ -45,7 +49,7 @@ Watch a lap-time chart and tyre wear is almost invisible. As the car burns fuel 
 
 **Data.** Three full seasons (2022–2024), 68 races, pulled from FastF1 with resumable, rate-limit-aware ingestion and zero failures. Ten separately tested exclusion rules remove what would contaminate the signal: pit in and out laps, safety-car laps, mixed-condition races, outlier laps and short stints. That takes 74,601 raw laps down to 53,854 clean laps across 2,824 stints.
 
-<!-- src: README Data, Tier 1 table; results/tier1_summary.json; results/exclusion_table.csv -->
+{/* src: README Data, Tier 1 table; results/tier1_summary.json; results/exclusion_table.csv */}
 
 **Model.** A `statsmodels` MixedLM strips out everything that isn't tyre wear:
 
@@ -57,17 +61,21 @@ Watch a lap-time chart and tyre wear is almost invisible. As the car burns fuel 
 
 It converged on the full data and on every cross-validation fold.
 
-<!-- src: README Tier 2 -->
+{/* src: README Tier 2 */}
+
+<PitWallPipeline n={1} />
+
+<PitWallDegradation n={2} />
 
 **A fair baseline.** Beating a model that doesn't know which track it's at is easy; that naive baseline scores 9.06 s/lap. So I compared against a per-circuit, per-compound regression that already knows the track and gets its own degradation slope. Beating that isolates what the full model actually adds.
 
 **Validation.** Leave-one-race-out across the 21 circuits with cross-season data, so the held-out race is never seen in training.
 
-<!-- src: README Tier 2 "Baseline", "Validation" -->
+{/* src: README Tier 2 "Baseline", "Validation" */}
 
 **Strategy simulator.** For a given race and stint plan, the simulator adds up the degradation cost and draws the random parts from real data: pit-lane loss from each circuit's actual in and out laps, safety-car probability and timing from each circuit's history, and lap-time noise from the model's residuals. It runs 2,000 simulations per plan across one- and two-stop strategies and returns the fastest expected plan with its P5–P95 band.
 
-<!-- src: README Tier 3 -->
+{/* src: README Tier 3 */}
 
 ## Results
 
@@ -78,14 +86,16 @@ It converged on the full data and on every cross-validation fold.
 | Medium | 1.35 | 1.68 |
 | Hard | 1.14 | 1.55 |
 
-<!-- src: README Tier 2 table; results/model_metrics.json -->
+{/* src: README Tier 2 table; results/model_metrics.json */}
+
+<PitWallAccuracy n={3} />
 
 **Backtest against the field (59 races).** The simulator never sees the real pit laps. It picks the same number of stops as the teams about half the time (49.2%). Its pit laps land on average 7.4 laps later than the teams', and that gap is the interesting result. The simulator finds the pace-optimal window, while real teams pit earlier to undercut rivals and protect track position. The expected-time curve around the optimum is shallow, a few seconds across a wide window, so in practice track position decides the lap.
 
-<!-- src: README "Backtest vs the field"; results/backtest.json -->
+{/* src: README "Backtest vs the field"; results/backtest.json */}
 
 ## What's next
 
 The biggest gap is an undercut and track-position model, which would close most of the 7.4-lap offset. After that: a traffic model, and per-driver degradation slopes instead of one curve per compound.
 
-<!-- src: README Limitations -->
+{/* src: README Limitations */}

@@ -1,0 +1,35 @@
+---
+import Figure from '../Figure.astro';
+import Flow from '../charts/Flow.astro';
+interface Props { n: number }
+---
+
+<Figure
+  n={Astro.props.n}
+  caption="The agent’s LangGraph pipeline. If Evaluate finds the retrieved data insufficient, the graph loops back to Plan for another pass before answering."
+  source="backend/agent/graph.py in the F1 RIA repo"
+>
+  <Flow
+    columns={4}
+    summary="Eight nodes: understand, plan, execute, process, evaluate, enrich, generate, validate. Evaluate can loop back to plan when the data is insufficient. Execute calls 8 intent-level tools that route to 79 database functions."
+    stages={[
+      { name: 'Understand', detail: 'Entities, sub-questions and a HyDE-style hypothetical answer.' },
+      { name: 'Plan', detail: 'A tool DAG with parallel groups.' },
+      { name: 'Execute', detail: '8 intent-level tools route to 79 TimescaleDB functions, plus Neo4j and Qdrant.', emphasis: true },
+      { name: 'Process', detail: 'Aggregate raw rows into an analysis.' },
+      { name: 'Evaluate', detail: 'Is the data sufficient? If not, back to Plan.' },
+      { name: 'Enrich', detail: 'Retrieve race reports and regulations for context.' },
+      { name: 'Generate', detail: 'Answer plus a chart spec for the adaptive UI.' },
+      { name: 'Validate', detail: 'Check the answer against the retrieved data.' },
+    ]}
+    layers={[
+      {
+        label: 'Corrective loop',
+        detail: 'Evaluate → Plan when retrieval comes back thin (the CRAG pattern), so the model never answers from memory.',
+        from: 2,
+        to: 5,
+        tone: 'ink',
+      },
+    ]}
+  />
+</Figure>

@@ -1,0 +1,87 @@
+---
+import { getAlsoBuilt } from '../lib/content';
+
+const alsoBuilt = await getAlsoBuilt();
+---
+
+<section class="also" aria-labelledby="also-title">
+  <h3 id="also-title" class="split__label">Also built</h3>
+  <ul class="split__content also__list">
+    {
+      alsoBuilt.map((item) => (
+        <li>
+          <a href={item.repo}>{item.title}</a>
+          <span class="also__line"> — {item.line}</span>
+          {item.demo && (
+            <>
+              {' '}
+              <a href={item.demo} class="also__demo">
+                Live demo<span class="visually-hidden">: {item.title}</span>
+              </a>
+            </>
+          )}
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .split__label {
+    grid-column: 1 / -1;
+    margin-bottom: var(--s-3);
+  }
+
+  .split__content {
+    grid-column: 1 / -1;
+  }
+
+  @media (min-width: 768px) {
+    .split__label {
+      grid-column: 1 / 4;
+      margin-bottom: 0;
+      padding-top: 0.2em;
+    }
+
+    .split__content {
+      grid-column: 4 / 12;
+    }
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  /* Also built */
+  .also {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+    column-gap: var(--grid-gutter);
+    padding-block: var(--s-12) 0;
+  }
+
+  .also h3.split__label {
+    font-size: var(--t-small);
+    font-weight: 600;
+    color: var(--c-ink);
+  }
+
+  .also__list {
+    display: grid;
+    gap: var(--s-4);
+    max-width: 72ch;
+  }
+
+  .also__list a {
+    font-weight: 560;
+  }
+
+  .also__line {
+    color: var(--c-secondary);
+  }
+
+  .also__demo {
+    font-size: var(--t-small);
+  }
+</style>

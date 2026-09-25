@@ -48,3 +48,41 @@
 - **OG image:** `/og-card/` (noindex, excluded from the sitemap) is screenshotted at 1200×630 into `public/og.png`.
 - **Resume link** renders only once `public/resume.pdf` exists (Phase 5).
 - **Lighthouse mobile:** 100 / 100 / 100 / 100 on home and `/work/aurora/`, CLS 0, LCP 1.5–1.7s.
+
+## 2026-09-25 — Art-direction pass
+- **Hero trace is now the signature:** a ruler above it, a title line ("Same ticket, same model. The only change is the loop-breaker."), strokes about 1.7× heavier, 16px labels on desktop, and about 50% more vertical room. Labels get a ground-coloured halo (`paint-order: stroke`) so grid lines never cut through them.
+- **Rhythm:**
+  - Selected work sits on a full-bleed tint band (`#DBEBF2`, with `#AFC6D1` hairlines). All text is AA on tint: ink 14.1, secondary 5.6, petrol 6.7, brass-text 4.6.
+  - The closing CTA plus footer form a full-bleed ink band. On-dark petrol `#7CC4DC` (8.9:1) and on-dark secondary `#A3ADB5` (7.6:1). Plain petrol on ink is only 2.1:1, so it isn't used there. The focus ring is inverted on dark.
+  - Three spacing tokens: `--s-section-lg` around the set pieces, `--s-section`, and `--s-section-sm` for the record sections.
+  - Research, Toolkit and Education use a smaller heading scale.
+- **Key figures:** readout clamp up to 5rem. Aurora's lead is "0 / 43" (eval scenarios with a policy violation). Below 1024px the readout sits above the body so it never overflows.
+- **Grey text:** a new `--t-meta` token (15–16px) for mechanism details, stack, captions, the strip and dates.
+- **Case studies:** the body spans cols 4–12. Prose children stay capped at 68ch; tables, figures and `pre` break out to the full width.
+- Lighthouse after the pass: 100/100/100/100 on home and a case study.
+
+## 2026-09-25 — Phase 3: real project visuals
+- **Every visual is generated from committed repo outputs.** Each extractor takes the repo path as an argument, so no local paths are committed:
+  - `scripts/extract-aurora-results.py`: `docs/model-comparison.md` (from `make compare`) and `eval_results/latest.json`
+  - `scripts/extract-f1-consolidation.py`: `backend/eval/results/consolidation.json`
+  - `scripts/extract-pitwall.py`: `results/model_full.pkl` fixed effects (run inside PitWall's uv env to unpickle), `model_metrics.json`, `backtest.json`, and stint caps from `data/laps_clean.parquet`
+- **Charts:**
+  - Bar and dumbbell charts are HTML/CSS, so labels stay real text at every width.
+  - The degradation curves are SVG, with wide and compact layouts.
+  - The palette rule holds everywhere: petrol is the result, brass the reference or failure, and shape plus direct labels repeat every colour cue. Brass points are hollow squares; the before-bar is hatched.
+- **Diagrams:** `Flow.astro` draws numbered stages (a real sequence) plus spanning layers; stages stack vertically on phones.
+  - Aurora: 4 stages, with guardrail and reliability layers.
+  - F1 RIA: its 8 LangGraph nodes read from `graph.py`, including the corrective Evaluate → Plan loop.
+  - PitWall: a 5-stage pipeline.
+- **Case studies are now MDX**, with figures placed in the prose. Source notes became `{/* */}` comments, which never render.
+- **Covers:**
+  - Aurora: its demo GIF re-encoded to a 166KB MP4 (it was 235KB). Poster from frame 1, `preload="none"`, played only while ≥50% visible, and never under reduced motion. Without JS it keeps native controls.
+  - F1 RIA and PitWall: their headline charts. F1 RIA has no screenshots, and its UI needs three databases running to show anything real.
+- **Bugs found in renders and fixed:**
+  - `color-mix(in oklch, tint, ground)` turned pink, because the near-neutral ground's hue sends the interpolation through magenta. All mixes now use sRGB.
+  - Flow stages misaligned, because stretched grid rows spread space inside each stage (fixed with `align-content: start`).
+  - Degradation end labels crossed other curves. They moved to a right gutter with leader lines.
+  - Dumbbell labels collided or clipped. The low value's label now sits beside its dot; on phones the values are listed as text.
+- **QA:**
+  - Lighthouse mobile: home 100/100/100/100 (169 KB total); PitWall case study 99/100/100/100.
+  - 15 renders with no overflow and no console errors.

@@ -1,0 +1,30 @@
+---
+import Figure from '../Figure.astro';
+import Flow from '../charts/Flow.astro';
+interface Props { n: number }
+---
+
+<Figure
+  n={Astro.props.n}
+  caption="From raw laps to a backtested strategy. The simulator never sees the real pit laps it is compared against."
+  source="PitWall README and results/"
+>
+  <Flow
+    summary="Five stages: ingest 68 races from FastF1; clean with 10 exclusion rules to 53,854 laps; fit a mixed-effects degradation model; simulate 2,000 races per plan; backtest against 59 real races."
+    stages={[
+      { name: 'Ingest', detail: '68 races, 2022–2024, from FastF1. Resumable, zero failures.' },
+      { name: 'Clean', detail: '10 tested exclusion rules: 74,601 → 53,854 laps.' },
+      { name: 'Model', detail: 'MixedLM: fuel, circuit, season, driver out; wear curve per compound.', emphasis: true },
+      { name: 'Simulate', detail: '2,000 Monte Carlo races per one- or two-stop plan.' },
+      { name: 'Backtest', detail: 'Compared with what teams actually did in 59 races.' },
+    ]}
+    layers={[
+      {
+        label: 'Validation',
+        detail: 'Leave-one-race-out across 21 circuits: the held-out race is never in training.',
+        from: 3,
+        to: 3,
+      },
+    ]}
+  />
+</Figure>

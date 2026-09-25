@@ -1,0 +1,91 @@
+---
+// Work-row cover: a real screen recording, or the project's headline chart.
+import type { CollectionEntry } from 'astro:content';
+import F1Results from './figures/F1Results.astro';
+import DegradationChart from './charts/DegradationChart.astro';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+const { cover, slug } = Astro.props.project.data;
+---
+
+<div class="cover">
+  {
+    cover.kind === 'video' && (
+      <video
+        class="cover__video"
+        src={cover.src}
+        poster={cover.poster}
+        width="1200"
+        height="654"
+        muted
+        loop
+        playsinline
+        controls
+        preload="none"
+        aria-label={cover.alt}
+        data-autoplay
+      />
+    )
+  }
+  {cover.kind === 'image' && <img src={cover.src} alt={cover.alt} loading="lazy" decoding="async" />}
+  {
+    cover.kind === 'chart' && (
+      <div class="cover__chart" role="img" aria-label={cover.alt}>
+        <div aria-hidden="true">
+          {cover.src === 'f1-results' && <F1Results n={0} bare compact />}
+          {cover.src === 'pitwall-degradation' && <DegradationChart compact idPrefix={`cover-${slug}`} />}
+        </div>
+      </div>
+    )
+  }
+</div>
+
+<script>
+  // Covers autoplay (muted) only while on screen and never under reduced motion.
+  // Native controls stay on in every case: they are the pause control (WCAG 2.2.2)
+  // and the way to start playback if the browser refuses autoplay.
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const videos = document.querySelectorAll<HTMLVideoElement>('video[data-autoplay]');
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const { target, isIntersecting } of entries) {
+        const v = target as HTMLVideoElement;
+        if (isIntersecting && !reduce.matches) {
+          v.preload = 'auto';
+          // Refused autoplay leaves the poster and native controls in place.
+          v.play().catch(() => {});
+        } else {
+          v.pause();
+        }
+      }
+    },
+    { threshold: 0.5 },
+  );
+  videos.forEach((v) => {
+    if (!reduce.matches) observer.observe(v);
+  });
+</script>
+
+<style>
+  .cover {
+    margin-top: var(--s-6);
+  }
+
+  .cover__video,
+  .cover img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1200 / 654;
+    background: var(--c-ink);
+    border: 1px solid var(--c-rule);
+  }
+
+  .cover__chart {
+    padding: var(--s-4);
+    background: var(--c-ground);
+    border: 1px solid var(--c-rule);
+  }
+</style>

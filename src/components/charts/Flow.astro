@@ -1,0 +1,182 @@
+---
+// Architecture flow: ordered stages with a short detail each, plus optional "layers"
+// that span a run of stages (e.g. guardrails wrapping the act step). Horizontal on
+// desktop, vertical on phones. Stages are a real sequence, so they are numbered.
+interface Stage {
+  name: string;
+  detail: string;
+  emphasis?: boolean;
+}
+interface Layer {
+  label: string;
+  detail: string;
+  /** 1-based, inclusive stage span. */
+  from: number;
+  to: number;
+  tone?: 'accent' | 'brass' | 'ink';
+}
+interface Props {
+  stages: Stage[];
+  layers?: Layer[];
+  /** Plain-language description of the whole diagram. */
+  summary: string;
+  /** Stages per row on desktop (default: all in one row). Layers span full width when wrapping. */
+  columns?: number;
+}
+const { stages, layers = [], summary, columns = stages.length } = Astro.props;
+const wraps = columns < stages.length;
+---
+
+<div class:list={['flow', wraps && 'flow--wrap']} style={`--stages:${columns}`}>
+  <p class="visually-hidden">{summary}</p>
+  <ol class="flow__stages">
+    {
+      stages.map((s, i) => (
+        <li class:list={['flow__stage', s.emphasis && 'flow__stage--emphasis']}>
+          <span class="flow__n">{i + 1}</span>
+          <span class="flow__name">{s.name}</span>
+          <span class="flow__detail">{s.detail}</span>
+        </li>
+      ))
+    }
+  </ol>
+  {
+    layers.map((layer) => (
+      <div
+        class:list={['flow__layer', `flow__layer--${layer.tone ?? 'accent'}`]}
+        style={wraps ? '--from:1;--to:-1' : `--from:${layer.from};--to:${layer.to + 1}`}
+      >
+        <span class="flow__layer-label">{layer.label}</span>
+        <span class="flow__layer-detail">{layer.detail}</span>
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  .flow {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--s-3);
+    font-size: var(--t-meta);
+  }
+
+  .flow__stages {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: var(--s-3);
+  }
+
+  .flow__stage {
+    position: relative;
+    display: grid;
+    align-content: start;
+    margin: 0; /* reset the case-study `.prose li + li` spacing */
+    grid-template-columns: 2rem 1fr;
+    column-gap: var(--s-3);
+    padding: var(--s-3) 0;
+    border-top: 1px solid var(--c-ink);
+  }
+
+  .flow__n {
+    grid-row: span 2;
+    font-family: var(--f-mono);
+    font-size: var(--t-small);
+    color: var(--c-secondary);
+    padding-top: 0.15em;
+  }
+
+  .flow__name {
+    font-weight: 620;
+  }
+
+  .flow__detail {
+    color: var(--c-secondary);
+    line-height: 1.45;
+  }
+
+  /* Thicker petrol rule; trim the padding by the extra 2px so text stays aligned. */
+  .flow__stage--emphasis {
+    border-top: 3px solid var(--c-accent);
+    padding-top: calc(var(--s-3) - 2px);
+  }
+
+  .flow__stage--emphasis .flow__name {
+    color: var(--c-accent);
+  }
+
+  .flow__layer {
+    display: grid;
+    gap: var(--s-1);
+    padding: var(--s-3) var(--s-4);
+    border-top: 3px solid var(--c-accent);
+    background: color-mix(in srgb, var(--c-accent-tint) 60%, var(--c-ground));
+  }
+
+  .flow__layer--brass {
+    border-top-color: var(--c-brass);
+    background: color-mix(in srgb, var(--c-brass) 10%, var(--c-ground));
+  }
+
+  .flow__layer--ink {
+    border-top-color: var(--c-ink);
+    background: transparent;
+    padding-inline: 0;
+  }
+
+  .flow__layer-label {
+    font-weight: 620;
+  }
+
+  .flow__layer-detail {
+    color: var(--c-secondary);
+  }
+
+  @media (min-width: 768px) {
+    .flow {
+      grid-template-columns: repeat(var(--stages), minmax(0, 1fr));
+      column-gap: var(--grid-gutter);
+    }
+
+    /* Same column gap as the parent, so stages and layers share the exact tracks. */
+    .flow__stages {
+      grid-column: 1 / -1;
+      grid-template-columns: subgrid;
+      column-gap: var(--grid-gutter);
+      row-gap: 0;
+    }
+
+    .flow--wrap .flow__stages {
+      row-gap: var(--s-4);
+    }
+
+    /* No arrow off the end of a wrapped row (wrapping is used with 4 columns). */
+    .flow--wrap .flow__stage:nth-child(4n)::after {
+      display: none;
+    }
+
+    .flow__stage {
+      grid-template-columns: 1fr;
+      padding-right: var(--s-2);
+    }
+
+    .flow__n {
+      grid-row: auto;
+    }
+
+    /* Arrowhead on the rule between stages. */
+    .flow__stage:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: -5.5px;
+      right: calc(var(--grid-gutter) * -1 + 1px);
+      border: 5px solid transparent;
+      border-left: 7px solid var(--c-ink);
+    }
+
+    .flow__layer {
+      grid-column: var(--from) / var(--to);
+    }
+  }
+</style>

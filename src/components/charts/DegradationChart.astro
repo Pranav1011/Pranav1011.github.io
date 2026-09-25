@@ -1,0 +1,201 @@
+---
+// PitWall's fitted tyre-degradation curves: lap-time loss vs tyre age, per compound,
+// each drawn up to the 90th-percentile stint actually run (the compound's cap).
+// Data: src/assets/projects/pitwall/data.json (scripts/extract-pitwall.py).
+import data from '../../assets/projects/pitwall/data.json';
+
+interface Props {
+  compact?: boolean;
+  idPrefix?: string;
+}
+const { compact = false, idPrefix = 'deg' } = Astro.props;
+
+type Compound = 'SOFT' | 'MEDIUM' | 'HARD';
+const order: Compound[] = ['SOFT', 'MEDIUM', 'HARD'];
+const style: Record<Compound, { cls: string; name: string }> = {
+  SOFT: { cls: 'soft', name: 'Soft' },
+  MEDIUM: { cls: 'medium', name: 'Medium' },
+  HARD: { cls: 'hard', name: 'Hard' },
+};
+
+const maxAge = Math.max(...order.map((c) => data.caps[c]));
+const maxLoss = Math.max(...order.flatMap((c) => data.curves[c].map((p) => p.loss)));
+const yMax = Math.ceil(maxLoss * 4) / 4; // round up to 0.25 s
+
+function layout(width: number, height: number, fs: number) {
+  const pad = { l: fs * 3.8, r: fs * 11, t: fs * 2.6, b: fs * 3.2 };
+  const x = (age: number) => pad.l + ((age - 1) / (maxAge - 1)) * (width - pad.l - pad.r);
+  const y = (loss: number) => height - pad.b - (loss / yMax) * (height - pad.t - pad.b);
+  const xTicks = [1, 10, 20, 30, maxAge];
+  const yTicks = Array.from({ length: Math.round(yMax / 0.25) + 1 }, (_, i) => i * 0.25);
+  return { width, height, fs, pad, x, y, xTicks, yTicks };
+}
+
+const variants = compact ? [{ l: layout(360, 300, 12), cls: 'deg--only' }] : [
+  { l: layout(760, 400, 14), cls: 'deg--wide' },
+  { l: layout(360, 300, 12), cls: 'deg--compact' },
+];
+const path = (l: ReturnType<typeof layout>, c: Compound) =>
+  data.curves[c].map((p, i) => `${i ? 'L' : 'M'}${l.x(p.age).toFixed(1)},${l.y(p.loss).toFixed(1)}`).join(' ');
+const last = (c: Compound) => data.curves[c][data.curves[c].length - 1];
+
+/** End labels live in the right gutter, stacked by end value, with a dotted leader
+ *  from each curve's last point, so no label ever crosses another curve. */
+function endLabels(l: ReturnType<typeof layout>) {
+  const ends = order
+    .map((c) => ({ c, age: last(c).age, loss: last(c).loss, yPos: l.y(last(c).loss) }))
+    .sort((a, b) => a.yPos - b.yPos);
+  const step = l.fs * 2.6;
+  for (let i = 1; i < ends.length; i++) {
+    if (ends[i].yPos - ends[i - 1].yPos < step) ends[i].yPos = ends[i - 1].yPos + step;
+  }
+  const gutterX = l.width - l.pad.r + l.fs;
+  return ends.map((e) => ({ ...e, gutterX }));
+}
+const summary = order
+  .map((c) => `${style[c].name}: ${last(c).loss.toFixed(2)} s slower per lap by lap ${last(c).age}`)
+  .join('; ');
+---
+
+{
+  variants.map(({ l, cls }, vi) => (
+    <svg
+      class={`deg ${cls}`}
+      viewBox={`0 0 ${l.width} ${l.height}`}
+      role="img"
+      aria-labelledby={`${idPrefix}-${vi}-title`}
+      font-size={l.fs}
+    >
+      <title id={`${idPrefix}-${vi}-title`}>Fitted tyre degradation by compound. {summary}.</title>
+      {l.yTicks.map((t) => (
+        <g>
+          <line x1={l.pad.l} x2={l.width - l.pad.r} y1={l.y(t)} y2={l.y(t)} class="grid" />
+          <text x={l.pad.l - 8} y={l.y(t) + 4} text-anchor="end" class="tick">
+            {t === 0 ? '0' : `+${t.toFixed(2)}`}
+          </text>
+        </g>
+      ))}
+      {l.xTicks.map((t) => (
+        <text x={l.x(t)} y={l.height - l.pad.b + l.fs * 1.5} text-anchor="middle" class="tick">
+          {t}
+        </text>
+      ))}
+      <text x={l.pad.l} y={l.height - 6} class="axis-title">Tyre age (laps)</text>
+      <text x={l.pad.l} y={l.fs * 1} class="axis-title">Lap-time loss (s/lap)</text>
+      {order.map((c) => <path d={path(l, c)} class={`curve curve--${style[c].cls}`} />)}
+      {endLabels(l).map((e) => (
+        <g class={`end end--${style[e.c].cls}`}>
+          <polyline
+            points={`${l.x(e.age) + 5},${l.y(e.loss)} ${e.gutterX - 14},${l.y(e.loss)} ${e.gutterX - 6},${e.yPos - l.fs * 0.3}`}
+            class="leader"
+          />
+          <circle cx={l.x(e.age)} cy={l.y(e.loss)} r={4.5} />
+          <text x={e.gutterX} y={e.yPos}>{style[e.c].name}</text>
+          <text x={e.gutterX} y={e.yPos + l.fs * 1.1} class="end__value">
+            +{e.loss.toFixed(2)} s, lap {e.age}
+          </text>
+        </g>
+      ))}
+    </svg>
+  ))
+}
+
+<style>
+  .deg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    font-family: var(--f-mono);
+  }
+
+  .deg--compact {
+    display: none;
+  }
+
+  @media (max-width: 639px) {
+    .deg--wide {
+      display: none;
+    }
+    .deg--compact {
+      display: block;
+    }
+  }
+
+  .grid {
+    stroke: var(--c-rule);
+  }
+
+  .tick,
+  .axis-title {
+    fill: var(--c-secondary);
+  }
+
+  .axis-title {
+    font-family: var(--f-sans);
+  }
+
+  .curve {
+    fill: none;
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Three series, two hues + ink: dash pattern and direct labels separate them too. */
+  .curve--soft {
+    stroke: var(--c-brass);
+  }
+
+  .curve--medium {
+    stroke: var(--c-ink);
+    stroke-dasharray: 7 6;
+  }
+
+  .curve--hard {
+    stroke: var(--c-accent);
+  }
+
+  .leader {
+    fill: none;
+    stroke: var(--c-secondary);
+    stroke-width: 1;
+    stroke-dasharray: 1.5 3;
+  }
+
+  .end circle {
+    stroke: var(--c-ground);
+    stroke-width: 2;
+  }
+
+  .end--soft circle {
+    fill: var(--c-brass);
+  }
+
+  .end--medium circle {
+    fill: var(--c-ink);
+  }
+
+  .end--hard circle {
+    fill: var(--c-accent);
+  }
+
+  .end text {
+    font-family: var(--f-sans);
+    font-weight: 620;
+    fill: var(--c-ink);
+  }
+
+  .end .end__value {
+    font-family: var(--f-mono);
+    font-weight: 400;
+    fill: var(--c-secondary);
+  }
+
+  .end--soft text:first-of-type {
+    fill: var(--c-brass-text);
+  }
+
+  .end--hard text:first-of-type {
+    fill: var(--c-accent);
+  }
+</style>

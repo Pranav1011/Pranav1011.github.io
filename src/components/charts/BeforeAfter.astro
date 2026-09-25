@@ -1,0 +1,113 @@
+---
+// Paired bars for a before/after measurement. Each metric is scaled to its own
+// "before" value, so the after bar reads directly as the fraction that remains.
+interface Metric {
+  label: string;
+  before: number;
+  after: number;
+  unit: string;
+}
+interface Props {
+  metrics: Metric[];
+  summary: string;
+  compact?: boolean;
+}
+const { metrics, summary, compact = false } = Astro.props;
+const n = (v: number) => v.toLocaleString('en-US');
+const cut = (m: Metric) => Math.round((1 - m.after / m.before) * 1000) / 10;
+---
+
+<div class:list={['ba', compact && 'ba--compact']} role="img" aria-label={summary}>
+  {
+    metrics.map((m) => (
+      <div class="ba__metric" aria-hidden="true">
+        <p class="ba__label">
+          {m.label} <span class="ba__cut">−{cut(m)}%</span>
+        </p>
+        <div class="ba__row">
+          <span class="ba__tag">Before</span>
+          <span class="ba__bar ba__bar--before" style="width:100%" />
+          <span class="ba__value">
+            {n(m.before)} {m.unit}
+          </span>
+        </div>
+        <div class="ba__row">
+          <span class="ba__tag">After</span>
+          <span class="ba__bar ba__bar--after" style={`width:${(m.after / m.before) * 100}%`} />
+          <span class="ba__value ba__value--after">
+            {n(m.after)} {m.unit}
+          </span>
+        </div>
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  .ba {
+    display: grid;
+    gap: var(--s-8);
+    font-size: var(--t-meta);
+  }
+
+  .ba--compact {
+    gap: var(--s-6);
+  }
+
+  .ba__label {
+    font-weight: 600;
+    margin-bottom: var(--s-3);
+  }
+
+  .ba__cut {
+    color: var(--c-accent);
+    font-weight: 640;
+    margin-left: var(--s-2);
+  }
+
+  .ba__row {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    grid-template-areas: 'tag bar' '. value';
+    column-gap: var(--s-3);
+    align-items: center;
+  }
+
+  .ba__row + .ba__row {
+    margin-top: var(--s-3);
+  }
+
+  .ba__tag {
+    grid-area: tag;
+    font-size: var(--t-small);
+    color: var(--c-secondary);
+  }
+
+  .ba__bar {
+    grid-area: bar;
+    display: block;
+    height: 14px;
+    min-width: 3px;
+  }
+
+  /* Before = the reference: a hatched brass outline; after = solid petrol. */
+  .ba__bar--before {
+    border: 2px solid var(--c-brass);
+    background: repeating-linear-gradient(135deg, transparent 0 5px, color-mix(in srgb, var(--c-brass) 35%, transparent) 5px 6px);
+  }
+
+  .ba__bar--after {
+    background: var(--c-accent);
+  }
+
+  .ba__value {
+    grid-area: value;
+    margin-top: var(--s-1);
+    color: var(--c-brass-text);
+    font-weight: 540;
+  }
+
+  .ba__value--after {
+    color: var(--c-accent);
+  }
+</style>

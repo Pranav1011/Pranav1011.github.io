@@ -1,0 +1,26 @@
+---
+import Figure from '../Figure.astro';
+import BeforeAfter from '../charts/BeforeAfter.astro';
+import data from '../../assets/projects/f1-ria/data.json';
+interface Props { n: number; compact?: boolean; bare?: boolean }
+const { n, compact = false, bare = false } = Astro.props;
+const metrics = [
+  { label: 'Tools bound to the agent', before: data.tools.before, after: data.tools.after, unit: 'tools' },
+  { label: 'Tool-schema tokens per request', before: data.schema_tokens.before, after: data.schema_tokens.after, unit: 'tokens' },
+];
+const summary = `Tools: ${data.tools.before} before, ${data.tools.after} after. Tool-schema tokens: ${data.schema_tokens.before} before, ${data.schema_tokens.after} after, a ${data.reduction_pct.tokens}% cut.`;
+---
+
+{
+  bare ? (
+    <BeforeAfter metrics={metrics} summary={summary} compact={compact} />
+  ) : (
+    <Figure
+      n={n}
+      caption={`Before and after consolidating the TimescaleDB tool surface. Both sets are measured the same way: ${data.method}.`}
+      source="backend/eval/results/consolidation.json"
+    >
+      <BeforeAfter metrics={metrics} summary={summary} />
+    </Figure>
+  )
+}

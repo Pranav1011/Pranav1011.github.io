@@ -1,0 +1,34 @@
+---
+import Figure from '../Figure.astro';
+import Dumbbell from '../charts/Dumbbell.astro';
+import data from '../../assets/projects/pitwall/data.json';
+interface Props { n: number }
+
+const m = data.mae;
+const compounds = ['SOFT', 'MEDIUM', 'HARD'] as const;
+const rows = [
+  {
+    label: 'All compounds',
+    points: [
+      { value: m.fair_baseline_cv_mae_s, label: 'Baseline', tone: 'brass' as const },
+      { value: m.model_cv_mae_s, label: 'Model', tone: 'accent' as const },
+    ],
+  },
+  ...compounds.map((c) => ({
+    label: c[0] + c.slice(1).toLowerCase(),
+    points: [
+      { value: m.fair_baseline_mae_by_compound[c], label: 'Baseline', tone: 'brass' as const },
+      { value: m.model_mae_by_compound[c], label: 'Model', tone: 'accent' as const },
+    ],
+  })),
+];
+const summary = rows.map((r) => `${r.label}: model ${r.points[1].value.toFixed(2)} s, baseline ${r.points[0].value.toFixed(2)} s`).join('; ');
+---
+
+<Figure
+  n={Astro.props.n}
+  caption={`Out-of-sample lap-time error (mean absolute, seconds per lap). The baseline is a per-circuit, per-compound regression that already knows the track. The model beats it on every compound, ${data.cv.races_scored} races scored.`}
+  source="results/model_metrics.json"
+>
+  <Dumbbell rows={rows} domain={[0, 3]} ticks={[0, 1, 2, 3]} format="seconds" summary={summary} />
+</Figure>

@@ -1,0 +1,410 @@
+{
+  "source": "PitWall committed outputs (github.com/Pranav1011/pitwall/results)",
+  "caps": {
+    "SOFT": 22,
+    "MEDIUM": 27,
+    "HARD": 37
+  },
+  "coefficients": {
+    "SOFT": {
+      "linear": 0.10605055199458481,
+      "quadratic": -0.0025236222807064994
+    },
+    "MEDIUM": {
+      "linear": 0.058034602043630916,
+      "quadratic": -0.0006940616174110118
+    },
+    "HARD": {
+      "linear": 0.05328475744857998,
+      "quadratic": -0.000559844555829951
+    }
+  },
+  "curves": {
+    "SOFT": [
+      {
+        "age": 1,
+        "loss": 0.0
+      },
+      {
+        "age": 2,
+        "loss": 0.0985
+      },
+      {
+        "age": 3,
+        "loss": 0.1919
+      },
+      {
+        "age": 4,
+        "loss": 0.2803
+      },
+      {
+        "age": 5,
+        "loss": 0.3636
+      },
+      {
+        "age": 6,
+        "loss": 0.4419
+      },
+      {
+        "age": 7,
+        "loss": 0.5152
+      },
+      {
+        "age": 8,
+        "loss": 0.5834
+      },
+      {
+        "age": 9,
+        "loss": 0.6465
+      },
+      {
+        "age": 10,
+        "loss": 0.7046
+      },
+      {
+        "age": 11,
+        "loss": 0.7577
+      },
+      {
+        "age": 12,
+        "loss": 0.8057
+      },
+      {
+        "age": 13,
+        "loss": 0.8486
+      },
+      {
+        "age": 14,
+        "loss": 0.8866
+      },
+      {
+        "age": 15,
+        "loss": 0.9194
+      },
+      {
+        "age": 16,
+        "loss": 0.9472
+      },
+      {
+        "age": 17,
+        "loss": 0.97
+      },
+      {
+        "age": 18,
+        "loss": 0.9877
+      },
+      {
+        "age": 19,
+        "loss": 1.0004
+      },
+      {
+        "age": 20,
+        "loss": 1.008
+      },
+      {
+        "age": 21,
+        "loss": 1.0106
+      },
+      {
+        "age": 22,
+        "loss": 1.0082
+      }
+    ],
+    "MEDIUM": [
+      {
+        "age": 1,
+        "loss": 0.0
+      },
+      {
+        "age": 2,
+        "loss": 0.056
+      },
+      {
+        "age": 3,
+        "loss": 0.1105
+      },
+      {
+        "age": 4,
+        "loss": 0.1637
+      },
+      {
+        "age": 5,
+        "loss": 0.2155
+      },
+      {
+        "age": 6,
+        "loss": 0.2659
+      },
+      {
+        "age": 7,
+        "loss": 0.3149
+      },
+      {
+        "age": 8,
+        "loss": 0.3625
+      },
+      {
+        "age": 9,
+        "loss": 0.4088
+      },
+      {
+        "age": 10,
+        "loss": 0.4536
+      },
+      {
+        "age": 11,
+        "loss": 0.4971
+      },
+      {
+        "age": 12,
+        "loss": 0.5391
+      },
+      {
+        "age": 13,
+        "loss": 0.5798
+      },
+      {
+        "age": 14,
+        "loss": 0.6191
+      },
+      {
+        "age": 15,
+        "loss": 0.657
+      },
+      {
+        "age": 16,
+        "loss": 0.6935
+      },
+      {
+        "age": 17,
+        "loss": 0.7287
+      },
+      {
+        "age": 18,
+        "loss": 0.7624
+      },
+      {
+        "age": 19,
+        "loss": 0.7948
+      },
+      {
+        "age": 20,
+        "loss": 0.8257
+      },
+      {
+        "age": 21,
+        "loss": 0.8553
+      },
+      {
+        "age": 22,
+        "loss": 0.8835
+      },
+      {
+        "age": 23,
+        "loss": 0.9103
+      },
+      {
+        "age": 24,
+        "loss": 0.9357
+      },
+      {
+        "age": 25,
+        "loss": 0.9597
+      },
+      {
+        "age": 26,
+        "loss": 0.9824
+      },
+      {
+        "age": 27,
+        "loss": 1.0036
+      }
+    ],
+    "HARD": [
+      {
+        "age": 1,
+        "loss": 0.0
+      },
+      {
+        "age": 2,
+        "loss": 0.0516
+      },
+      {
+        "age": 3,
+        "loss": 0.1021
+      },
+      {
+        "age": 4,
+        "loss": 0.1515
+      },
+      {
+        "age": 5,
+        "loss": 0.1997
+      },
+      {
+        "age": 6,
+        "loss": 0.2468
+      },
+      {
+        "age": 7,
+        "loss": 0.2928
+      },
+      {
+        "age": 8,
+        "loss": 0.3377
+      },
+      {
+        "age": 9,
+        "loss": 0.3815
+      },
+      {
+        "age": 10,
+        "loss": 0.4241
+      },
+      {
+        "age": 11,
+        "loss": 0.4657
+      },
+      {
+        "age": 12,
+        "loss": 0.5061
+      },
+      {
+        "age": 13,
+        "loss": 0.5454
+      },
+      {
+        "age": 14,
+        "loss": 0.5835
+      },
+      {
+        "age": 15,
+        "loss": 0.6206
+      },
+      {
+        "age": 16,
+        "loss": 0.6565
+      },
+      {
+        "age": 17,
+        "loss": 0.6913
+      },
+      {
+        "age": 18,
+        "loss": 0.725
+      },
+      {
+        "age": 19,
+        "loss": 0.7576
+      },
+      {
+        "age": 20,
+        "loss": 0.789
+      },
+      {
+        "age": 21,
+        "loss": 0.8194
+      },
+      {
+        "age": 22,
+        "loss": 0.8486
+      },
+      {
+        "age": 23,
+        "loss": 0.8767
+      },
+      {
+        "age": 24,
+        "loss": 0.9036
+      },
+      {
+        "age": 25,
+        "loss": 0.9295
+      },
+      {
+        "age": 26,
+        "loss": 0.9542
+      },
+      {
+        "age": 27,
+        "loss": 0.9778
+      },
+      {
+        "age": 28,
+        "loss": 1.0003
+      },
+      {
+        "age": 29,
+        "loss": 1.0217
+      },
+      {
+        "age": 30,
+        "loss": 1.042
+      },
+      {
+        "age": 31,
+        "loss": 1.0611
+      },
+      {
+        "age": 32,
+        "loss": 1.0791
+      },
+      {
+        "age": 33,
+        "loss": 1.096
+      },
+      {
+        "age": 34,
+        "loss": 1.1118
+      },
+      {
+        "age": 35,
+        "loss": 1.1264
+      },
+      {
+        "age": 36,
+        "loss": 1.14
+      },
+      {
+        "age": 37,
+        "loss": 1.1524
+      }
+    ]
+  },
+  "mae": {
+    "model_cv_mae_s": 1.3124,
+    "fair_baseline_cv_mae_s": 1.714,
+    "naive_baseline_cv_mae_s": 9.0603,
+    "model_mae_by_compound": {
+      "SOFT": 1.9102,
+      "MEDIUM": 1.3504,
+      "HARD": 1.1405
+    },
+    "fair_baseline_mae_by_compound": {
+      "SOFT": 2.4785,
+      "MEDIUM": 1.681,
+      "HARD": 1.5518
+    },
+    "naive_baseline_mae_by_compound": {
+      "SOFT": 9.279,
+      "MEDIUM": 8.9908,
+      "HARD": 9.0564
+    }
+  },
+  "cv": {
+    "scheme": "leave-one-race-out over cross-season circuits (held-out race never in train; circuit intercept from other season)",
+    "races_scored": 55,
+    "laps": 53854
+  },
+  "backtest": {
+    "races_backtested": 59,
+    "n_sims_per_plan": 2000,
+    "agreement_definition": "same stop count and every pit lap within +/-3",
+    "agreement_rate_pct": 6.8,
+    "stop_count_agreement_pct": 49.2,
+    "median_pit_lap_offset": 8,
+    "mean_pit_lap_offset": 7.4,
+    "offset_note": "sim pits later than the field (positive) \u2014 the unmodelled undercut/track-position effect makes real teams stop earlier",
+    "resid_sigma_s": 1.457
+  }
+}

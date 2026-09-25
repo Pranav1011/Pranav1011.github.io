@@ -1,0 +1,36 @@
+---
+import Figure from '../Figure.astro';
+import Flow from '../charts/Flow.astro';
+interface Props { n: number }
+---
+
+<Figure
+  n={Astro.props.n}
+  caption="Aurora’s agent loop. Every consequential write passes the policy engine before it runs; the queue, idempotency keys and crash recovery sit underneath the whole loop."
+  source="agent/graph.py, policy/, reliability/ in the Aurora repo"
+>
+  <Flow
+    summary="Four stages: intake, plan, act, resolve. Guardrails span all four stages. The reliability layer, a Redis job queue with idempotency keys and crash recovery, sits under the whole loop."
+    stages={[
+      { name: 'Intake', detail: 'Classify intent; load the customer, history and long-term memory.' },
+      { name: 'Plan', detail: 'A structured plan: ordered steps, the tool each needs, risk level.' },
+      { name: 'Act', detail: 'Tool loop over 16 schema-validated read and write tools.', emphasis: true },
+      { name: 'Resolve', detail: 'A reply grounded in tool results, or an escalation to a human.' },
+    ]}
+    layers={[
+      {
+        label: 'Five guardrails',
+        detail: 'Injection sanitizer, policy-gated writes, loop breaker, cost ceiling, reply grounding.',
+        from: 1,
+        to: 4,
+      },
+      {
+        label: 'Reliability',
+        detail: 'Redis/RQ durable queue with retries and dead-letter, idempotency keys, crash recovery on restart.',
+        from: 1,
+        to: 4,
+        tone: 'ink',
+      },
+    ]}
+  />
+</Figure>

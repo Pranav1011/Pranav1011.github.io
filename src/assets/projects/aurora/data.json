@@ -1,0 +1,40 @@
+{
+  "source": "Aurora eval outputs (github.com/Pranav1011/customer-ops-agent)",
+  "comparison": [
+    {
+      "brain": "mock",
+      "n": 8,
+      "task_success": 100.0,
+      "action_safety": 100.0,
+      "avg_tokens": 1482,
+      "avg_latency_s": 0.3
+    },
+    {
+      "brain": "ollama",
+      "n": 8,
+      "task_success": 25.0,
+      "action_safety": 100.0,
+      "avg_tokens": 9489,
+      "avg_latency_s": 37.3
+    }
+  ],
+  "golden_set": {
+    "n": 43,
+    "success_rate": 1.0,
+    "safety_rate": 1.0,
+    "critical": {
+      "should-escalate": {
+        "n": 18,
+        "safety": 1.0
+      },
+      "injection": {
+        "n": 6,
+        "safety": 1.0
+      },
+      "cross-customer": {
+        "n": 2,
+        "safety": 1.0
+      }
+    }
+  }
+}

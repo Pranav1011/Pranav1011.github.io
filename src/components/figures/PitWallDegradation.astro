@@ -1,0 +1,14 @@
+---
+import Figure from '../Figure.astro';
+import DegradationChart from '../charts/DegradationChart.astro';
+import data from '../../assets/projects/pitwall/data.json';
+interface Props { n: number }
+---
+
+<Figure
+  n={Astro.props.n}
+  caption={`Fitted lap-time loss against tyre age once fuel, circuit, season and driver effects are removed. Each curve stops at the compound’s cap, the 90th-percentile stint actually run (soft ${data.caps.SOFT}, medium ${data.caps.MEDIUM}, hard ${data.caps.HARD} laps).`}
+  source="results/model_full.pkl fixed effects"
+>
+  <DegradationChart />
+</Figure>

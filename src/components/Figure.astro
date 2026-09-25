@@ -1,0 +1,42 @@
+---
+// Case-study figure. Breaks out of the 68ch prose measure to the full body column.
+interface Props {
+  n: number;
+  caption: string;
+  /** Where the numbers came from, shown after the caption. */
+  source?: string;
+}
+const { n, caption, source } = Astro.props;
+---
+
+<figure class="figure">
+  <div class="figure__body"><slot /></div>
+  <figcaption>
+    <span class="figure__n">Fig. {n}</span>
+    {caption}
+    {source && <span class="figure__source"> Source: {source}.</span>}
+  </figcaption>
+</figure>
+
+<style>
+  .figure {
+    margin-block: 2.5em;
+    padding-top: var(--s-6);
+    border-top: 1px solid var(--c-ink);
+    font-family: var(--f-sans);
+  }
+
+  figcaption {
+    margin-top: var(--s-6);
+    max-width: 72ch;
+    font-size: var(--t-meta);
+    line-height: 1.5;
+    color: var(--c-secondary);
+  }
+
+  .figure__n {
+    font-weight: 620;
+    color: var(--c-ink);
+    margin-right: 0.4em;
+  }
+</style>

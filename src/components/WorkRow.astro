@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import Headline from './Headline.astro';
+import Cover from './Cover.astro';
 
 interface Props {
   project: CollectionEntry<'projects'>;
@@ -21,6 +22,7 @@ const headingId = `work-${p.slug}`;
       )
     }
     <p class="work-row__year tnum">{p.year}</p>
+    <div class="work-row__cover"><Cover project={Astro.props.project} /></div>
   </div>
 
   <div class="work-row__body">
@@ -66,33 +68,38 @@ const headingId = `work-${p.slug}`;
   }
 
   .work-row__readout {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: var(--s-4);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    column-gap: var(--s-4);
     margin-bottom: var(--s-6);
+  }
+
+  .work-row__cover {
+    grid-column: 1 / -1;
   }
 
   .work-row__value {
     display: block;
     font-variant-numeric: proportional-nums;
     font-size: var(--t-readout);
-    line-height: 1;
-    font-weight: 540;
-    letter-spacing: -0.02em;
+    line-height: 0.95;
+    font-weight: 560;
+    letter-spacing: -0.015em;
     color: var(--c-accent);
+    white-space: nowrap;
   }
 
   .work-row__unit {
     display: block;
-    margin-top: var(--s-2);
-    font-size: var(--t-small);
+    margin-top: var(--s-3);
+    font-size: var(--t-meta);
     color: var(--c-secondary);
-    max-width: 18ch;
+    max-width: 20ch;
   }
 
   .work-row__year {
-    font-size: var(--t-small);
+    font-size: var(--t-meta);
     color: var(--c-secondary);
   }
 
@@ -129,13 +136,14 @@ const headingId = `work-${p.slug}`;
   }
 
   .work-row__mechanisms dt {
-    font-size: var(--t-small);
-    font-weight: 600;
+    font-size: var(--t-meta);
+    font-weight: 620;
   }
 
   .work-row__mechanisms dd {
     margin: var(--s-1) 0 0;
-    font-size: var(--t-small);
+    font-size: var(--t-meta);
+    line-height: 1.45;
     color: var(--c-secondary);
   }
 
@@ -153,7 +161,7 @@ const headingId = `work-${p.slug}`;
 
   .work-row__stack {
     margin-top: var(--s-4);
-    font-size: var(--t-small);
+    font-size: var(--t-meta);
     color: var(--c-secondary);
   }
 
@@ -175,26 +183,27 @@ const headingId = `work-${p.slug}`;
   }
 
   @media (min-width: 768px) {
-    .work-row__readout {
-      grid-column: 1 / 4;
-      flex-direction: column;
-      justify-content: flex-start;
-      margin-bottom: 0;
-    }
-
-    .work-row__body {
-      grid-column: 4 / -1;
-    }
-
     .work-row__mechanisms {
       grid-template-columns: repeat(3, 1fr);
       column-gap: var(--grid-gutter);
     }
   }
 
-  @media (min-width: 1100px) {
+  /* Readout gets its own column only when it's wide enough for a 5rem figure. */
+  @media (min-width: 1024px) {
+    .work-row__readout {
+      grid-column: 1 / 5;
+      grid-template-columns: 1fr;
+      align-content: start;
+      margin-bottom: 0;
+    }
+
+    .work-row__year {
+      margin-top: var(--s-3);
+    }
+
     .work-row__body {
-      grid-column: 4 / 12;
+      grid-column: 5 / -1;
     }
   }
 </style>

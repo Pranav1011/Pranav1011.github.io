@@ -40,24 +40,25 @@ function layout(width: number, labelW: number, rowH: number, fs: number, stackRe
   const rows = [
     { key: 'before', run: before, label: ['Without', 'loop-breaker'], tone: 'brass' },
     { key: 'after', run: after, label: ['With', 'loop-breaker'], tone: 'accent' },
-  ].map((r, i) => ({ ...r, y: 40 + i * rowH }));
+  ].map((r, i) => ({ ...r, y: 48 + i * rowH }));
   const ticks = tickEvery(width > 500 ? 10 : 20);
-  const height = 40 + (rows.length - 1) * rowH + (stackReply ? 72 : 58);
+  const height = 48 + (rows.length - 1) * rowH + (stackReply ? 88 : 72);
   /** Place a label right of `at`, or flip it left when it would cross the right edge. */
   const place = (at: number, text: string, gap = 10) => {
     const w = text.length * fs * 0.62;
     return at + gap + w > right ? { x: at - gap, anchor: 'end' } : { x: at + gap, anchor: 'start' };
   };
-  return { width, height, x, rows, ticks, fs, place, replyDy: stackReply ? 22 + fs + 4 : 22 };
+  return { width, height, x, rows, ticks, fs, place, replyDy: stackReply ? 28 + fs + 6 : 28 };
 }
 
-const wide = layout(1200, 150, 84, 13);
-const medium = layout(720, 110, 88, 12);
-const compact = layout(360, 78, 100, 11, true);
+const wide = layout(1200, 176, 128, 16);
+const medium = layout(720, 124, 116, 14);
+const compact = layout(360, 86, 120, 12, true);
 const fmt = (t: number) => `${t.toFixed(1)} s`;
 ---
 
 <figure class="trace" aria-labelledby={`${idPrefix}-cap`}>
+  <p class="trace__title">Same ticket, same model. The only change is the loop-breaker.</p>
   {
     [
       { l: wide, cls: 'trace__svg trace__svg--wide' },
@@ -81,8 +82,8 @@ const fmt = (t: number) => `${t.toFixed(1)} s`;
           const caught = row.key === 'after';
           return (
             <g class={`row row--${row.tone}`} font-size={l.fs}>
-              <text x={0} y={y - 6} class="row__label">{row.label[0]}</text>
-              <text x={0} y={y + l.fs + 2} class="row__label">{row.label[1]}</text>
+              <text x={0} y={y - 5} class="row__label">{row.label[0]}</text>
+              <text x={0} y={y + l.fs + 4} class="row__label">{row.label[1]}</text>
 
               {/* Phases: intake → plan → act → resolve */}
               <line x1={l.x(0)} x2={l.x(r.plan)} y1={y} y2={y} class="phase phase--quiet" />
@@ -92,19 +93,19 @@ const fmt = (t: number) => `${t.toFixed(1)} s`;
 
               {/* Each get_order tool call */}
               {r.loops.map((t) => (
-                <line x1={l.x(t)} x2={l.x(t)} y1={y - 11} y2={y + 11} class="call" />
+                <line x1={l.x(t)} x2={l.x(t)} y1={y - 15} y2={y + 15} class="call" />
               ))}
 
               {/* The guard that ended the act loop */}
               <rect
-                x={l.x(r.guard) - 6}
-                y={y - 6}
-                width={12}
-                height={12}
+                x={l.x(r.guard) - 8}
+                y={y - 8}
+                width={16}
+                height={16}
                 class="guard"
                 transform={caught ? `rotate(45 ${l.x(r.guard)} ${y})` : undefined}
               />
-              <circle cx={l.x(r.reply)} cy={y} r={4.5} class="reply" />
+              <circle cx={l.x(r.reply)} cy={y} r={6} class="reply" />
 
               {(() => {
                 const guardText = caught ? `loop-breaker, ${fmt(r.guard)}` : `iteration cap, ${fmt(r.guard)}`;
@@ -113,9 +114,9 @@ const fmt = (t: number) => `${t.toFixed(1)} s`;
                 const rp = l.place(l.x(r.reply), replyText, 8);
                 return (
                   <>
-                    <text x={g.x} y={y - 14} text-anchor={g.anchor} class="note">{guardText}</text>
+                    <text x={g.x} y={y - 22} text-anchor={g.anchor} class="note">{guardText}</text>
                     <text x={rp.x} y={y + l.replyDy} text-anchor={rp.anchor} class="note note--quiet">{replyText}</text>
-                    <text x={l.x(r.firstAct)} y={y + 22} class="note note--quiet">{r.loops.length} × get_order</text>
+                    <text x={l.x(r.firstAct)} y={y + 28} class="note note--quiet">{r.loops.length} × get_order</text>
                   </>
                 );
               })()}
@@ -179,7 +180,7 @@ const fmt = (t: number) => `${t.toFixed(1)} s`;
 
   .row__label {
     font-family: var(--f-sans);
-    font-weight: 560;
+    font-weight: 600;
     fill: var(--c-ink);
   }
 
@@ -189,12 +190,12 @@ const fmt = (t: number) => `${t.toFixed(1)} s`;
 
   .phase--quiet {
     stroke: var(--c-secondary);
-    stroke-width: 1.5;
-    stroke-dasharray: 2 4;
+    stroke-width: 2;
+    stroke-dasharray: 2 5;
   }
 
   .phase--act {
-    stroke-width: 3;
+    stroke-width: 5;
   }
 
   .row--brass .phase--act,
@@ -208,7 +209,7 @@ const fmt = (t: number) => `${t.toFixed(1)} s`;
   }
 
   .call {
-    stroke-width: 2;
+    stroke-width: 3;
   }
 
   .row--brass .guard {
@@ -222,7 +223,16 @@ const fmt = (t: number) => `${t.toFixed(1)} s`;
   .reply {
     fill: var(--c-ground);
     stroke: var(--c-ink);
-    stroke-width: 1.5;
+    stroke-width: 2;
+  }
+
+  /* A ground-coloured halo keeps labels legible where they cross grid lines. */
+  .note,
+  .axis text {
+    paint-order: stroke;
+    stroke: var(--c-ground);
+    stroke-width: 5px;
+    stroke-linejoin: round;
   }
 
   .note {
@@ -242,11 +252,20 @@ const fmt = (t: number) => `${t.toFixed(1)} s`;
     fill: var(--c-secondary);
   }
 
+  .trace__title {
+    font-size: var(--t-h3);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+    max-width: 36ch;
+    margin-bottom: var(--s-8);
+  }
+
   figcaption {
-    margin-top: var(--s-4);
-    max-width: 70ch;
-    font-size: var(--t-small);
-    line-height: 1.5;
+    margin-top: var(--s-6);
+    max-width: 72ch;
+    font-size: var(--t-meta);
+    line-height: 1.55;
     color: var(--c-secondary);
   }
 

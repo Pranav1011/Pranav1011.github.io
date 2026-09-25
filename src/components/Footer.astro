@@ -10,10 +10,21 @@ const year = new Date().getFullYear();
 </footer>
 
 <style>
+  /* Continues the closing ink band. */
   .site-footer {
-    border-top: var(--hairline);
+    --focus-ring: 0 0 0 2px var(--c-ink), 0 0 0 4px var(--c-accent-on-dark);
+    background: var(--c-ink);
+    border-top: 1px solid var(--c-rule-on-dark);
     font-size: var(--t-small);
-    color: var(--c-secondary);
+    color: var(--c-secondary-on-dark);
+  }
+
+  .site-footer a {
+    color: var(--c-accent-on-dark);
+  }
+
+  .site-footer a:hover {
+    color: var(--c-ground);
   }
 
   .site-footer__inner {

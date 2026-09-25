@@ -65,6 +65,12 @@ a:hover {
   color: var(--c-ink);
 }
 
+/* Inside the tint band the tint selection would vanish: invert it. */
+.band--tint ::selection {
+  background: var(--c-ink);
+  color: var(--c-ground);
+}
+
 /* Focus ring: 2px ground offset, then petrol, so it reads on petrol fills too. */
 :focus-visible {
   outline: none;

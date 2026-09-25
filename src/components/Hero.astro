@@ -1,5 +1,6 @@
 ---
 import TraceFigure from './TraceFigure.astro';
+import Ruler from './Ruler.astro';
 import { getSite, getResumeHref } from '../lib/content';
 
 const s = await getSite();
@@ -34,7 +35,8 @@ const resume = await getResumeHref();
   </dl>
 
   <div class="hero__figure">
-    <TraceFigure />
+    <Ruler />
+    <div class="hero__instrument"><TraceFigure /></div>
   </div>
 </section>
 
@@ -43,7 +45,7 @@ const resume = await getResumeHref();
     display: grid;
     grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
     column-gap: var(--grid-gutter);
-    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem) var(--s-16);
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem) var(--s-section);
   }
 
   h1,
@@ -128,18 +130,22 @@ const resume = await getResumeHref();
   }
 
   .hero__strip dt {
-    font-size: var(--t-small);
+    font-size: var(--t-meta);
     color: var(--c-secondary);
   }
 
   .hero__strip dd {
     margin: 0;
-    font-size: var(--t-small);
+    font-size: var(--t-meta);
     font-weight: 500;
   }
 
   .hero__figure {
-    margin-top: var(--s-12);
+    margin-top: var(--s-16);
+  }
+
+  .hero__instrument {
+    padding-top: var(--s-8);
   }
 
   @media (min-width: 1024px) {
@@ -160,7 +166,11 @@ const resume = await getResumeHref();
     }
 
     .hero__figure {
-      margin-top: var(--s-12);
+      margin-top: var(--s-24);
+    }
+
+    .hero__instrument {
+      padding-top: var(--s-12);
     }
   }
 </style>

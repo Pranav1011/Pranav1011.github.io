@@ -2,6 +2,7 @@
 import { defineConfig, fontProviders } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { satteri } from '@astrojs/markdown-satteri';
+import mdx from '@astrojs/mdx';
 
 // Content files carry `<!-- src: … -->` source notes for internal review.
 // They name local files and must never reach the published HTML.
@@ -15,7 +16,7 @@ const stripComments = {
 
 export default defineConfig({
   site: 'https://pranav1011.github.io',
-  integrations: [sitemap({ filter: (page) => !page.includes('/og-card') })],
+  integrations: [mdx(), sitemap({ filter: (page) => !page.includes('/og-card') })],
   markdown: {
     processor: satteri({ mdastPlugins: [stripComments] }),
   },

@@ -11,7 +11,13 @@
   --c-accent-tint: #dbebf2;
   --c-brass: #a57710; /* chart marks only, never text */
   --c-brass-text: #8a6000;
-  --c-code: color-mix(in oklch, var(--c-accent-tint) 50%, var(--c-ground));
+  --c-code: color-mix(in srgb, var(--c-accent-tint) 50%, var(--c-ground));
+
+  /* Band variants (contrast in docs/DESIGN_LOG.md, art-direction pass) */
+  --c-rule-on-tint: #afc6d1; /* hairlines inside the tint band */
+  --c-accent-on-dark: #7cc4dc; /* 8.87:1 on ink — links, focus, key text on the ink band */
+  --c-secondary-on-dark: #a3adb5; /* 7.57:1 on ink */
+  --c-rule-on-dark: #34424c;
 
   /* Type families (CSS variables set by the Astro Fonts API) */
   --f-sans: var(--font-sans), system-ui, sans-serif;
@@ -22,10 +28,11 @@
   --t-display: clamp(2.5rem, 1.6rem + 4.2vw, 5.25rem);
   --t-h2: clamp(1.75rem, 1.35rem + 1.6vw, 2.75rem);
   --t-h3: clamp(1.25rem, 1.1rem + 0.6vw, 1.6rem);
-  --t-readout: clamp(2.25rem, 1.8rem + 2vw, 3.5rem);
+  --t-readout: clamp(3rem, 2.2rem + 3vw, 5rem);
   --t-prose: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
   --t-body: 1rem;
   --t-small: 0.875rem;
+  --t-meta: clamp(0.9375rem, 0.9rem + 0.12vw, 1rem); /* secondary text that people actually read */
   --t-data: 0.8125rem;
 
   --lh-display: 0.98;
@@ -48,7 +55,10 @@
   --s-24: 6rem;
   --s-32: 8rem;
   --s-48: 12rem;
-  --s-section: clamp(5rem, 3.5rem + 5vw, 8.5rem);
+  /* Section rhythm: wide around the two set pieces, tight inside the record. */
+  --s-section-lg: clamp(6rem, 4rem + 7vw, 11rem);
+  --s-section: clamp(4.5rem, 3rem + 4vw, 7rem);
+  --s-section-sm: clamp(3.5rem, 2.5rem + 2.5vw, 5rem);
 
   /* Grid */
   --grid-max: 1320px;

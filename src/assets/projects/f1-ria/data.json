@@ -1,0 +1,16 @@
+{
+  "source": "F1 RIA consolidation measurement (github.com/Pranav1011/F1-Race-Intelligence-Agent)",
+  "method": "langchain convert_to_openai_tool + tiktoken(gpt-4o)",
+  "tools": {
+    "before": 79,
+    "after": 8
+  },
+  "schema_tokens": {
+    "before": 13487,
+    "after": 2014
+  },
+  "reduction_pct": {
+    "tools": 89.9,
+    "tokens": 85.1
+  }
+}

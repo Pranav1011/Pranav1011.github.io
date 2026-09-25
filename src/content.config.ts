@@ -2,6 +2,9 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
+/** Chart ids Cover.astro knows how to render. Keep in sync with that component. */
+export const COVER_CHARTS = ['f1-results', 'pitwall-degradation'] as const;
+
 const PLACEHOLDER = /\[[^\]]*\]|\bTBD\b|\bTODO\b|placeholder/i;
 
 const words = (max: number) => (s: string) => s.trim().split(/\s+/).length <= max;
@@ -12,7 +15,7 @@ const realText = z
   .refine((s) => !PLACEHOLDER.test(s), 'Placeholder text is not allowed');
 
 const projects = defineCollection({
-  loader: glob({ pattern: '*.md', base: './src/content/projects' }),
+  loader: glob({ pattern: '*.{md,mdx}', base: './src/content/projects' }),
   schema: z.object({
     title: z.string(),
     headline: realText,
@@ -35,11 +38,17 @@ const projects = defineCollection({
       paper: z.url().optional(),
       writeup: z.url().optional(),
     }),
-    cover: z.object({
-      src: z.string(),
-      alt: realText,
-      kind: z.enum(['image', 'video']),
-    }),
+    cover: z
+      .object({
+        /** image/video: a path under public/; chart: one of COVER_CHARTS (rendered by Cover.astro). */
+        src: z.string(),
+        alt: realText,
+        kind: z.enum(['image', 'video', 'chart']),
+        poster: z.string().optional(),
+      })
+      .refine((c) => c.kind !== 'chart' || (COVER_CHARTS as readonly string[]).includes(c.src), {
+        message: `Chart covers must be one of: ${COVER_CHARTS.join(', ')}`,
+      }),
     status: z.enum(['active', 'complete']).optional(),
   }),
 });

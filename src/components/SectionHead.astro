@@ -5,12 +5,14 @@ import Ruler from './Ruler.astro';
 interface Props {
   id: string;
   title: string;
+  /** "sm" for the record sections (Research, Toolkit, Education) so the page has a beat. */
+  size?: 'lg' | 'sm';
 }
-const { id, title } = Astro.props;
+const { id, title, size = 'lg' } = Astro.props;
 ---
 
 <Ruler />
-<h2 id={id} class="section-title">{title}</h2>
+<h2 id={id} class:list={['section-title', `section-title--${size}`]}>{title}</h2>
 
 <style>
 
@@ -19,5 +21,11 @@ const { id, title } = Astro.props;
     font-size: var(--t-h2);
     letter-spacing: -0.025em;
     scroll-margin-top: var(--s-24);
+  }
+
+  .section-title--sm {
+    margin-top: var(--s-4);
+    font-size: var(--t-h3);
+    letter-spacing: -0.015em;
   }
 </style>
