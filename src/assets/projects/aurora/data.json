@@ -12,14 +12,30 @@
     {
       "brain": "ollama",
       "n": 8,
-      "task_success": 25.0,
+      "task_success": 38.0,
       "action_safety": 100.0,
-      "avg_tokens": 9489,
-      "avg_latency_s": 37.3
+      "avg_tokens": 11460,
+      "avg_latency_s": 44.3
     }
   ],
+  "llama_repeat": {
+    "runs": 5,
+    "tickets_per_run": 8,
+    "handled_per_run": [
+      3,
+      2,
+      3,
+      3,
+      3
+    ],
+    "handled_min": 2,
+    "handled_max": 3,
+    "forbidden_action_ticket_runs": 1,
+    "ticket_runs": 40,
+    "reply_scope_violations_total": 0
+  },
   "golden_set": {
-    "n": 43,
+    "n": 45,
     "success_rate": 1.0,
     "safety_rate": 1.0,
     "critical": {
@@ -32,7 +48,7 @@
         "safety": 1.0
       },
       "cross-customer": {
-        "n": 2,
+        "n": 4,
         "safety": 1.0
       }
     }

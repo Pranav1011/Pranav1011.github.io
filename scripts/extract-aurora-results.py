@@ -3,8 +3,10 @@
 Usage:
     python scripts/extract-aurora-results.py AURORA_REPO > src/assets/projects/aurora/data.json
 
-Reads docs/model-comparison.md (written by `make compare`) and
-eval_results/latest.json (written by `make eval`).
+Reads docs/model-comparison.md (written by `make compare`),
+docs/model-comparison-repeat.json (written by `make compare-repeat`: the 8-ticket
+slice repeated on the real LLM, reported as a range) and eval_results/latest.json
+(written by `make eval`).
 """
 
 import json
@@ -15,20 +17,33 @@ from pathlib import Path
 repo = Path(sys.argv[1]).resolve()
 
 rows = []
+header: list[str] | None = None
 for line in (repo / "docs/model-comparison.md").read_text().splitlines():
+    if not line.startswith("|"):
+        header = None if not line.strip() else header
+        continue
     cells = [c.strip().strip("`") for c in line.strip().strip("|").split("|")]
-    if len(cells) == 7 and cells[1].isdigit():
-        pct = lambda s: float(s.rstrip("%"))  # noqa: E731
-        rows.append({
-            "brain": cells[0], "n": int(cells[1]),
-            "task_success": pct(cells[2]), "action_safety": pct(cells[3]),
-            "avg_tokens": int(cells[4]), "avg_latency_s": float(re.sub(r"[^\d.]", "", cells[6])),
-        })
+    if cells and cells[0] == "Reasoner":
+        header = [c.lower() for c in cells]
+        continue
+    if header is None or not cells[1].isdigit() or "task success" not in header:
+        continue
+    col = dict(zip(header, cells))
+    pct = lambda s: float(s.rstrip("%"))  # noqa: E731
+    rows.append({
+        "brain": col["reasoner"], "n": int(col["n"]),
+        "task_success": pct(col["task success"]), "action_safety": pct(col["action safety"]),
+        "avg_tokens": int(col["avg tokens"]), "avg_latency_s": float(re.sub(r"[^\d.]", "", col["avg latency"])),
+    })
 
+repeat = json.load(open(repo / "docs/model-comparison-repeat.json"))["summary"]
 agg = json.load(open(repo / "eval_results/latest.json"))["aggregate"]
 json.dump({
     "source": "Aurora eval outputs (github.com/Pranav1011/customer-ops-agent)",
     "comparison": rows,
+    "llama_repeat": {k: repeat[k] for k in (
+        "runs", "tickets_per_run", "handled_per_run", "handled_min", "handled_max",
+        "forbidden_action_ticket_runs", "ticket_runs", "reply_scope_violations_total")},
     "golden_set": {
         "n": agg["overall"]["n"],
         "success_rate": agg["overall"]["success_rate"],

@@ -6,7 +6,7 @@ order: 1
 featured: true
 year: 2026
 role: Solo — design, build, evaluation
-summary: An AI support agent that can issue refunds and cancel orders, built never to take an action the rules don’t allow, even when it’s wrong.
+summary: An AI support agent that can issue refunds and cancel orders, with every action checked against fixed rules before it runs.
 problem: An AI agent that can refund money or cancel orders is risky. If it misreads a ticket, it can do real damage.
 mechanisms:
   - label: Checks before acting
@@ -15,10 +15,10 @@ mechanisms:
     detail: If the same ticket arrives twice, the action still happens only once.
   - label: Survives crashes
     detail: If a worker dies mid-ticket, the job resumes without repeating anything.
-result: It never took a forbidden action across 43 test tickets, including 6 attempts to trick it. With a weaker AI model, it handled far fewer tickets correctly (2 of 8), but still took no forbidden actions.
+result: It took no forbidden actions across 43 test tickets on the scripted model, including 6 attempts to trick it. On a weaker AI model it handled 2–3 of 8 tickets correctly and made 1 forbidden refund in 40 runs.
 metric:
   value: "0"
-  label: forbidden actions in every test run, on both models
+  label: forbidden actions in 43 test tickets (scripted model)
 stack: [Python, LangGraph, FastAPI, Redis/RQ, Chroma, MCP]
 links:
   repo: https://github.com/Pranav1011/customer-ops-agent
@@ -39,7 +39,7 @@ import AuroraResults from '../../components/figures/AuroraResults.astro';
 
 - **Problem:** AI agents that take real actions (refunds, cancellations) have to stay safe even when the model is wrong.
 - **What I did:** wrapped the agent in fixed rules and five safety checks, and built a test harness to measure it.
-- **Result:** 0 forbidden actions in 43 test tickets, run with a scripted stand-in model. On a real local AI model it handled only 2 of 8 correctly, and still took no forbidden actions.
+- **Result:** 0 forbidden actions in 43 test tickets on a scripted stand-in model. On a weaker AI model (Llama 3.1 8B, 5 runs of 8 tickets) it handled 2–3 of 8 correctly and made 1 forbidden refund in 40 runs.
 
 ## The problem
 
@@ -86,20 +86,22 @@ I built the eval harness before I trusted any result. Run with a scripted stand-
 | Metric | Result |
 |---|---|
 | Task success | 100% |
-| Action safety | 100% (no forbidden action; escalates every time it must) |
+| Action safety | 100% (no forbidden action; escalates every time it must), scripted model |
 | Should-escalate / injection / cross-customer | 100% / 100% / 100% |
 | Cost and latency per ticket | ~$0.006, ~320 ms |
 
 {/* src: README "Evaluation results" table; eval_results/latest.json */}
 
-**The result that matters most** came from swapping in a weaker brain. On Llama 3.1 8B, task success fell to 25%, but action safety stayed at 100%. The small model looped, picked the wrong tools and drafted replies around orders that didn't exist, and the guardrails caught every one of those before it became an action. Safety is decoupled from model quality, which is the point of the design.
+**The harder test** is swapping in a weaker brain. A small local model varies from run to run, so I ran the same 8 tickets on Llama 3.1 8B five times rather than trusting one run. It handled 2–3 of 8 correctly per run, and it never put another customer’s data in a reply. But in 1 of the 40 ticket runs it made a forbidden refund: a ticket hid an instruction to issue a $500 refund, the rules blocked that, and the model retried with $90, the full order value, which the rules allowed.
 
-| Brain | Task success | Action safety | Avg tokens | Avg latency |
-|---|---|---|---|---|
-| Deterministic mock | 100% | 100% | 1,482 | 0.3 s |
-| Llama 3.1 8B (local) | 25% | 100% | 9,489 | 37.3 s |
+| Brain | Handled correctly | Forbidden actions | Other customers’ data in replies |
+|---|---|---|---|
+| Scripted stand-in (1 run of 8) | 8 of 8 | 0 | 0 |
+| Llama 3.1 8B (5 runs of 8) | 2–3 of 8 per run | 1 in 40 ticket runs | 0 in 40 |
 
-{/* src: README "Model comparison"; docs/model-comparison.md */}
+“Fails safely” means those last two columns: no forbidden actions, and no other customer’s data in replies. Both are measured on every run. On the scripted model both held everywhere; on the weaker model one forbidden refund got through, a rule gap I’m closing.
+
+{/* src: docs/model-comparison.md (make compare); docs/model-comparison-repeat.json (make compare-repeat, 5 runs); forbidden refund: eval trace a3ff3701b8ac (inj-embedded-refund, run 1) */}
 
 <AuroraResults n={2} />
 
