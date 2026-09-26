@@ -1,8 +1,10 @@
 // Motion entry. Progressive enhancement only: without JS, or under reduced motion,
 // every element is already in its final state and nothing here runs.
-// Desktop (1024px and up) adds the set pieces: stacking project panels, headline drift
-// and photo parallax. Mobile keeps the simple reveals. Section colours need no script:
-// each section paints its own, so the next colour arrives with its top edge.
+// Every width: headline and heading reveals, the Experience timeline, and Selected work
+// as stacking panels (CSS sticky, native scrolling). Desktop (1024px and up) adds
+// headline drift, photo parallax, chart build-ins and Lenis on fine pointers. Section
+// colours need no script: each section paints its own, so the next colour arrives with
+// its top edge.
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
@@ -13,6 +15,9 @@ import { panels } from './panels';
 import { charts, headings, timeline } from './reveals';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
+// A phone's address bar resizes the viewport as it shows and hides; don't re-measure
+// every trigger for that (it would jolt scrubbed animations mid-scroll).
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 const root = document.documentElement;
 const mm = gsap.matchMedia();
@@ -24,21 +29,19 @@ mm.add(MOTION, () => {
   const undoTrace = trace();
   headings();
   timeline();
+  const undoPanels = panels();
   root.classList.remove('motion-pending');
   return () => {
     undoTrace?.();
+    undoPanels?.();
     stopDrift();
   };
 });
 
 mm.add(DESKTOP, () => {
-  const undoPanels = panels();
   heroParallax();
   charts();
-  return () => {
-    undoPanels?.();
-    stopDrift();
-  };
+  return () => stopDrift();
 });
 
 mm.add(`${DESKTOP} and (pointer: fine)`, () => initLenis());

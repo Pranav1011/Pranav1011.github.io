@@ -1,7 +1,7 @@
 import { gsap } from 'gsap';
 
 /**
- * Selected work as stacking panels (desktop, motion allowed). The pinning itself is CSS
+ * Selected work as stacking panels (motion allowed, every width). The pinning itself is CSS
  * (position: sticky in WorkRow.astro), switched on by the `panels` class set here, so
  * without this script panels are a plain list. This also pins a panel taller than the
  * viewport by its bottom edge, lets each key figure slide in with its panel, sets a
@@ -17,8 +17,9 @@ export function panels() {
   const flowTop = (i: number) =>
     stack.getBoundingClientRect().top + window.scrollY + rows.slice(0, i).reduce((sum, r) => sum + r.offsetHeight, 0);
 
+  // In svh, so the stick point doesn't jump as a phone's address bar shows and hides.
   const fit = () =>
-    rows.forEach((row) => row.style.setProperty('--stick', `${Math.min(0, window.innerHeight - row.offsetHeight)}px`));
+    rows.forEach((row) => row.style.setProperty('--stick', `min(0px, calc(100svh - ${row.offsetHeight}px))`));
   const observer = new ResizeObserver(fit);
   rows.forEach((row) => observer.observe(row));
   window.addEventListener('resize', fit);
@@ -28,14 +29,15 @@ export function panels() {
   rows.forEach((row, i) => {
     const readout = row.querySelector('.work-row__readout');
     if (readout) {
-      // Sideways, so the figure never crosses the heading below it.
-      gsap.from(readout, { x: 80, opacity: 0, ease: 'none',
+      // Sideways, so the figure never crosses the heading below it (the panel clips x).
+      gsap.from(readout, { x: () => Math.min(80, window.innerWidth * 0.12), opacity: 0, ease: 'none',
         scrollTrigger: { start: () => flowTop(i) - window.innerHeight, end: () => flowTop(i) - window.innerHeight * 0.2,
           scrub: true, invalidateOnRefresh: true } });
     }
     const inner = row.querySelector('.work-row__inner');
     if (rows[i + 1] && inner) {
-      gsap.to(inner, { scale: 0.94, opacity: 0.3, transformOrigin: '50% 0%', ease: 'none',
+      // Scale towards the edge the panel sticks by: its top, or its bottom if it's taller than the screen.
+      gsap.to(inner, { scale: 0.94, opacity: 0.3, transformOrigin: () => (row.offsetHeight > window.innerHeight ? '50% 100%' : '50% 0%'), ease: 'none',
         scrollTrigger: { start: () => flowTop(i + 1) - window.innerHeight, end: () => flowTop(i + 1),
           scrub: true, invalidateOnRefresh: true } });
     }

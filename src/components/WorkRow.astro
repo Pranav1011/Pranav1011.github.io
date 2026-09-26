@@ -233,16 +233,19 @@ const headingId = `work-${p.slug}`;
     }
   }
 
-  /* Stacking panels (desktop, motion allowed): each project pins while the next slides up
-     over it. Only once motion/panels.ts has run (html.panels): it sets --stick so a panel
-     taller than the viewport pins by its bottom edge. Otherwise, a plain list. */
-  @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  /* Stacking panels (motion allowed, every width): each project sticks while the next
+     slides up over it. Pure CSS position: sticky with native scrolling, no scroll
+     hijacking. Only once motion/panels.ts has run (html.panels): it sets --stick so a
+     panel taller than the screen (every panel on a phone) sticks by its bottom edge,
+     after you've read it. Otherwise, and under reduced motion, a plain list. */
+  @media (prefers-reduced-motion: no-preference) {
     :global(html.panels) .work-row {
       position: sticky;
       top: var(--stick, 0px);
       min-height: 100svh;
       display: flex;
       align-items: center;
+      overflow-x: clip;
       background: var(--c-page);
       border-bottom: 0;
       border-top: var(--hairline);
