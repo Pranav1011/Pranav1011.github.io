@@ -24,17 +24,37 @@ stack: [Python, statsmodels, FastF1, pandas, NumPy, Matplotlib]
 links:
   repo: https://github.com/Pranav1011/pitwall
 cover:
-  src: pitwall-degradation
-  alt: Line chart of fitted tyre degradation. Soft, medium and hard tyres lose about one second per lap by the end of their typical stints.
-  kind: chart
+  src: /media/pitwall-loop.mp4
+  poster: /media/pitwall-loop-poster.jpg
+  alt: Animation of a spinning tyre whose medium-compound band thins as the lap count rises from 1 to 27, while the time lost per lap climbs from 0 to about 1 second, from the fitted model.
+  kind: video
 status: complete
 ---
 
 import PitWallPipeline from '../../components/figures/PitWallPipeline.astro';
 import PitWallDegradation from '../../components/figures/PitWallDegradation.astro';
 import PitWallAccuracy from '../../components/figures/PitWallAccuracy.astro';
+import OverviewVideo from '../../components/OverviewVideo.astro';
 
 {/* src (frontmatter): pitwall/README.md Tier 2 table; results/model_metrics.json */}
+
+<OverviewVideo
+  src="/media/pitwall-overview.mp4"
+  poster="/media/pitwall-overview-poster.jpg"
+  width={1280}
+  height={720}
+  lines={[
+    'What does a worn F1 tyre actually cost?',
+    'Tyres slow down every lap. Pit too early or too late, and it costs you time.',
+    'But tyre wear hides behind fuel, track and driver effects. On medium tyres, by lap 27, each lap is about 1 second slower.',
+    'I built a model that pulls tyre wear out of three seasons of real race data: 53,854 clean laps.',
+    '23% less error than a baseline that already knows the track, tested only on races it had never seen.',
+    '2,000 versions of each race, played out to find the best moment to pit. 2023 Bahrain Grand Prix: best pit lap 24.',
+  ]}
+  credit="Music: Sascha Ende (ende.app), CC BY 4.0."
+/>
+
+{/* src (video): brag run on this repo; claims ledger in the local brag output (every number from results/*.json or the repo's simulator) */}
 
 ## TL;DR
 

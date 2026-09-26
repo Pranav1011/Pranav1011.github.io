@@ -7,7 +7,7 @@ import DegradationChart from './charts/DegradationChart.astro';
 interface Props {
   project: CollectionEntry<'projects'>;
 }
-const { cover, slug } = Astro.props.project.data;
+const { cover, slug, title } = Astro.props.project.data;
 ---
 
 <div class="cover plate">
@@ -35,7 +35,7 @@ const { cover, slug } = Astro.props.project.data;
             <path d="M2.5 1.5h2.5v9H2.5zM7 1.5h2.5v9H7z" />
           </svg>
           <span class="cover__toggle-label">Play</span>
-          <span class="visually-hidden"> the Aurora console recording</span>
+          <span class="visually-hidden"> the {title} recording</span>
         </button>
       </div>
     )

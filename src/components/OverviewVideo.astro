@@ -1,0 +1,87 @@
+---
+// A case study's 30-second overview video: click to play (native controls, no autoplay),
+// nothing downloaded until played (preload="none"), poster frame shown until then. Every
+// point is on-screen text, so it works muted; the same lines are listed under it for screen readers.
+interface Props {
+  src: string;
+  poster: string;
+  width: number;
+  height: number;
+  /** Plain-text lines shown on screen, in order. */
+  lines: string[];
+  credit?: string;
+}
+const { src, poster, width, height, lines, credit } = Astro.props;
+---
+
+<figure class="overview">
+  <p class="overview__label" id="overview-label">Watch the 30-second overview</p>
+  <video
+    class="overview__video"
+    controls
+    preload="none"
+    playsinline
+    poster={poster}
+    width={width}
+    height={height}
+    aria-labelledby="overview-label"
+  >
+    <source src={src} type="video/mp4" />
+  </video>
+  <details class="overview__lines">
+    <summary>On-screen text</summary>
+    <ol>{lines.map((line) => <li>{line}</li>)}</ol>
+  </details>
+  {credit && <figcaption class="overview__credit">{credit}</figcaption>}
+</figure>
+
+<style>
+  .overview {
+    margin-block: 0 2.5em;
+    font-family: var(--f-sans);
+  }
+
+  .overview__label {
+    margin-bottom: var(--s-3);
+    font-size: var(--t-small);
+    font-weight: 620;
+    color: var(--c-accent);
+  }
+
+  .overview__video {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    border-radius: 12px;
+    background: var(--c-night);
+  }
+
+  .overview__lines {
+    margin-top: var(--s-3);
+    font-size: var(--t-small);
+    color: var(--c-secondary);
+  }
+
+  .overview__lines summary {
+    cursor: pointer;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    color: var(--c-ink);
+  }
+
+  .overview__lines ol {
+    margin: 0;
+    padding-left: 1.2em;
+    display: grid;
+    gap: var(--s-1);
+  }
+
+  .overview__credit {
+    margin-top: var(--s-1);
+    font-size: var(--t-data);
+    color: var(--c-secondary);
+  }
+</style>
