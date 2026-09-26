@@ -24,16 +24,35 @@ stack: [LangGraph, FastAPI, TimescaleDB, Neo4j, Qdrant, Next.js]
 links:
   repo: https://github.com/Pranav1011/F1-Race-Intelligence-Agent
 cover:
-  src: f1-results
-  alt: Bar chart. Tools fell from 79 to 8, and the size of their definitions from 13,487 to 2,014 tokens.
-  kind: chart
+  src: /media/f1ria-loop.mp4
+  poster: /media/f1ria-loop-poster.jpg
+  alt: Animation of 79 tiles, one for each of the agent's original tools, collapsing into the 8 tools they now sit under, labelled race_analysis, driver_stat, standings, compare, whatif, get_available_sessions, get_database_schema and query_f1_sql.
+  kind: video
 status: active
 ---
 
 import F1Architecture from '../../components/figures/F1Architecture.astro';
 import F1Results from '../../components/figures/F1Results.astro';
+import OverviewVideo from '../../components/OverviewVideo.astro';
 
 {/* src (frontmatter): backend/eval/results/consolidation.json; backend/tests/test_tools/test_consolidated.py */}
+
+<OverviewVideo
+  src="/media/f1ria-overview.mp4"
+  poster="/media/f1ria-overview-poster.jpg"
+  width={1280}
+  height={720}
+  lines={[
+    'Ask seven seasons of Formula 1 anything: 2018–2024 race data.',
+    'A real question: “Compare Verstappen and Norris’s tire degradation in the 2024 Singapore GP.” It picks the right tool for it: race_analysis, then get_tire_degradation.',
+    'And answers from the race data: real lap times, 2024 Singapore GP, hard tyres, laps 31–62.',
+    '79 tools: it had grown to one for every kind of question. Grouped into eight, and every one of the 79 still works.',
+    '85% smaller tool definitions (13,487 to 2,014 tokens). Nothing lost.',
+  ]}
+  credit="Music: Sascha Ende (ende.app), CC BY 4.0."
+/>
+
+{/* src (video): brag run on the F1 RIA repo; ledger in its local brag output (README question, consolidated_tools.py, tests/test_tools/test_consolidated.py, eval/results/consolidation.json; the chart from FastF1 data for that race) */}
 
 ## TL;DR
 

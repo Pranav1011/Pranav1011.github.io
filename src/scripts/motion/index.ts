@@ -19,6 +19,7 @@ import { curtain } from './curtain';
 import { statement } from './statement';
 import { focusList } from './focus';
 import { scrollCue } from './scroll-cue';
+import { backToTop } from './back-to-top';
 import { marquee } from './marquee';
 import { experienceSlides, focusSlides } from './horizontal';
 import { charts, headings, timeline, workHeading } from './reveals';
@@ -39,10 +40,8 @@ mm.add(MOTION, () => {
   headings();
   timeline();
   focusList();
-  const undoCue = scrollCue();
   root.classList.remove('motion-pending');
   return () => {
-    undoCue?.();
     undoTrace?.();
     stopDrift();
   };
@@ -77,5 +76,9 @@ mm.add(`${DESKTOP} and (pointer: fine)`, () => initLenis());
 mm.add('(prefers-reduced-motion: reduce)', () => {
   root.classList.remove('motion-pending');
 });
+
+// Not motion: these work under reduced motion too (static cue, instant scroll to top).
+scrollCue();
+backToTop();
 
 document.fonts?.ready.then(() => ScrollTrigger.refresh());

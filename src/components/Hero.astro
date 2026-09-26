@@ -84,6 +84,8 @@ const RING = false;
     color: var(--c-secondary);
   }
 
+  /* 45ch on desktop keeps the centre of the first screen's bottom edge clear for the
+     scroll cue. */
   .hero__intro {
     margin-top: var(--s-6);
     max-width: 58ch;
@@ -183,6 +185,10 @@ const RING = false;
   }
 
   @media (min-width: 1024px) {
+    .hero__intro {
+      max-width: 45ch;
+    }
+
     .hero--photo h1,
     .hero--photo .hero__text {
       grid-column: 1 / 8;

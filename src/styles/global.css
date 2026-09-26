@@ -108,7 +108,8 @@ a:hover {
   width: 100%;
   max-width: calc(var(--grid-max) + 2 * var(--grid-margin));
   margin-inline: auto;
-  padding-inline: var(--grid-margin);
+  /* viewport-fit=cover: keep content clear of the iPhone notch in landscape. */
+  padding-inline: max(var(--grid-margin), env(safe-area-inset-left, 0px)) max(var(--grid-margin), env(safe-area-inset-right, 0px));
 }
 
 .grid {
@@ -164,4 +165,62 @@ html.curtain .curtain {
 
 .wordmark__text {
   display: inline-block;
+}
+
+/* Back to top: 44px petrol circle, bottom right, clear of the iPhone safe area. It lifts
+   (--lift, set by motion/back-to-top.ts) above any link or button that would sit under it. */
+.to-top {
+  position: fixed;
+  z-index: 30;
+  right: calc(max(20px, var(--grid-margin) * 0.6) + env(safe-area-inset-right, 0px));
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px) + var(--lift, 0px));
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--c-accent-hover);
+  color: var(--c-ground);
+  box-shadow: 0 6px 18px -8px rgb(18 28 35 / 0.5);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out), opacity 0.2s var(--ease-out); /* lift is instant, so it always measures from rest */
+}
+
+.to-top[hidden] {
+  display: none;
+}
+
+.to-top[data-clear='no'] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.to-top svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.to-top:hover {
+  background: var(--c-accent);
+}
+
+/* Over petrol and ink sections: the on-dark colours. */
+.to-top--on-dark {
+  background: #7cc4dc;
+  color: var(--c-night);
+}
+
+.to-top--on-dark:hover {
+  background: var(--c-ground);
+}
+
+.to-top:focus-visible {
+  box-shadow: 0 0 0 2px var(--c-ground), 0 0 0 4px var(--c-night);
 }

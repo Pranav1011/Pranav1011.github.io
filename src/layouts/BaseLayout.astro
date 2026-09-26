@@ -37,7 +37,7 @@ const person = {
 <html lang="en" data-no-motion={chrome ? undefined : ""}>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title}</title>
     <meta name="description" content={description} />
     {/* Noindex pages (404, OG card) get no canonical: their URL is not a real page. */}
@@ -111,6 +111,13 @@ const person = {
         </div>
       ) : (
         chrome && <Footer />
+      )
+    }
+    {
+      chrome && (
+        <button type="button" class="to-top" data-to-top aria-label="Back to top" hidden>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V3M3.5 7.5 8 3l4.5 4.5" /></svg>
+        </button>
       )
     }
   </body>

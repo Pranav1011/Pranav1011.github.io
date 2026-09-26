@@ -20,7 +20,7 @@ const featured = await getFeatured();
     <Hero />
     {/* Shown by motion/scroll-cue.ts only when motion is allowed and the page is at the top;
         a real link, so it works from the keyboard and reads as "Scroll to see more". */}
-    <a class="scroll-cue" href="#work" data-scroll-cue hidden>Scroll to see more <span aria-hidden="true">↓</span></a>
+    <a class="scroll-cue" href="#work" data-scroll-cue hidden><span class="scroll-cue__text">Scroll to explore</span><svg class="scroll-cue__arrow" viewBox="0 0 16 30" aria-hidden="true"><path d="M8 1v26M2 21l6 7 6-7" /></svg></a>
     <FocusList />
     <Statement />
     <Marquee />
@@ -49,30 +49,64 @@ const featured = await getFeatured();
     overflow-x: clip;
   }
 
-  /* Bottom right: clear of the hero text (below the photo on desktop). */
+  /* Scroll cue. From 1360px: centred at the bottom of the first screen, where the hero
+     leaves that spot clear. Narrower: bottom right, on a paper backing so it stays
+     readable over the intro. The arrow bobs only when motion is allowed. */
   .scroll-cue {
     position: fixed;
-    right: var(--grid-margin);
-    bottom: var(--s-6);
     z-index: 20;
+    right: calc(var(--grid-margin) + env(safe-area-inset-right, 0px));
+    bottom: calc(var(--s-6) + env(safe-area-inset-bottom, 0px));
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
-    gap: var(--s-2);
+    gap: var(--s-1);
     min-height: 44px;
-    padding: 0 var(--s-4);
-    border-radius: 999px;
-    background: var(--c-night);
-    color: var(--c-ground);
+    padding: var(--s-2) var(--s-3);
+    border-radius: 12px;
+    border: 1px solid var(--c-rule);
+    background: var(--c-ground);
+    color: var(--c-secondary);
     font-size: var(--t-small);
-    font-weight: 600;
+    font-weight: 560;
     text-decoration: none;
     transition: opacity 0.4s var(--ease-out);
   }
 
+  @media (min-width: 1360px) {
+    .scroll-cue {
+      right: auto;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 0;
+      background: none;
+    }
+  }
+
   .scroll-cue:hover,
   .scroll-cue:focus-visible {
-    color: var(--c-ground);
-    background: var(--c-accent);
+    color: var(--c-accent);
+  }
+
+  .scroll-cue__arrow {
+    width: 12px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .scroll-cue__arrow {
+      animation: cue-bob 2.4s ease-in-out infinite;
+    }
+  }
+
+  @keyframes cue-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(6px); }
   }
 
   .scroll-cue[data-leaving] {
