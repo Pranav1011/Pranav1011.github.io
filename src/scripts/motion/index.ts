@@ -18,6 +18,7 @@ import { panels } from './panels';
 import { curtain } from './curtain';
 import { statement } from './statement';
 import { focusList } from './focus';
+import { scrollCue } from './scroll-cue';
 import { marquee } from './marquee';
 import { experienceSlides, focusSlides } from './horizontal';
 import { charts, headings, timeline, workHeading } from './reveals';
@@ -38,8 +39,10 @@ mm.add(MOTION, () => {
   headings();
   timeline();
   focusList();
+  const undoCue = scrollCue();
   root.classList.remove('motion-pending');
   return () => {
+    undoCue?.();
     undoTrace?.();
     stopDrift();
   };

@@ -18,11 +18,14 @@ const featured = await getFeatured();
 <BaseLayout title={`${site.name}, AI engineer`} description={site.description}>
   <main id="main">
     <Hero />
+    {/* Shown by motion/scroll-cue.ts only when motion is allowed and the page is at the top;
+        a real link, so it works from the keyboard and reads as "Scroll to see more". */}
+    <a class="scroll-cue" href="#work" data-scroll-cue hidden>Scroll to see more <span aria-hidden="true">↓</span></a>
     <FocusList />
     <Statement />
     <Marquee />
 
-    <section class="band band--work" aria-labelledby="work">
+    <section class="band band--work scheme-work" aria-labelledby="work">
       <div class="container">
         <SectionHead id="work" title="Selected work" ruler={false} />
         <div class="stack">
@@ -46,8 +49,44 @@ const featured = await getFeatured();
     overflow-x: clip;
   }
 
+  /* Bottom right: clear of the hero text (below the photo on desktop). */
+  .scroll-cue {
+    position: fixed;
+    right: var(--grid-margin);
+    bottom: var(--s-6);
+    z-index: 20;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    min-height: 44px;
+    padding: 0 var(--s-4);
+    border-radius: 999px;
+    background: var(--c-night);
+    color: var(--c-ground);
+    font-size: var(--t-small);
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.4s var(--ease-out);
+  }
+
+  .scroll-cue:hover,
+  .scroll-cue:focus-visible {
+    color: var(--c-ground);
+    background: var(--c-accent);
+  }
+
+  .scroll-cue[data-leaving] {
+    opacity: 0;
+  }
+
+  .scroll-cue[hidden] {
+    display: none;
+  }
+
+  /* Cards sit inset in the petrol band, with the band showing on every side. */
   .stack {
     margin-top: var(--s-8);
+    padding-inline: clamp(0rem, 2vw, 2.5rem);
   }
 
   /* Much larger than the other section titles: Selected work is the page's set piece. */

@@ -153,12 +153,12 @@ html.curtain .curtain {
 .wordmark {
   overflow: hidden;
   padding: 0 var(--grid-margin) var(--s-4);
-  font-size: calc((100vw - 2 * var(--grid-margin)) / 6.05);
-  line-height: 0.8;
-  font-weight: 780;
-  letter-spacing: -0.045em;
+  font-size: clamp(2.5rem, 1rem + 7vw, 7.5rem); /* quieter: about half the page width */
+  line-height: 0.85;
+  font-weight: 700;
+  letter-spacing: -0.04em;
   white-space: nowrap;
-  color: var(--c-ink);
+  color: var(--c-secondary);
   user-select: none;
 }
 

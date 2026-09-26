@@ -1,6 +1,5 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import Headline from './Headline.astro';
 import Cover from './Cover.astro';
 
 interface Props {
@@ -19,25 +18,26 @@ const headingId = `work-${p.slug}`;
 
 <article class:list={['work-row', scheme]} style={`--i:${index}`} aria-labelledby={headingId} data-panel>
   <div class="work-row__inner">
-  <div class="work-row__readout">
+  <div class="work-row__head">
+    <p class="work-row__meta"><span class="work-row__domain">{p.domain}</span><span class="work-row__year tnum">{p.year}</span></p>
+    <h3 id={headingId}><a href={caseStudy}>{p.title}</a></h3>
     {
       p.metric && (
-        <p>
+        <p class="work-row__readout">
           <span class="work-row__value">{p.metric.value}</span>
           <span class="work-row__unit">{p.metric.label}</span>
         </p>
       )
     }
-    <p class="work-row__meta"><span class="work-row__domain">{p.domain}</span><span class="work-row__year tnum">{p.year}</span></p>
   </div>
 
-  <div class="work-row__cover"><Cover project={Astro.props.project} /></div>
+  <div class="work-row__cover">
+    {index === 0 && <p class="work-row__cover-label">Aurora, live: an AI agent working through support tickets</p>}
+    <Cover project={Astro.props.project} />
+  </div>
 
   <div class="work-row__body">
-    <h3 id={headingId}>
-      <a href={caseStudy}><Headline text={p.headline} /></a>
-    </h3>
-    <p class="work-row__problem">{p.problem}</p>
+    <p class="work-row__problem">{p.summary}</p>
 
     <dl class="work-row__mechanisms">
       {
@@ -63,12 +63,16 @@ const headingId = `work-${p.slug}`;
 </article>
 
 <style>
-  /* A solid-colour card. The overlay darkens it when the next card covers it
-     (motion/panels.ts sets --dim); it's night ink, so it darkens every card colour. */
+  /* A solid-colour card, inset in the petrol band (capped at 1200px, centred). The overlay
+     darkens it when the next card covers it (motion/panels.ts sets --dim); it's night ink,
+     so it darkens every card colour. A faint outline keeps the petrol card distinct from
+     the petrol band. */
   .work-row {
     position: relative;
+    max-width: 1200px;
+    margin: 0 auto var(--s-8);
     border-radius: 12px;
-    margin-bottom: var(--s-6);
+    box-shadow: 0 0 0 1px rgb(241 242 240 / 0.14), 0 24px 60px -30px rgb(0 0 0 / 0.55);
   }
 
   .work-row.scheme-ink {
@@ -86,65 +90,29 @@ const headingId = `work-${p.slug}`;
     z-index: 3;
   }
 
+  /* Mobile: domain, name and figure; then the cover; then summary to links. */
   .work-row__inner {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: 'readout' 'cover' 'body';
+    grid-template-areas: 'head' 'cover' 'body';
     padding: var(--s-6) clamp(1.25rem, 4vw, 2rem) var(--s-8);
   }
 
-  .work-row__readout {
-    grid-area: readout;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: start;
-    column-gap: var(--s-4);
+  .work-row__head {
+    grid-area: head;
     margin-bottom: var(--s-6);
   }
 
-  .work-row__cover {
-    grid-area: cover;
-    position: relative;
-    z-index: 2;
-  }
-
-  .work-row__cover :global(.cover) {
-    border-radius: 8px;
-  }
-
-  .work-row__body {
-    grid-area: body;
-  }
-
-  .work-row__value {
-    display: block;
-    font-variant-numeric: proportional-nums;
-    font-size: var(--t-readout);
-    line-height: 0.95;
-    font-weight: 620;
-    letter-spacing: -0.02em;
-    color: var(--c-figure);
-    white-space: nowrap;
-  }
-
-  .work-row__unit {
-    display: block;
-    margin-top: var(--s-3);
-    font-size: var(--t-meta);
-    color: var(--c-secondary);
-    max-width: 24ch;
-  }
-
   .work-row__meta {
-    display: grid;
-    justify-items: end;
-    gap: var(--s-1);
-    text-align: right;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
   }
 
   /* The domain label: a small ruled tag. */
   .work-row__domain {
-    padding: 0.2em 0.6em;
+    padding: 0.2em 0.65em;
     border: 1px solid var(--c-rule);
     border-radius: 999px;
     font-size: var(--t-small);
@@ -154,28 +122,75 @@ const headingId = `work-${p.slug}`;
   }
 
   .work-row__year {
-    font-size: var(--t-meta);
+    font-size: var(--t-small);
     color: var(--c-secondary);
   }
 
+  /* The project name is the card heading. */
   h3 {
-    margin-top: var(--s-6);
-    font-size: var(--t-h3);
+    margin-top: var(--s-4);
+    font-size: clamp(2rem, 1.3rem + 2vw, 3.25rem);
+    line-height: 1;
+    letter-spacing: -0.035em;
     font-weight: var(--w-display);
-    max-width: 36ch;
   }
 
   h3 a {
     color: var(--c-ink);
-    text-decoration-color: var(--c-rule);
-    text-decoration-thickness: 2px;
+    text-decoration: none;
   }
 
   h3 a:hover,
   h3 a:focus-visible {
     color: var(--c-accent);
     text-decoration: underline;
-    text-decoration-thickness: 2px;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 0.12em;
+  }
+
+  .work-row__readout {
+    margin-top: var(--s-4);
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: var(--s-1) var(--s-3);
+  }
+
+  .work-row__value {
+    font-variant-numeric: proportional-nums;
+    font-size: clamp(2.25rem, 1.6rem + 1.8vw, 3.25rem);
+    line-height: 1;
+    font-weight: 640;
+    letter-spacing: -0.02em;
+    color: var(--c-figure);
+    white-space: nowrap;
+  }
+
+  .work-row__unit {
+    font-size: var(--t-small);
+    color: var(--c-secondary);
+    max-width: 22ch;
+  }
+
+  .work-row__cover {
+    grid-area: cover;
+    position: relative;
+    z-index: 2;
+  }
+
+  .work-row__cover :global(.cover) {
+    border-radius: 12px;
+  }
+
+  .work-row__cover-label {
+    margin-bottom: var(--s-2);
+    font-size: var(--t-small);
+    font-weight: 560;
+    color: var(--c-secondary);
+  }
+
+  .work-row__body {
+    grid-area: body;
   }
 
   .work-row__body > * {
@@ -183,31 +198,33 @@ const headingId = `work-${p.slug}`;
   }
 
   .work-row__problem {
-    margin-top: var(--s-4);
+    margin-top: var(--s-6);
   }
 
   .work-row__mechanisms {
-    margin-top: var(--s-6);
+    margin-top: var(--s-4);
     display: grid;
-    gap: var(--s-4);
+    gap: var(--s-3);
   }
 
   .work-row__mechanisms dt {
-    font-size: var(--t-meta);
+    font-size: var(--t-small);
     font-weight: 620;
   }
 
   .work-row__mechanisms dd {
     margin: var(--s-1) 0 0;
-    font-size: var(--t-meta);
+    font-size: var(--t-small);
     line-height: 1.45;
     color: var(--c-secondary);
   }
 
   .work-row__result {
-    margin-top: var(--s-6);
-    padding-top: var(--s-4);
+    margin-top: var(--s-4);
+    padding-top: var(--s-3);
     border-top: var(--hairline);
+    font-size: var(--t-small);
+    line-height: 1.5;
     font-weight: 500;
   }
 
@@ -217,15 +234,15 @@ const headingId = `work-${p.slug}`;
   }
 
   .work-row__stack {
-    margin-top: var(--s-4);
-    font-size: var(--t-meta);
+    margin-top: var(--s-2);
+    font-size: 0.8125rem;
     color: var(--c-secondary);
   }
 
   .work-row__links {
     list-style: none;
     padding: 0;
-    margin-top: var(--s-4);
+    margin-top: var(--s-2);
     display: flex;
     flex-wrap: wrap;
     gap: 0 var(--s-6);
@@ -246,34 +263,34 @@ const headingId = `work-${p.slug}`;
     }
   }
 
-  /* Desktop: the cover takes about 60% of the card; key figure and text take the rest.
-     The mechanisms show as their labels only (the detail is in each case study). */
+  /* Desktop: cover on the left (about 60%); the text column on the right reads top to
+     bottom: domain, name, key figure, then summary to links. Mechanisms show as labels
+     only (the detail is in each case study). */
   @media (min-width: 1024px) {
     .work-row__inner {
-      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-      grid-template-areas: 'cover readout' 'cover body';
+      grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+      grid-template-areas: 'cover head' 'cover body';
       grid-template-rows: auto 1fr;
-      column-gap: clamp(2rem, 1rem + 2.2vw, 3.5rem);
+      column-gap: clamp(1.75rem, 1rem + 1.8vw, 3rem);
       align-items: start;
-      padding: clamp(1.5rem, 0.5rem + 1.8vw, 2.75rem);
+      padding: clamp(1.5rem, 0.5rem + 1.5vw, 2.25rem);
+    }
+
+    .work-row__head {
+      margin-bottom: 0;
     }
 
     .work-row__cover {
       align-self: center;
     }
 
-    .work-row__readout {
-      grid-template-columns: auto auto;
-      justify-content: space-between;
-      margin-bottom: 0;
-    }
-
-    h3 {
+    .work-row__problem {
       margin-top: var(--s-4);
+      font-size: var(--t-small);
+      line-height: 1.5;
     }
 
     .work-row__mechanisms {
-      margin-top: var(--s-4);
       display: flex;
       flex-wrap: wrap;
       gap: var(--s-1) var(--s-4);
@@ -296,10 +313,6 @@ const headingId = `work-${p.slug}`;
       clip-path: inset(50%);
       white-space: nowrap;
     }
-
-    .work-row__result {
-      margin-top: var(--s-4);
-    }
   }
 
   /* The deck (motion allowed, every width; only once motion/panels.ts has run, which
@@ -321,19 +334,8 @@ const headingId = `work-${p.slug}`;
   }
 
   @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
-    :global(html.panels) .work-row {
-      min-height: calc(100svh - 2rem - 3rem);
-      margin-bottom: 0;
-      display: flex;
-      align-items: center;
-    }
-
     :global(html.panels) .work-row:first-child {
       margin-bottom: 110svh;
-    }
-
-    :global(html.panels) .work-row__inner {
-      width: 100%;
     }
   }
 </style>

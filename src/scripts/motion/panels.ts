@@ -1,8 +1,8 @@
 import { gsap } from 'gsap';
 
 /** Desktop deck: the first card pins this far from the top, each later one DECK_STEP lower. */
-const DECK_TOP = 16;
-const DECK_STEP = 24;
+const DECK_TOP = 40;
+const DECK_STEP = 20;
 
 /**
  * Selected work as a deck of colour cards (motion allowed, every width). The pinning is
@@ -61,7 +61,7 @@ export function panels(desktop: boolean) {
     // and text from the left, PitWall's the other way round. 32px at most on mobile.
     const side = i % 2 === 0 ? 1 : -1;
     const reach = () => (desktop ? Math.min(140, window.innerWidth * 0.1) : 24);
-    const text = row.querySelectorAll('.work-row__readout, .work-row__body');
+    const text = row.querySelectorAll('.work-row__head, .work-row__body');
     const enter = scrub(() => flowTop(i) - window.innerHeight, () => flowTop(i) - pin(i));
     if (i === 0) {
       if (!desktop) gsap.fromTo(text, { x: () => side * reach() }, { x: 0, ease: 'none', scrollTrigger: enter });
@@ -116,24 +116,29 @@ export function panels(desktop: boolean) {
  */
 function bigImage(row: HTMLElement, cover: HTMLElement, desktop: boolean, pinnedAt: () => number, stack: HTMLElement) {
   if (desktop) {
-    // The cover's rect while the card is pinned, from layout offsets (transform-free).
-    const full = () => {
-      const x = stack.getBoundingClientRect().left + cover.offsetLeft;
+    // Framed, not full-screen: the video starts at 80% of the screen width (at most 75% of
+    // its height), centred with the petrol band showing around it, then shrinks into its
+    // place in the card. The rect comes from layout offsets (transform-free); the card is
+    // centred in the stack.
+    const framed = () => {
+      const cardLeft = stack.getBoundingClientRect().left + (stack.clientWidth - row.offsetWidth) / 2;
+      const x = cardLeft + cover.offsetLeft;
       const y = DECK_TOP + cover.offsetTop;
       const w = cover.offsetWidth;
       const h = cover.offsetHeight;
-      const s = Math.max(window.innerWidth / w, window.innerHeight / h);
+      const s = Math.min((window.innerWidth * 0.8) / w, (window.innerHeight * 0.75) / h);
       return { x: window.innerWidth / 2 - (x + w / 2), y: window.innerHeight / 2 - (y + h / 2), scale: s };
     };
-    gsap.fromTo(cover, { x: () => full().x, y: () => full().y, scale: () => full().scale },
+    gsap.fromTo(cover, { x: () => framed().x, y: () => framed().y, scale: () => framed().scale },
       { x: 0, y: 0, scale: 1, ease: 'power2.inOut',
         scrollTrigger: { start: pinnedAt, end: () => pinnedAt() + window.innerHeight * 0.9, scrub: true, invalidateOnRefresh: true } });
     // The text arrives from the right as the video leaves it room.
-    gsap.from(row.querySelectorAll('.work-row__readout, .work-row__body'), { opacity: 0, x: () => Math.min(140, window.innerWidth * 0.1), ease: 'none',
+    gsap.from(row.querySelectorAll('.work-row__head, .work-row__body'), { opacity: 0, x: () => Math.min(140, window.innerWidth * 0.1), ease: 'none',
       scrollTrigger: { start: () => pinnedAt() + window.innerHeight * 0.45, end: () => pinnedAt() + window.innerHeight * 0.9,
         scrub: true, invalidateOnRefresh: true } });
   } else {
-    const bleed = () => window.innerWidth / cover.offsetWidth;
+    // Mobile: the framed video at full width, with side margins, settling into the card.
+    const bleed = () => (window.innerWidth - 32) / cover.offsetWidth;
     gsap.fromTo(cover, { scale: bleed }, { scale: 1, ease: 'none',
       scrollTrigger: { trigger: cover, start: 'top bottom', end: 'top 35%', scrub: true, invalidateOnRefresh: true } });
   }
