@@ -11,6 +11,8 @@ export function heroHeadline() {
   SplitText.create(h1, {
     type: 'lines',
     mask: 'lines',
+      // Lines keep their real text, so skip SplitText's aria-label (invalid on <p>).
+      aria: 'none',
     autoSplit: true,
     onSplit: (self) =>
       gsap.from(self.lines, { yPercent: 105, duration: HEADLINE.duration, stagger: HEADLINE.stagger, ease: EASE }),

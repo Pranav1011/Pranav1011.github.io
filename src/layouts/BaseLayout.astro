@@ -40,10 +40,14 @@ const person = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
-    {noindex && <meta name="robots" content="noindex" />}
+    {/* Noindex pages (404, OG card) get no canonical: their URL is not a real page. */}
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
     <meta name="theme-color" content="#f1f2f0" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <link rel="sitemap" href="/sitemap-index.xml" />
 
     <meta property="og:type" content="website" />
