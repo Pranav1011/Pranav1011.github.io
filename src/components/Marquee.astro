@@ -1,0 +1,117 @@
+---
+// Two rows of the domains I've built for, moving in opposite directions (motion/marquee.ts:
+// speed follows scroll velocity, direction follows scroll direction). The rows are
+// decorative (aria-hidden); the sentence below them says the same thing for screen readers.
+// It can be paused, and it's static without JS and under reduced motion.
+const DOMAINS = ['Customer support', 'Formula 1', 'Enterprise documents', 'Recommendations', 'CAD geometry'];
+const rows = [DOMAINS, [...DOMAINS].reverse()];
+/** Two copies per row, so the track can wrap seamlessly at half its width. */
+const COPIES = 2;
+---
+
+<section class="marquee" aria-labelledby="marquee-title">
+  <h2 id="marquee-title" class="visually-hidden">Domains</h2>
+  <p class="visually-hidden">Domains I’ve built for: customer support, Formula 1, enterprise documents, recommendations and CAD geometry.</p>
+  <div class="marquee__rows" aria-hidden="true">
+    {
+      rows.map((items, r) => (
+        <div class="marquee__row" data-marquee-row={r % 2 === 0 ? 1 : -1}>
+          <div class="marquee__track">
+            {Array.from({ length: COPIES }, () => (
+              <span class="marquee__set">
+                {items.map((item) => (
+                  <span class="marquee__item">
+                    {item}
+                    <span class="marquee__mark" />
+                  </span>
+                ))}
+              </span>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+  <div class="container marquee__controls">
+    <button type="button" class="marquee__toggle" data-marquee-toggle hidden>
+      <span data-label>Pause</span><span class="visually-hidden"> the moving list of domains</span>
+    </button>
+  </div>
+</section>
+
+<style>
+  .marquee {
+    padding-block: var(--s-12) var(--s-section);
+    overflow: hidden;
+  }
+
+  .marquee__rows {
+    display: grid;
+    gap: var(--s-2);
+  }
+
+  .marquee__row {
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .marquee__track {
+    display: inline-flex;
+    will-change: transform;
+  }
+
+  .marquee__set {
+    display: inline-flex;
+  }
+
+  .marquee__item {
+    display: inline-flex;
+    align-items: center;
+    font-size: clamp(2.5rem, 1.2rem + 6vw, 7.5rem);
+    line-height: 1.05;
+    font-weight: var(--w-display);
+    letter-spacing: -0.04em;
+    color: var(--c-ink);
+  }
+
+  .marquee__row:nth-child(2) .marquee__item {
+    color: var(--c-faded);
+  }
+
+  /* A small brass mark between domains. */
+  .marquee__mark {
+    display: inline-block;
+    width: 0.22em;
+    height: 0.22em;
+    margin-inline: 0.45em;
+    border-radius: 50%;
+    background: var(--c-brass);
+  }
+
+  .marquee__controls {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--s-4);
+  }
+
+  .marquee__toggle {
+    min-height: 44px;
+    padding: 0 var(--s-4);
+    border: 1px solid var(--c-ink);
+    background: transparent;
+    color: var(--c-ink);
+    font: inherit;
+    font-size: var(--t-small);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .marquee__toggle[hidden] {
+    display: none;
+  }
+
+  .marquee__toggle:hover {
+    background: var(--c-night);
+    color: var(--c-ground);
+  }
+</style>

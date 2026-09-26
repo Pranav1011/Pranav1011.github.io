@@ -5,13 +5,19 @@ import Cover from './Cover.astro';
 
 interface Props {
   project: CollectionEntry<'projects'>;
+  /** Position in the deck: sets the card's colour and its pin offset. */
+  index: number;
 }
+const { index } = Astro.props;
 const p = Astro.props.project.data;
+/** Each project is its own solid-colour card (schemes and contrast in tokens.css). */
+const SCHEMES = ['scheme-work', 'scheme-ink', 'scheme-brass'] as const;
+const scheme = SCHEMES[index % SCHEMES.length];
 const caseStudy = `/work/${p.slug}/`;
 const headingId = `work-${p.slug}`;
 ---
 
-<article class="work-row" aria-labelledby={headingId} data-panel>
+<article class:list={['work-row', scheme]} style={`--i:${index}`} aria-labelledby={headingId} data-panel>
   <div class="work-row__inner">
   <div class="work-row__readout">
     {
@@ -22,7 +28,7 @@ const headingId = `work-${p.slug}`;
         </p>
       )
     }
-    <p class="work-row__year tnum">{p.year}</p>
+    <p class="work-row__meta"><span class="work-row__domain">{p.domain}</span><span class="work-row__year tnum">{p.year}</span></p>
   </div>
 
   <div class="work-row__cover"><Cover project={Astro.props.project} /></div>
@@ -57,15 +63,34 @@ const headingId = `work-${p.slug}`;
 </article>
 
 <style>
+  /* A solid-colour card. The overlay darkens it when the next card covers it
+     (motion/panels.ts sets --dim); it's night ink, so it darkens every card colour. */
   .work-row {
-    border-bottom: var(--hairline);
+    position: relative;
+    border-radius: 12px;
+    margin-bottom: var(--s-6);
+  }
+
+  .work-row.scheme-ink {
+    --c-figure: #e6ca91; /* pale brass on ink, 10.87:1 */
+  }
+
+  .work-row::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--c-night);
+    opacity: var(--dim, 0);
+    pointer-events: none;
+    z-index: 3;
   }
 
   .work-row__inner {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: 'readout' 'cover' 'body';
-    padding-block: var(--s-12);
+    padding: var(--s-6) clamp(1.25rem, 4vw, 2rem) var(--s-8);
   }
 
   .work-row__readout {
@@ -79,6 +104,12 @@ const headingId = `work-${p.slug}`;
 
   .work-row__cover {
     grid-area: cover;
+    position: relative;
+    z-index: 2;
+  }
+
+  .work-row__cover :global(.cover) {
+    border-radius: 8px;
   }
 
   .work-row__body {
@@ -90,8 +121,8 @@ const headingId = `work-${p.slug}`;
     font-variant-numeric: proportional-nums;
     font-size: var(--t-readout);
     line-height: 0.95;
-    font-weight: 560;
-    letter-spacing: -0.015em;
+    font-weight: 620;
+    letter-spacing: -0.02em;
     color: var(--c-figure);
     white-space: nowrap;
   }
@@ -104,6 +135,24 @@ const headingId = `work-${p.slug}`;
     max-width: 24ch;
   }
 
+  .work-row__meta {
+    display: grid;
+    justify-items: end;
+    gap: var(--s-1);
+    text-align: right;
+  }
+
+  /* The domain label: a small ruled tag. */
+  .work-row__domain {
+    padding: 0.2em 0.6em;
+    border: 1px solid var(--c-rule);
+    border-radius: 999px;
+    font-size: var(--t-small);
+    font-weight: 560;
+    color: var(--c-ink);
+    white-space: nowrap;
+  }
+
   .work-row__year {
     font-size: var(--t-meta);
     color: var(--c-secondary);
@@ -112,6 +161,7 @@ const headingId = `work-${p.slug}`;
   h3 {
     margin-top: var(--s-6);
     font-size: var(--t-h3);
+    font-weight: var(--w-display);
     max-width: 36ch;
   }
 
@@ -196,15 +246,16 @@ const headingId = `work-${p.slug}`;
     }
   }
 
-  /* Desktop: the cover takes half the panel; the key figure and text take the other half. */
+  /* Desktop: the cover takes about 60% of the card; key figure and text take the rest.
+     The mechanisms show as their labels only (the detail is in each case study). */
   @media (min-width: 1024px) {
     .work-row__inner {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
       grid-template-areas: 'cover readout' 'cover body';
       grid-template-rows: auto 1fr;
-      column-gap: clamp(2rem, 1rem + 2.5vw, 4rem);
+      column-gap: clamp(2rem, 1rem + 2.2vw, 3.5rem);
       align-items: start;
-      padding-block: var(--s-16);
+      padding: clamp(1.5rem, 0.5rem + 1.8vw, 2.75rem);
     }
 
     .work-row__cover {
@@ -217,38 +268,68 @@ const headingId = `work-${p.slug}`;
       margin-bottom: 0;
     }
 
-    .work-row__mechanisms {
+    h3 {
       margin-top: var(--s-4);
-      gap: var(--s-3);
     }
 
-    .work-row__mechanisms > div {
-      display: grid;
-      grid-template-columns: 9.5rem 1fr;
-      gap: var(--s-4);
+    .work-row__mechanisms {
+      margin-top: var(--s-4);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--s-1) var(--s-4);
+    }
+
+    .work-row__mechanisms dt {
+      font-weight: 560;
+      color: var(--c-secondary);
+    }
+
+    .work-row__mechanisms dt::before {
+      content: '— ';
     }
 
     .work-row__mechanisms dd {
-      margin: 0;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .work-row__result {
+      margin-top: var(--s-4);
     }
   }
 
-  /* Stacking panels (motion allowed, every width): each project sticks while the next
-     slides up over it. Pure CSS position: sticky with native scrolling, no scroll
-     hijacking. Only once motion/panels.ts has run (html.panels): it sets --stick so a
-     panel taller than the screen (every panel on a phone) sticks by its bottom edge,
-     after you've read it. Otherwise, and under reduced motion, a plain list. */
+  /* The deck (motion allowed, every width; only once motion/panels.ts has run, which
+     sets html.panels and --stick). Each card pins while the next slides up over it.
+     Desktop: cards pin a little lower each time, so the previous card's top edge stays
+     visible above the new one; the first card also holds for the Aurora video to shrink
+     into place. A card taller than the screen (every card on a phone) pins by its
+     bottom edge. CSS position: sticky with native scrolling; no scroll hijacking. */
   @media (prefers-reduced-motion: no-preference) {
     :global(html.panels) .work-row {
       position: sticky;
       top: var(--stick, 0px);
-      min-height: 100svh;
+      transform-origin: 50% 0%;
+    }
+
+    :global(html.panels) .work-row:not(:first-child) {
+      overflow-x: clip;
+    }
+  }
+
+  @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+    :global(html.panels) .work-row {
+      min-height: calc(100svh - 2rem - 3rem);
+      margin-bottom: 0;
       display: flex;
       align-items: center;
-      overflow-x: clip;
-      background: var(--c-page);
-      border-bottom: 0;
-      border-top: var(--hairline);
+    }
+
+    :global(html.panels) .work-row:first-child {
+      margin-bottom: 110svh;
     }
 
     :global(html.panels) .work-row__inner {

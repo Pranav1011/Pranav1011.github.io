@@ -1,0 +1,44 @@
+---
+// What I work on: a large vertical list. motion/focus.ts scrubs it so the item at the
+// middle of the screen is ink and the others are faded. Without JS, and under reduced
+// motion, every item is ink.
+import { getSite } from '../lib/content';
+
+const s = await getSite();
+---
+
+<section class="focus container" aria-labelledby="focus-title">
+  <h2 id="focus-title" class="focus__label">What I work on</h2>
+  <ul class="focus__list" data-focus>
+    {s.focus.map((item) => <li class="focus__item">{item}</li>)}
+  </ul>
+</section>
+
+<style>
+  .focus {
+    padding-block: var(--s-12) var(--s-section);
+  }
+
+  .focus__label {
+    padding-bottom: var(--s-3);
+    border-bottom: 1px solid var(--c-ink);
+    font-size: var(--t-meta);
+    font-weight: 600;
+    letter-spacing: 0;
+    color: var(--c-secondary);
+  }
+
+  .focus__list {
+    list-style: none;
+    padding: 0;
+    margin-top: var(--s-6);
+  }
+
+  .focus__item {
+    font-size: clamp(2.5rem, 1.2rem + 6vw, 7.5rem);
+    line-height: 1.02;
+    font-weight: var(--w-display);
+    letter-spacing: -0.04em;
+    color: var(--c-ink);
+  }
+</style>

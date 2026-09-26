@@ -1,6 +1,7 @@
 ---
 title: Recommend
 headline: A movie recommender that answers in under 100 ms
+domain: Recommendations
 slug: recommend
 order: 99
 featured: false

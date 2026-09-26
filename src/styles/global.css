@@ -38,7 +38,7 @@ video {
 h1,
 h2,
 h3 {
-  font-weight: 620;
+  font-weight: var(--w-heading);
   line-height: var(--lh-heading);
   letter-spacing: -0.02em;
   text-wrap: balance;
@@ -126,4 +126,42 @@ a:hover {
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Curtain footer (html.curtain, set by motion/curtain.ts when motion is allowed and the
+   CTA and footer fit in the screen): they stick to the bottom behind the page, and the
+   opaque content above lifts away to reveal them. Otherwise, normal flow. */
+/* Horizontal entrances slide in from past the edges; clip (unlike hidden) keeps
+   position: sticky working inside. */
+main {
+  overflow-x: clip;
+}
+
+html.curtain main {
+  position: relative;
+  z-index: 1;
+  background: var(--c-page);
+}
+
+html.curtain .curtain {
+  position: sticky;
+  bottom: 0;
+  z-index: 0;
+}
+
+/* Giant wordmark across the bottom of the curtain footer, sized to the page width. */
+.wordmark {
+  overflow: hidden;
+  padding: 0 var(--grid-margin) var(--s-4);
+  font-size: calc((100vw - 2 * var(--grid-margin)) / 6.05);
+  line-height: 0.8;
+  font-weight: 780;
+  letter-spacing: -0.045em;
+  white-space: nowrap;
+  color: var(--c-ink);
+  user-select: none;
+}
+
+.wordmark__text {
+  display: inline-block;
 }

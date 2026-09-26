@@ -1,22 +1,44 @@
 import { gsap } from 'gsap';
 import { SplitText } from 'gsap/SplitText';
-import { CHART_START, DUR, EASE, REVEAL_START } from './tokens';
+import { CHARS, CHART_START, DUR, EASE, REVEAL_START } from './tokens';
 
 const once = (trigger: Element, start = REVEAL_START) => ({ trigger, start, once: true });
 
-/** Section headings and figure titles: masked line reveal, once. */
+/**
+ * Section headings: a short character stagger, once. The h2 keeps an aria-label and the
+ * split characters are aria-hidden, so it's read as one word, not letter by letter.
+ * Figure titles (<p>, where aria-label isn't valid) keep the masked line reveal.
+ */
 export function headings() {
-  document.querySelectorAll<HTMLElement>('.section-title, .figure__title').forEach((el) => {
+  document.querySelectorAll<HTMLElement>('.section-title').forEach((el) => {
+    SplitText.create(el, {
+      type: 'words,chars',
+      mask: 'chars',
+      aria: 'auto',
+      autoSplit: true,
+      onSplit: (self) =>
+        gsap.from(self.chars, { yPercent: 110, duration: CHARS.duration, stagger: CHARS.stagger, ease: EASE, scrollTrigger: once(el) }),
+    });
+  });
+  document.querySelectorAll<HTMLElement>('.figure__title').forEach((el) => {
     SplitText.create(el, {
       type: 'lines',
       mask: 'lines',
-      // Lines keep their real text, so skip SplitText's aria-label (invalid on <p>).
       aria: 'none',
       autoSplit: true,
       onSplit: (self) =>
         gsap.from(self.lines, { yPercent: 105, duration: DUR.base, stagger: 0.07, ease: EASE, scrollTrigger: once(el) }),
     });
   });
+}
+
+/** "Selected work" slides a short way sideways as the petrol band comes up (desktop). */
+export function workHeading() {
+  const h = document.querySelector<HTMLElement>('#work');
+  const band = h?.closest('section');
+  if (!h || !band) return;
+  gsap.fromTo(h, { x: () => Math.min(120, window.innerWidth * 0.08) }, { x: 0, ease: 'none',
+    scrollTrigger: { trigger: band, start: 'top bottom', end: 'top 25%', scrub: true, invalidateOnRefresh: true } });
 }
 
 /**

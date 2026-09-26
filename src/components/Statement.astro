@@ -1,0 +1,108 @@
+---
+// One large line between the focus list and Selected work, with small crops of real
+// project covers and charts floating around it (desktop). Words are split here, in the
+// HTML, so there's no layout shift; motion/statement.ts fills them from secondary grey
+// to ink with scroll and drifts the chips at different speeds. Without JS, and under
+// reduced motion, the line is full ink and the chips sit still.
+import { Image } from 'astro:assets';
+import auroraQueue from '../assets/chips/aurora-queue.jpg';
+import auroraTrace from '../assets/chips/aurora-trace.jpg';
+import auroraLoop from '../assets/chips/aurora-loop.png';
+import f1Tools from '../assets/chips/f1-tools.png';
+import pitwall from '../assets/chips/pitwall-degradation.png';
+
+const LINE = 'Most agent demos stop at the tool call. I care about what happens next.';
+const words = LINE.split(' ');
+/** Position (percent of the section), width (rem) and drift speed (negative moves up). */
+const chips = [
+  { src: auroraQueue, top: '10%', left: '1%', w: 14, speed: -0.5 },
+  { src: f1Tools, top: '8%', right: '2%', w: 16, speed: 0.35 },
+  { src: auroraTrace, top: '44%', right: '0%', w: 13, speed: -0.25 },
+  { src: auroraLoop, bottom: '10%', left: '4%', w: 19, speed: 0.6 },
+  { src: pitwall, bottom: '8%', right: '15%', w: 10, speed: -0.4 },
+];
+---
+
+<section class="statement container" aria-label="Statement">
+  <div class="statement__chips" aria-hidden="true">
+    {
+      chips.map((c) => (
+        <div
+          class="statement__chip plate"
+          data-speed={c.speed}
+          style={`top:${c.top ?? 'auto'};bottom:${c.bottom ?? 'auto'};left:${c.left ?? 'auto'};right:${c.right ?? 'auto'};width:${c.w}rem`}
+        >
+          <Image src={c.src} alt="" widths={[Math.round(c.w * 16), Math.round(c.w * 32)]} sizes={`${c.w}rem`} loading="lazy" decoding="async" />
+        </div>
+      ))
+    }
+  </div>
+  <p class="statement__line" data-statement>
+    {words.map((w, i) => (
+      <>
+        <span class="statement__word">{w}</span>
+        {i < words.length - 1 && ' '}
+      </>
+    ))}
+  </p>
+</section>
+
+<style>
+  .statement {
+    position: relative;
+    padding-block: var(--s-section);
+  }
+
+  .statement__line {
+    position: relative;
+    z-index: 1;
+    max-width: 20ch;
+    font-size: clamp(2.25rem, 1.2rem + 4.4vw, 5.5rem);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    font-weight: var(--w-display);
+    text-wrap: balance;
+    color: var(--c-ink);
+  }
+
+  /* Chips are desktop only: on a phone they'd crowd the line. */
+  .statement__chips {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .statement {
+      min-height: 110svh;
+      display: grid;
+      place-items: center;
+      padding-block: var(--s-24);
+    }
+
+    .statement__line {
+      text-align: center;
+      max-width: 16ch;
+    }
+
+    .statement__chips {
+      display: block;
+      position: absolute;
+      inset: 0 var(--grid-margin);
+      pointer-events: none;
+    }
+
+    .statement__chip {
+      position: absolute;
+      overflow: hidden;
+      border: 1px solid var(--c-rule);
+      border-radius: 12px;
+      background: var(--c-page);
+      box-shadow: 0 18px 40px -24px rgb(18 28 35 / 0.35);
+    }
+
+    .statement__chip :global(img) {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+  }
+</style>

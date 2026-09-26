@@ -99,7 +99,20 @@ const person = {
       )
     }
     <slot />
-    {chrome && <Footer />}
+    {
+      /* The home page passes its closing CTA as the "curtain": with the footer, it sits
+         behind the page and is revealed as the content above lifts away (motion/curtain.ts). */
+      Astro.slots.has('curtain') ? (
+        <div class="curtain scheme-ink" data-curtain>
+          <slot name="curtain" />
+          {chrome && <Footer />}
+          {/* Decorative: the name is already in the header and footer. */}
+          <p class="wordmark" aria-hidden="true"><span class="wordmark__text">SAI PRANAV</span></p>
+        </div>
+      ) : (
+        chrome && <Footer />
+      )
+    }
   </body>
 </html>
 {/* Motion bundle: Astro hoists and bundles this module script. The OG card (chrome=false)

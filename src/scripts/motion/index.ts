@@ -1,8 +1,11 @@
 // Motion entry. Progressive enhancement only: without JS, or under reduced motion,
 // every element is already in its final state and nothing here runs.
-// Every width: headline and heading reveals, the Experience timeline, and Selected work
-// as stacking panels (CSS sticky, native scrolling). Desktop (1024px and up) adds
-// headline drift, photo parallax, chart build-ins and Lenis on fine pointers. Section
+// Every width: headline reveal, character-stagger section headings, the focus-list
+// highlight, the statement's scroll fill, the Experience timeline, Selected work as a
+// deck of colour cards (CSS sticky, native scrolling) opening with the Aurora video
+// shrinking into its card, and the curtain footer. Desktop (1024px and up) adds headline
+// drift, photo and cover parallax, the floating statement chips, the sliding "Selected
+// work" heading, chart build-ins and Lenis on fine pointers. Section
 // colours need no script: each section paints its own, so the next colour arrives with
 // its top edge.
 import { gsap } from 'gsap';
@@ -12,7 +15,12 @@ import { initLenis } from './lenis';
 import { heroHeadline, heroParallax, stopDrift } from './hero';
 import { trace } from './trace';
 import { panels } from './panels';
-import { charts, headings, timeline } from './reveals';
+import { curtain } from './curtain';
+import { statement } from './statement';
+import { focusList } from './focus';
+import { marquee } from './marquee';
+import { experienceSlides, focusSlides } from './horizontal';
+import { charts, headings, timeline, workHeading } from './reveals';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 // A phone's address bar resizes the viewport as it shows and hides; don't re-measure
@@ -29,19 +37,35 @@ mm.add(MOTION, () => {
   const undoTrace = trace();
   headings();
   timeline();
-  const undoPanels = panels();
+  focusList();
   root.classList.remove('motion-pending');
   return () => {
     undoTrace?.();
-    undoPanels?.();
     stopDrift();
   };
 });
 
-mm.add(DESKTOP, () => {
-  heroParallax();
-  charts();
-  return () => stopDrift();
+// Set pieces that differ by width re-run when the window crosses 1024px.
+mm.add({ motion: MOTION, desktop: DESKTOP }, (ctx) => {
+  const { motion, desktop } = ctx.conditions as { motion: boolean; desktop: boolean };
+  if (!motion) return;
+  const undoPanels = panels(desktop);
+  const undoCurtain = curtain(desktop);
+  const undoMarquee = marquee(desktop);
+  statement(desktop);
+  focusSlides(desktop);
+  experienceSlides(desktop);
+  if (desktop) {
+    heroParallax();
+    workHeading();
+    charts();
+  }
+  return () => {
+    undoPanels?.();
+    undoCurtain?.();
+    undoMarquee?.();
+    stopDrift();
+  };
 });
 
 mm.add(`${DESKTOP} and (pointer: fine)`, () => initLenis());

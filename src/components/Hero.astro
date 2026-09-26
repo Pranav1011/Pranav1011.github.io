@@ -12,6 +12,7 @@ const RING = false;
 <section class:list={['hero container', { 'hero--photo': photo }]} aria-labelledby="hero-title">
   <h1 id="hero-title">{s.headline}</h1>
   <div class="hero__text">
+    <p class="hero__subline">{s.subline}</p>
     {s.intro.map((p) => <p class="hero__intro">{p}</p>)}
     <p class="hero__availability">
       <span class="hero__dot" aria-hidden="true"></span>{s.availability}
@@ -45,16 +46,6 @@ const RING = false;
     )
   }
 
-  <dl class="hero__strip">
-    {
-      s.strip.map((cell) => (
-        <div>
-          <dt>{cell.label}</dt>
-          <dd>{cell.value}</dd>
-        </div>
-      ))
-    }
-  </dl>
 </section>
 
 <style>
@@ -67,8 +58,7 @@ const RING = false;
 
   h1,
   .hero__text,
-  .hero__photo,
-  .hero__strip {
+  .hero__photo {
     grid-column: 1 / -1;
   }
 
@@ -80,12 +70,22 @@ const RING = false;
     font-size: var(--t-display);
     line-height: var(--lh-display);
     letter-spacing: -0.035em;
-    font-weight: 620;
+    font-weight: var(--w-display);
     max-width: 20ch;
   }
 
+  .hero__subline {
+    margin-top: var(--s-6);
+    max-width: 34ch;
+    font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.75rem);
+    line-height: 1.3;
+    font-weight: 560;
+    letter-spacing: -0.012em;
+    color: var(--c-secondary);
+  }
+
   .hero__intro {
-    margin-top: var(--s-8);
+    margin-top: var(--s-6);
     max-width: 58ch;
     font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
     line-height: 1.55;
@@ -182,48 +182,9 @@ const RING = false;
     object-fit: cover;
   }
 
-  /* Below the intro: a single ruled row of three cells. */
-  .hero__strip {
-    margin-top: var(--s-12);
-    border-top: 1px solid var(--c-ink);
-  }
-
-  .hero__strip > div {
-    padding-block: var(--s-3);
-    border-bottom: var(--hairline);
-    display: grid;
-    grid-template-columns: 8.5rem 1fr;
-    gap: var(--s-4);
-  }
-
-  .hero__strip dt {
-    font-size: var(--t-meta);
-    color: var(--c-secondary);
-  }
-
-  .hero__strip dd {
-    margin: 0;
-    font-size: var(--t-meta);
-    font-weight: 500;
-  }
-
-  @media (min-width: 768px) {
-    .hero__strip {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      column-gap: var(--grid-gutter);
-    }
-
-    .hero__strip > div {
-      grid-template-columns: 1fr;
-      gap: var(--s-1);
-    }
-  }
-
   @media (min-width: 1024px) {
     .hero--photo h1,
-    .hero--photo .hero__text,
-    .hero--photo .hero__strip {
+    .hero--photo .hero__text {
       grid-column: 1 / 8;
     }
 
@@ -233,14 +194,10 @@ const RING = false;
 
     .hero--photo .hero__photo {
       grid-column: 9 / -1;
-      grid-row: 1 / span 3;
+      grid-row: 1 / span 2;
       align-self: start;
       width: 100%;
       margin: var(--s-2) 0 0;
-    }
-
-    .hero__strip {
-      margin-top: var(--s-16);
     }
   }
 </style>

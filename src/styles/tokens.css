@@ -8,6 +8,7 @@
   --c-page: #f1f2f0;
   --c-ink: #121c23;
   --c-secondary: #545c63;
+  --c-faded: #7b838a; /* 3.43:1 on paper: large text only (the focus list, the statement) */
   --c-rule: #ccd2d6;
   --c-accent: #00566e;
   --c-accent-hover: #003f53;
@@ -23,9 +24,11 @@
   --f-mono: var(--font-mono), ui-monospace, monospace;
 
   /* Fluid type scale, 360px → 1440px */
-  --t-display: clamp(2.5rem, 1.6rem + 4.2vw, 5.25rem);
-  --t-h2: clamp(1.75rem, 1.35rem + 1.6vw, 2.75rem);
-  --t-h3: clamp(1.25rem, 1.1rem + 0.6vw, 1.6rem);
+  --t-display: clamp(2.75rem, 1.4rem + 5.9vw, 6.75rem);
+  --t-h2: clamp(2.125rem, 1.4rem + 3.1vw, 4.25rem);
+  --t-h3: clamp(1.375rem, 1.15rem + 0.9vw, 1.9rem);
+  --w-display: 720; /* display and section headings */
+  --w-heading: 660;
   --t-readout: clamp(3rem, 2.2rem + 3vw, 5rem);
   --t-prose: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
   --t-body: 1rem;

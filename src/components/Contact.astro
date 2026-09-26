@@ -57,8 +57,9 @@ const resume = await getResumeHref();
   /* Full-bleed ink band: the ink scheme (tokens.css). */
   /* No top margin: the space above belongs to the record section, so the page colour in
      it doesn't depend on scroll direction. */
+  /* Compact enough that the CTA, footer and wordmark fit in one screen (the curtain). */
   .contact {
-    padding-block: var(--s-section) var(--s-section-lg);
+    padding-block: var(--s-section-sm) var(--s-12);
   }
 
   .contact a:hover {
@@ -76,7 +77,7 @@ const resume = await getResumeHref();
     font-size: var(--t-display);
     line-height: var(--lh-display);
     letter-spacing: -0.035em;
-    font-weight: 620;
+    font-weight: var(--w-display);
     max-width: 14ch;
   }
 

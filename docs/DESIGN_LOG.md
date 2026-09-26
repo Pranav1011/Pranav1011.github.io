@@ -128,3 +128,22 @@
 - Removed the empty band and ruler between the hero strip and Selected work.
 - Stacking panels: incoming panel solid `#003F53`; key figures slide in sideways so they never cross the heading.
 - Hero portrait added (EXIF and GPS stripped before commit); og.png regenerated with it.
+
+## 2026-09-25 (scroll pass)
+
+- Lenis: duration 1.2 s, exponential ease-out, wheel multiplier 0.85 (compared with a heavier 1.4 s / 0.75). One 100 px notch settles at 85 px in about 0.6 s.
+- Statement section between the hero and Selected work; its words fill from secondary grey (6.06 : 1) to ink with scroll, at every width. Full ink without JS and under reduced motion.
+- Covers settle from 1.12 inside their frames as each panel enters: to 1.04 on desktop, which leaves room for a ±1.8% parallax inside the frame, and to 1.00 on mobile.
+- "Selected work" set much larger and slides in sideways a short way as the petrol band arrives (desktop).
+- Curtain footer: the CTA and footer stick to the bottom behind the opaque page (CSS sticky, so native and smooth on iOS) and are revealed at the end. Only on when they fit in the screen; keyboard focus and Contact links scroll to the end; normal flow without JS and under reduced motion.
+- Section headings: character stagger (aria-label on the h2, characters aria-hidden). Figure titles keep the line reveal.
+- Not added, by decision: horizontal-scroll galleries, speed-based skew, custom cursors.
+
+## 2026-09-26: scroll choreography pass
+
+- Selected work is a deck of colour cards: Aurora deep petrol `#003F53`, F1 RIA ink `#121C23` (key figure pale brass, 10.87 : 1), PitWall brass tint `#F3E7CE`; 12px corners; cover about 60% of the card width. Desktop cards pin 16px, 40px and 64px from the top, so the previous card's top edge stays visible; a covered card scales to 0.94 and darkens under a night-ink overlay (`--dim` up to 0.28; a petrol overlay wouldn't darken the petrol card). CSS sticky at every width; cards taller than the screen pin by their bottom edge.
+- Big image moment: the Aurora console video fills the screen as the first card pins, then shrinks into its slot over 0.9 screens (the card holds for 1.1 screens). Mobile: the cover bleeds to the screen edges and settles into the card.
+- Focus strip replaced by a large list (Agents that act · Guardrails · Evaluation · Retrieval · Recovery); the item at mid-screen is ink, the others `#7B838A` (3.43 : 1, AA for large text).
+- Statement: grey-to-ink fill now starts at `#7B838A`; five crops of real covers and charts drift around it at different speeds (desktop only).
+- Curtain footer: giant "SAI PRANAV" wordmark (decorative, aria-hidden); CTA padding tightened so CTA + footer + wordmark fit one screen (780px at 1440, 621px at 375×629).
+- Type: display 6.75rem max at weight 720, section titles 4.25rem at 720.

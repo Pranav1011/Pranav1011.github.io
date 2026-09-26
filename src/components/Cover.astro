@@ -126,6 +126,7 @@ const { cover, slug } = Astro.props.project.data;
     }
   }
 
+  /* The frame clips its media, so motion/panels.ts can scale and shift it inside. */
   .cover__video,
   .cover img {
     display: block;
@@ -133,11 +134,16 @@ const { cover, slug } = Astro.props.project.data;
     height: auto;
     aspect-ratio: 1600 / 1000;
     background: var(--c-night);
-    border: 1px solid var(--c-rule);
   }
 
   .cover__media {
     position: relative;
+    overflow: hidden;
+    border: 1px solid var(--c-rule);
+  }
+
+  .cover > img {
+    border: 1px solid var(--c-rule);
   }
 
   /* Small toggle over the recording's lower-left corner. 44px tall hit target. */
@@ -187,6 +193,7 @@ const { cover, slug } = Astro.props.project.data;
   }
 
   .cover__chart {
+    overflow: hidden;
     padding: var(--s-4);
     background: var(--c-ground);
     border: 1px solid var(--c-rule);

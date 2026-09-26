@@ -13,8 +13,9 @@ export function stopDrift() {
 }
 
 /**
- * Headline: masked line reveal on load (~0.5 s). On desktop the lines then drift up and
- * fade as you scroll past the hero, each a little faster than the one above.
+ * Headline: masked line reveal on load (~0.5 s). Then, as you scroll past the hero,
+ * alternating lines slide out in opposite directions and fade: a quarter of the screen on
+ * desktop, 32px on mobile (main clips horizontal overflow).
  */
 export function heroHeadline(desktop: MediaQueryList) {
   const h1 = document.querySelector<HTMLElement>('#hero-title');
@@ -23,19 +24,18 @@ export function heroHeadline(desktop: MediaQueryList) {
   SplitText.create(h1, {
     type: 'lines',
     mask: 'lines',
-      // Lines keep their real text, so skip SplitText's aria-label (invalid on <p>).
-      aria: 'none',
+    // Lines keep their real text, so skip SplitText's aria-label (invalid on <p>).
+    aria: 'none',
     autoSplit: true,
     onSplit: (self) => {
       stopDrift();
-      if (desktop.matches) {
-        drift = gsap.to(self.masks, {
-          y: (i) => -28 * (i + 1),
-          opacity: 0,
-          ease: 'none',
-          scrollTrigger: { trigger: h1, start: 'top 12%', end: 'bottom -30%', scrub: true },
-        });
-      }
+      const reach = () => (desktop.matches ? window.innerWidth * 0.25 : 32);
+      drift = gsap.to(self.masks, {
+        x: (i) => (i % 2 === 0 ? -1 : 1) * reach(),
+        opacity: 0,
+        ease: 'none',
+        scrollTrigger: { trigger: h1, start: 'top 12%', end: 'bottom -30%', scrub: true, invalidateOnRefresh: true },
+      });
       return gsap.from(self.lines, { yPercent: 105, duration: HEADLINE.duration, stagger: HEADLINE.stagger, ease: EASE });
     },
   });

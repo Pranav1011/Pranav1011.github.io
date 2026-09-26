@@ -19,6 +19,8 @@ const projects = defineCollection({
   schema: z.object({
     title: z.string(),
     headline: realText,
+    /** The domain the project works in, shown on its card. */
+    domain: z.string(),
     slug: z.string(),
     order: z.number().int(),
     featured: z.boolean(),
@@ -60,9 +62,10 @@ const site = defineCollection({
     shortName: z.string(),
     description: realText.refine((d) => d.length <= 155, 'Meta description must be 155 characters or fewer'),
     headline: realText.refine(words(12), 'Headline must be 12 words or fewer'),
+    subline: realText,
     intro: z.array(realText).min(1),
     availability: realText,
-    strip: z.array(z.object({ label: z.string(), value: realText })).length(3),
+    focus: z.array(z.string()).min(3).max(6),
     email: z.email(),
     github: z.url(),
     linkedin: z.url(),

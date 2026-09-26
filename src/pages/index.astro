@@ -6,6 +6,9 @@ import WorkRow from '../components/WorkRow.astro';
 import AlsoBuilt from '../components/AlsoBuilt.astro';
 import Sections from '../components/Sections.astro';
 import Contact from '../components/Contact.astro';
+import Statement from '../components/Statement.astro';
+import FocusList from '../components/FocusList.astro';
+import Marquee from '../components/Marquee.astro';
 import { getFeatured, getSite } from '../lib/content';
 
 const site = await getSite();
@@ -15,29 +18,43 @@ const featured = await getFeatured();
 <BaseLayout title={`${site.name}, AI engineer`} description={site.description}>
   <main id="main">
     <Hero />
+    <FocusList />
+    <Statement />
+    <Marquee />
 
-    <section class="band scheme-work" aria-labelledby="work">
+    <section class="band band--work" aria-labelledby="work">
       <div class="container">
         <SectionHead id="work" title="Selected work" ruler={false} />
         <div class="stack">
-          {featured.map((project) => <WorkRow project={project} />)}
+          {featured.map((project, i) => <WorkRow project={project} index={i} />)}
         </div>
         <AlsoBuilt />
       </div>
     </section>
 
     <Sections />
-    <Contact />
   </main>
+  <Contact slot="curtain" />
 </BaseLayout>
 
 <style>
-  /* The band's colour marks the start, so it opens with the heading, not a gap. */
+  /* Selected work: paper, with each project on its own colour card. overflow-x: clip
+     keeps the Aurora video inside the page while it's full-screen (clip, unlike hidden,
+     leaves position: sticky working). */
   .band {
-    padding-block: var(--s-12) var(--s-section-lg);
+    padding-block: var(--s-12) var(--s-section);
+    overflow-x: clip;
   }
 
+  .stack {
+    margin-top: var(--s-8);
+  }
+
+  /* Much larger than the other section titles: Selected work is the page's set piece. */
   .band :global(#work) {
     margin-top: 0;
+    font-size: clamp(3rem, 1.6rem + 6.2vw, 8.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.045em;
   }
 </style>

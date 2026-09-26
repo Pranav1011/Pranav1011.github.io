@@ -1,18 +1,18 @@
 ---
 name: Sai Pranav Krovvidi
 shortName: Pranav
-description: "Sai Pranav Krovvidi, AI engineer in Boston. I build LLM agents that take real actions, and the guardrails and evals that show they’re safe to run."
-headline: "I build agents that act, and measure whether they should."
+description: "Sai Pranav Krovvidi, AI engineer in Boston. I build LLM agents and the systems around them for customer support, F1 analytics and enterprise documents."
+headline: "I build AI agents that hold up in the real world."
+subline: "Support desks, race strategy, enterprise documents. Different problems, same standard."
 intro:
-  - "I’m finishing my master’s at Northeastern, and most of what I build is LLM agents and the retrieval systems behind them. The part I enjoy most is the unglamorous bit: getting them to recover when something breaks, and measuring whether they actually work."
+  - "I’m finishing my master’s at Northeastern. I build LLM agents and the systems around them: retrieval, tools, guardrails, evaluation, and the plumbing that keeps them running. I’ve built them for customer support and Formula 1 analytics, and for enterprise document processing in my internship at GPT Integrators, where that work shipped to production."
 availability: "I’m looking for full-time AI engineering roles starting January 2027."
-strip:
-  - label: Focus
-    value: Agent reliability, retrieval, evaluation
-  - label: Most recently
-    value: AI Engineer Intern, GPT Integrators
-  - label: Studying
-    value: MS, Northeastern, graduating December 2026
+focus:
+  - Agents
+  - Retrieval
+  - Evaluation
+  - Machine learning
+  - Production
 email: krovvidipranav3@gmail.com
 github: https://github.com/Pranav1011
 linkedin: https://www.linkedin.com/in/sai-pranav-krovvidi
@@ -40,13 +40,12 @@ education:
     dates: Jun 2020 – May 2024
     detail: "GPA 3.55"
 cta:
-  heading: "Hiring for agents or evals? Let’s talk."
+  heading: "Building something with AI? Let’s talk."
 ---
 
 <!-- src: description — written for search/social previews, not reused from the intro -->
 <!-- src: headline — owner-approved positioning (private: SOURCES.md) -->
 <!-- src: intro — owner-approved copy (private: SOURCES.md) -->
-<!-- src: strip — employment and degree records (private: SOURCES.md) -->
 <!-- src: toolkit — each item used in Aurora, F1 RIA or PitWall, or at GPT Integrators / Tally:
        LangGraph, Chroma, MCP, Claude API (llm/anthropic.py), Ollama, FastAPI, Redis/RQ, Docker, GitHub Actions, SQLite, React, TypeScript — Aurora repo
        LangChain, HyDE (agent/nodes/understand.py), Qdrant, Neo4j, TimescaleDB, Langfuse (observability/langfuse_tracer.py), Next.js — F1 RIA repo

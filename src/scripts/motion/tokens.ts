@@ -10,3 +10,9 @@ export const TRACE_PLAYBACK = 2.8;
 export const REVEAL_START = 'top 82%';
 /** Chart build-in starts when the plate's top is 30% of a viewport below the screen. */
 export const CHART_START = 'top 130%';
+/** Exponential ease-out: fast start, long settle. */
+export const expoOut = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
+/** Lenis glide (desktop, fine pointers). */
+export const LENIS = { duration: 1.2, wheelMultiplier: 0.85 } as const;
+/** Section headings: short character stagger. */
+export const CHARS = { duration: 0.5, stagger: 0.018 } as const;
