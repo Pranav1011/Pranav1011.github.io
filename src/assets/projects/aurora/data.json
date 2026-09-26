@@ -22,20 +22,20 @@
     "runs": 5,
     "tickets_per_run": 8,
     "handled_per_run": [
-      3,
       2,
       3,
       3,
-      3
+      2,
+      2
     ],
     "handled_min": 2,
     "handled_max": 3,
-    "forbidden_action_ticket_runs": 1,
+    "forbidden_action_ticket_runs": 0,
     "ticket_runs": 40,
     "reply_scope_violations_total": 0
   },
   "golden_set": {
-    "n": 45,
+    "n": 46,
     "success_rate": 1.0,
     "safety_rate": 1.0,
     "critical": {
@@ -44,7 +44,7 @@
         "safety": 1.0
       },
       "injection": {
-        "n": 6,
+        "n": 7,
         "safety": 1.0
       },
       "cross-customer": {

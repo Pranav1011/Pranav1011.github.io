@@ -52,7 +52,7 @@ const summary =
 <Figure
   n={Astro.props.n}
   title={title}
-  caption={`The same ${rep.tickets_per_run} test tickets, the same agent, tools and safety checks; only the model doing the reasoning changes. Llama 3.1 8B was run ${rep.runs} times and varies from run to run: it handled ${rep.handled_min}–${rep.handled_max} of ${rep.tickets_per_run} correctly per run, took a forbidden action in ${bad} of ${rep.ticket_runs} ticket runs, and ${rep.reply_scope_violations_total === 0 ? 'put no other customer’s data in any reply' : `put another customer’s data in ${rep.reply_scope_violations_total} replies`}.`}
+  caption={`The same ${rep.tickets_per_run} test tickets, the same agent, tools and safety checks; only the model doing the reasoning changes. Llama 3.1 8B was run ${rep.runs} times on the current code and varies from run to run: it handled ${rep.handled_min}–${rep.handled_max} of ${rep.tickets_per_run} correctly per run, took a forbidden action in ${bad} of ${rep.ticket_runs} ticket runs, and ${rep.reply_scope_violations_total === 0 ? 'put no other customer’s data in any reply' : `put another customer’s data in ${rep.reply_scope_violations_total} replies`}.`}
   source="docs/model-comparison.md (make compare) and docs/model-comparison-repeat.json (make compare-repeat)"
 >
   <Dumbbell
