@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import { SplitText } from 'gsap/SplitText';
-import { DUR, EASE, REVEAL_START } from './tokens';
+import { CHART_START, DUR, EASE, REVEAL_START } from './tokens';
 
 const once = (trigger: Element, start = REVEAL_START) => ({ trigger, start, once: true });
 
@@ -19,22 +19,14 @@ export function headings() {
   });
 }
 
-/** Work-row covers unmask from the top edge down as they enter. */
-export function covers() {
-  document.querySelectorAll<HTMLElement>('.cover').forEach((el) => {
-    gsap.fromTo(
-      el,
-      { clipPath: 'inset(0% 0% 100% 0%)' },
-      { clipPath: 'inset(0% 0% 0% 0%)', duration: DUR.slow, ease: 'power3.out', scrollTrigger: once(el, 'top 88%'),
-        clearProps: 'clipPath' },
-    );
-  });
-}
-
-/** Case-study charts build in as their figure enters. */
+/**
+ * Case-study charts build in (desktop only). The build starts while the plate is still
+ * 30% of a viewport below the screen, so it's under way before the plate is seen and a
+ * plate never shows up empty. Cover charts, and every chart on mobile, render drawn.
+ */
 export function charts() {
-  document.querySelectorAll<HTMLElement>('.figure, .cover__chart').forEach((fig) => {
-    const tl = gsap.timeline({ scrollTrigger: once(fig, 'top 78%') });
+  document.querySelectorAll<HTMLElement>('.figure').forEach((fig) => {
+    const tl = gsap.timeline({ scrollTrigger: once(fig, CHART_START) });
 
     // Flow diagrams: stages arrive left to right, then the spanning layers.
     const stages = fig.querySelectorAll('.flow__stage');

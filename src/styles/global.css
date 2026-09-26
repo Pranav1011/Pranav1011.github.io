@@ -17,7 +17,7 @@ html {
 }
 
 body {
-  background: var(--c-ground);
+  background: var(--c-page);
   color: var(--c-ink);
   font-family: var(--f-sans);
   font-size: var(--t-body);
@@ -60,15 +60,10 @@ a:hover {
   color: var(--c-accent-hover);
 }
 
+/* Fixed colours: the pale selection reads on every section scheme. */
 ::selection {
   background: var(--c-accent-tint);
-  color: var(--c-ink);
-}
-
-/* Inside the tint band the tint selection would vanish: invert it. */
-.band--tint ::selection {
-  background: var(--c-ink);
-  color: var(--c-ground);
+  color: var(--c-night);
 }
 
 /* Focus ring: 2px ground offset, then petrol, so it reads on petrol fills too. */
@@ -91,7 +86,7 @@ a:hover {
   left: var(--grid-margin);
   top: var(--s-2);
   padding: var(--s-2) var(--s-4);
-  background: var(--c-ink);
+  background: var(--c-night);
   color: var(--c-ground);
   transform: translateY(-200%);
 }

@@ -10,7 +10,7 @@ interface Props {
 const { cover, slug } = Astro.props.project.data;
 ---
 
-<div class="cover">
+<div class="cover plate">
   {
     cover.kind === 'video' && (
       <div class="cover__media" data-video>
@@ -18,8 +18,8 @@ const { cover, slug } = Astro.props.project.data;
           class="cover__video"
           src={cover.src}
           poster={cover.poster}
-          width="1200"
-          height="654"
+          width="1600"
+          height="1000"
           muted
           loop
           playsinline
@@ -115,8 +115,15 @@ const { cover, slug } = Astro.props.project.data;
 </script>
 
 <style>
+  /* A paper plate: covers keep the paper scheme on any section colour. */
   .cover {
-    margin-top: var(--s-6);
+    margin-bottom: var(--s-6);
+  }
+
+  @media (min-width: 1024px) {
+    .cover {
+      margin-bottom: 0;
+    }
   }
 
   .cover__video,
@@ -124,8 +131,8 @@ const { cover, slug } = Astro.props.project.data;
     display: block;
     width: 100%;
     height: auto;
-    aspect-ratio: 1200 / 654;
-    background: var(--c-ink);
+    aspect-ratio: 1600 / 1000;
+    background: var(--c-night);
     border: 1px solid var(--c-rule);
   }
 

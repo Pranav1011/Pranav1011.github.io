@@ -1,13 +1,15 @@
 ---
-// The hero instrument: two real Aurora runs of the same ticket on the same model,
+// Aurora's loop breaker: two real runs of the same ticket on the same model,
 // drawn as a timing sheet. Data: src/data/aurora-trace.json (scripts/extract-aurora-trace.py).
 import trace from '../data/aurora-trace.json';
 
 interface Props {
   /** Adds an id prefix so the figure can appear twice on a page (e.g. the OG card). */
   idPrefix?: string;
+  /** Figure number, when it appears in a case study. */
+  n?: number;
 }
-const { idPrefix = 'trace' } = Astro.props;
+const { idPrefix = 'trace', n } = Astro.props;
 
 type Ev = { t: number; type: string; phase: string; tool?: string; decision?: string; reason?: string };
 type Run = { events: Ev[] };
@@ -65,7 +67,7 @@ const compact = layout(360, 86, 120, 12, true);
 const fmt = (t: number) => `${t.toFixed(1)} s`;
 ---
 
-<figure class="trace" aria-labelledby={`${idPrefix}-cap`} data-trace data-t-start={Math.min(before.firstAct, after.firstAct)} data-t-end={Math.max(before.reply, after.reply)}>
+<figure class:list={['trace', { 'trace--case': n }]} aria-labelledby={`${idPrefix}-cap`} data-trace data-t-start={Math.min(before.firstAct, after.firstAct)} data-t-end={Math.max(before.reply, after.reply)}>
   <div class="trace__head">
     <p class="trace__title">Same ticket, same AI model. The only difference is a check that stops it repeating itself.</p>
     <button type="button" class="trace__replay" hidden>
@@ -141,6 +143,7 @@ const fmt = (t: number) => `${t.toFixed(1)} s`;
     ))
   }
   <figcaption id={`${idPrefix}-cap`}>
+    {n && <span class="trace__n">Fig. {n}</span>}
     {
       `Aurora handling a real test ticket (a customer charged twice) on Llama 3.1 8B, drawn from its run logs. ` +
         `Without the check, it looked up the same order ${before.loops.length} times until a hard step limit stopped it at ${fmt(before.guard)}. ` +
@@ -153,6 +156,14 @@ const fmt = (t: number) => `${t.toFixed(1)} s`;
 <style>
   .trace {
     margin: 0;
+    font-family: var(--f-sans);
+  }
+
+  /* In a case study it matches the other figures (Figure.astro). */
+  .trace--case {
+    margin-block: 2.5em;
+    padding-top: var(--s-6);
+    border-top: 1px solid var(--c-ink);
   }
 
   .trace__svg {
@@ -327,6 +338,12 @@ const fmt = (t: number) => `${t.toFixed(1)} s`;
     font-size: var(--t-meta);
     line-height: 1.55;
     color: var(--c-secondary);
+  }
+
+  .trace__n {
+    font-weight: 620;
+    color: var(--c-ink);
+    margin-right: 0.4em;
   }
 
   figcaption code {

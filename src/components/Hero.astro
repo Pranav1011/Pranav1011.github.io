@@ -1,13 +1,15 @@
 ---
-import TraceFigure from './TraceFigure.astro';
-import Ruler from './Ruler.astro';
+import { Picture } from 'astro:assets';
 import { getSite, getResumeHref } from '../lib/content';
+import { photo, PHOTO_ALT } from '../lib/photo';
 
 const s = await getSite();
 const resume = await getResumeHref();
+/** A 1px petrol outline 8px outside the oval. */
+const RING = false;
 ---
 
-<section class="hero container" aria-labelledby="hero-title">
+<section class:list={['hero container', { 'hero--photo': photo }]} aria-labelledby="hero-title">
   <h1 id="hero-title">{s.headline}</h1>
   <div class="hero__text">
     {s.intro.map((p) => <p class="hero__intro">{p}</p>)}
@@ -23,6 +25,26 @@ const resume = await getResumeHref();
     </ul>
   </div>
 
+  {
+    photo && (
+      <div class:list={['hero__photo', { 'hero__photo--ring': RING }]} data-parallax>
+        {/* src/assets/photo.jpg is pre-cropped: a 4:5 frame centred on the face, eyes on the
+            upper third, plus 6% spare above and below for the parallax (960 × 1344).
+            AVIF and WebP at 1× and 2× with explicit dimensions. */}
+        <Picture
+          src={photo}
+          alt={PHOTO_ALT}
+          formats={['avif', 'webp']}
+          width={480}
+          height={672}
+          densities={[1, 2]}
+          loading="eager"
+          fetchpriority="high"
+        />
+      </div>
+    )
+  }
+
   <dl class="hero__strip">
     {
       s.strip.map((cell) => (
@@ -33,11 +55,6 @@ const resume = await getResumeHref();
       ))
     }
   </dl>
-
-  <div class="hero__figure">
-    <Ruler />
-    <div class="hero__instrument"><TraceFigure /></div>
-  </div>
 </section>
 
 <style>
@@ -45,14 +62,18 @@ const resume = await getResumeHref();
     display: grid;
     grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
     column-gap: var(--grid-gutter);
-    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem) var(--s-section);
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem) var(--s-12);
   }
 
   h1,
   .hero__text,
-  .hero__strip,
-  .hero__figure {
+  .hero__photo,
+  .hero__strip {
     grid-column: 1 / -1;
+  }
+
+  .hero--photo h1 {
+    grid-row: 2;
   }
 
   h1 {
@@ -103,19 +124,65 @@ const resume = await getResumeHref();
     min-height: 44px;
   }
 
+  /* Page-coloured text on an accent fill holds on every scheme (7.32 : 1 on paper). */
   .hero__primary {
     padding-inline: var(--s-4);
     background: var(--c-accent);
-    color: var(--c-ground);
+    color: var(--c-page);
     text-decoration: none;
     font-weight: 560;
   }
 
   .hero__primary:hover {
     background: var(--c-accent-hover);
-    color: var(--c-ground);
+    color: var(--c-page);
   }
 
+  /* A tall oval: a 4:5 frame with a 50% radius. The image is 12% taller than the frame
+     (6% spare above and below), so the parallax moves it inside the oval without showing
+     an edge; the oval itself stays put. On mobile it sits above the headline, small
+     enough that the headline stays in the first screen. */
+  .hero__photo {
+    position: relative;
+    grid-row: 1;
+    width: 8.5rem;
+    aspect-ratio: 4 / 5;
+    margin-bottom: var(--s-8);
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--c-rule);
+  }
+
+  .hero__photo--ring {
+    overflow: visible;
+  }
+
+  .hero__photo--ring::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border: 1px solid var(--c-accent);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .hero__photo--ring :global(picture) {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  .hero__photo :global(img) {
+    position: absolute;
+    left: 0;
+    top: -6%;
+    width: 100%;
+    height: 112%;
+    object-fit: cover;
+  }
+
+  /* Below the intro: a single ruled row of three cells. */
   .hero__strip {
     margin-top: var(--s-12);
     border-top: 1px solid var(--c-ink);
@@ -140,37 +207,40 @@ const resume = await getResumeHref();
     font-weight: 500;
   }
 
-  .hero__figure {
-    margin-top: var(--s-16);
-  }
-
-  .hero__instrument {
-    padding-top: var(--s-8);
-  }
-
-  @media (min-width: 1024px) {
-    .hero__text {
-      grid-column: 1 / 8;
-    }
-
+  @media (min-width: 768px) {
     .hero__strip {
-      grid-column: 9 / -1;
-      grid-row: 2;
-      align-self: start;
-      margin-top: var(--s-8);
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      column-gap: var(--grid-gutter);
     }
 
     .hero__strip > div {
       grid-template-columns: 1fr;
       gap: var(--s-1);
     }
+  }
 
-    .hero__figure {
-      margin-top: var(--s-24);
+  @media (min-width: 1024px) {
+    .hero--photo h1,
+    .hero--photo .hero__text,
+    .hero--photo .hero__strip {
+      grid-column: 1 / 8;
     }
 
-    .hero__instrument {
-      padding-top: var(--s-12);
+    .hero--photo h1 {
+      grid-row: 1;
+    }
+
+    .hero--photo .hero__photo {
+      grid-column: 9 / -1;
+      grid-row: 1 / span 3;
+      align-self: start;
+      width: 100%;
+      margin: var(--s-2) 0 0;
+    }
+
+    .hero__strip {
+      margin-top: var(--s-16);
     }
   }
 </style>

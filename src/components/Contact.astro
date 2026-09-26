@@ -5,7 +5,7 @@ const s = await getSite();
 const resume = await getResumeHref();
 ---
 
-<section id="contact" class="contact" aria-labelledby="contact-title">
+<section id="contact" class="contact scheme-ink" aria-labelledby="contact-title">
   <div class="container">
   <h2 id="contact-title">{s.cta.heading}</h2>
 
@@ -54,27 +54,20 @@ const resume = await getResumeHref();
 </script>
 
 <style>
-  /* Full-bleed ink band. Colours are the on-dark variants (see tokens.css). */
+  /* Full-bleed ink band: the ink scheme (tokens.css). */
+  /* No top margin: the space above belongs to the record section, so the page colour in
+     it doesn't depend on scroll direction. */
   .contact {
-    --c-rule: var(--c-rule-on-dark);
-    --focus-ring: 0 0 0 2px var(--c-ink), 0 0 0 4px var(--c-accent-on-dark);
-    margin-top: var(--s-section-lg);
     padding-block: var(--s-section) var(--s-section-lg);
-    background: var(--c-ink);
-    color: var(--c-ground);
-  }
-
-  .contact a {
-    color: var(--c-accent-on-dark);
   }
 
   .contact a:hover {
-    color: var(--c-ground);
+    color: var(--c-accent-hover);
   }
 
   .contact ::selection {
-    background: var(--c-accent-on-dark);
-    color: var(--c-ink);
+    background: var(--c-accent);
+    color: var(--c-page);
   }
 
 
@@ -106,9 +99,9 @@ const resume = await getResumeHref();
     display: none;
     min-height: 44px;
     padding-inline: var(--s-4);
-    border: 1px solid var(--c-accent-on-dark);
+    border: 1px solid var(--c-accent);
     background: transparent;
-    color: var(--c-accent-on-dark);
+    color: var(--c-accent);
     font: inherit;
     font-size: var(--t-small);
     font-weight: 560;
@@ -124,12 +117,12 @@ const resume = await getResumeHref();
   }
 
   .contact__copy:hover {
-    background: var(--c-rule-on-dark);
+    background: var(--c-rule);
   }
 
   .contact__copy[data-state='copied'] {
-    background: var(--c-accent-on-dark);
-    color: var(--c-ink);
+    background: var(--c-accent);
+    color: var(--c-page);
   }
 
   .contact__links {

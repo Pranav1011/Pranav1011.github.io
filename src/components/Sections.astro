@@ -9,7 +9,8 @@ const pub = await getPublication();
 const site = await getSite();
 ---
 
-<section class="section section--first container" aria-labelledby="experience">
+<section class="band band--experience scheme-brass" aria-labelledby="experience">
+  <div class="container">
   <SectionHead id="experience" title="Experience" />
   <div class="timeline-wrap">
   <span class="timeline__line" aria-hidden="true"></span>
@@ -34,61 +35,65 @@ const site = await getSite();
     }
   </ol>
   </div>
-</section>
-
-<section class="section container" aria-labelledby="research">
-  <SectionHead id="research" title="Research" size="sm" />
-  <div class="split">
-    <p class="split__label tnum">{pub.year}</p>
-    <div class="split__content">
-      <h3><a href={pub.url}>{pub.title}</a></h3>
-      <p class="meta">
-        {pub.venue}, vol. {pub.volume}, pp. {pub.pages}. {pub.role}. DOI {pub.doi}
-      </p>
-    </div>
   </div>
 </section>
 
-<section class="section container" aria-labelledby="toolkit">
-  <SectionHead id="toolkit" title="Toolkit" size="sm" />
-  <dl class="toolkit">
-    {
-      site.toolkit.map((g) => (
-        <div>
-          <dt>{g.group}</dt>
-          <dd>{g.items.join(', ')}</dd>
-        </div>
-      ))
-    }
-  </dl>
-</section>
+<section class="band band--record" aria-labelledby="record">
+  <div class="container">
+  <SectionHead id="record" title="Research, toolkit and education" size="sm" />
+  <div class="record">
+    <div class="record__col">
+      <section class="record__group" aria-labelledby="research">
+        <h3 id="research" class="record__head">Research</h3>
+        <p class="record__label tnum">{pub.year}</p>
+        <p class="record__title"><a href={pub.url}>{pub.title}</a></p>
+        <p class="meta">
+          {pub.venue}, vol. {pub.volume}, pp. {pub.pages}. {pub.role}. DOI {pub.doi}
+        </p>
+      </section>
 
-<section class="section container" aria-labelledby="education">
-  <SectionHead id="education" title="Education" size="sm" />
-  <ul class="education">
-    {
-      site.education.map((e) => (
-        <li class="split">
-          <p class="split__label tnum">{e.dates}</p>
-          <div class="split__content">
-            <h3>{e.degree}</h3>
-            <p class="meta">
-              {e.school}. {e.detail}
-            </p>
-          </div>
-        </li>
-      ))
-    }
-  </ul>
+      <section class="record__group" aria-labelledby="education">
+        <h3 id="education" class="record__head">Education</h3>
+        <ul class="education">
+          {
+            site.education.map((e) => (
+              <li>
+                <p class="record__label tnum">{e.dates}</p>
+                <p class="record__title">{e.degree}</p>
+                <p class="meta">
+                  {e.school}. {e.detail}
+                </p>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+    </div>
+
+    <section class="record__col record__group" aria-labelledby="toolkit">
+      <h3 id="toolkit" class="record__head">Toolkit</h3>
+      <dl class="toolkit">
+        {
+          site.toolkit.map((g) => (
+            <div>
+              <dt>{g.group}</dt>
+              <dd>{g.items.join(', ')}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </section>
+  </div>
+  </div>
 </section>
 
 <style>
-  .section {
-    margin-top: var(--s-section-sm);
+  .band--experience {
+    padding-block: var(--s-section) var(--s-section);
   }
 
-  .section--first {
-    margin-top: var(--s-section-lg);
+  .band--record {
+    padding-block: var(--s-section-sm) var(--s-section);
   }
 
   .split {
@@ -159,12 +164,65 @@ const site = await getSite();
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: var(--c-ground);
+    background: var(--c-page);
     border: 2px solid var(--c-accent);
   }
 
-  .education {
+  /* Research, toolkit and education: one section, two columns at desktop. */
+  .record {
+    margin-top: var(--s-8);
+    display: grid;
+    gap: var(--s-12) var(--grid-gutter);
+  }
+
+  .record__col {
+    display: grid;
+    align-content: start;
+    gap: var(--s-12);
+  }
+
+  .record__head {
+    padding-bottom: var(--s-2);
+    border-bottom: var(--hairline);
+    font-size: var(--t-small);
+    font-weight: 620;
+    letter-spacing: 0.01em;
+    scroll-margin-top: var(--s-24);
+  }
+
+  .record__label {
     margin-top: var(--s-4);
+    font-size: var(--t-meta);
+    color: var(--c-secondary);
+  }
+
+  .record__title {
+    margin-top: var(--s-1);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .record__title a {
+    color: var(--c-ink);
+    text-decoration-color: var(--c-rule);
+    text-decoration-thickness: 2px;
+  }
+
+  .record__title a:hover {
+    color: var(--c-accent);
+  }
+
+  .education {
+    display: grid;
+    gap: var(--s-2);
+  }
+
+  @media (min-width: 1024px) {
+    .record {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: clamp(2rem, 1rem + 2.5vw, 4rem);
+    }
   }
 
   h3 {
@@ -214,9 +272,9 @@ const site = await getSite();
 
   /* Toolkit */
   .toolkit {
-    margin-top: var(--s-6);
+    margin-top: var(--s-4);
     display: grid;
-    gap: var(--s-6) var(--grid-gutter);
+    gap: var(--s-4) var(--grid-gutter);
   }
 
   .toolkit dt {
@@ -231,7 +289,7 @@ const site = await getSite();
 
   @media (min-width: 768px) {
     .toolkit {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 </style>

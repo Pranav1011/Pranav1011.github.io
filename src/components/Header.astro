@@ -9,7 +9,7 @@ const { home = '/' } = Astro.props;
 const links = [
   { href: `${home}#work`, label: 'Work' },
   { href: `${home}#experience`, label: 'Experience' },
-  { href: `${home}#research`, label: 'Research' },
+  { href: `${home}#record`, label: 'Research' },
   { href: `${home}#contact`, label: 'Contact' },
 ];
 const resume = await getResumeHref();
@@ -50,7 +50,7 @@ const resume = await getResumeHref();
 <style>
   .site-header {
     border-bottom: var(--hairline);
-    background: var(--c-ground);
+    background: var(--c-page);
   }
 
   .site-header__inner {
@@ -126,7 +126,7 @@ const resume = await getResumeHref();
       right: 0;
       top: 100%;
       z-index: 10;
-      background: var(--c-ground);
+      background: var(--c-page);
       border-bottom: var(--hairline);
       padding: var(--s-2) var(--grid-margin) var(--s-4);
     }

@@ -111,3 +111,20 @@
   - the experience timeline rule draws with scroll (scrub)
 - **Cover video:** a styled Play/Pause toggle replaces the native controls when JS runs (WCAG 2.2.2). It pauses when off-screen, never auto-resumes after you pause it, and starts paused under reduced motion. Without JS it keeps native controls.
 - **Lighthouse mobile with motion:** home 98/100/100/100 (LCP 2.3s, TBT 90ms, 223 KB); PitWall case study 99/100/100/100.
+
+## 2026-09-25: section colours, stacking panels, hero portrait
+
+- Selected work on deep petrol `#003F53`, Experience on brass tint `#F3E7CE`, close on ink; covers and charts on paper plates. All text pairs re-checked (table in DESIGN_PLAN.md §1); the lowest is secondary on deep petrol at 5.01 : 1.
+- Hero: the Aurora trace moved to the case study ("What broke", Fig. 3). The hero takes a 4:5 portrait from `src/assets/photo.*` (AVIF/WebP, 1× and 2×) when the file exists; the Focus / Most recently / Studying strip sits below the intro as one ruled row.
+- Selected work panels: cover on one half at desktop (622 of 1296 px at 1440), key figure and text on the other; sticky stacking at 1024 px and up with motion allowed.
+- Research, Toolkit and Education merged into one two-column section.
+- Aurora cover re-recorded from the running console at 2× (1600 × 1000); the first frame and poster show a resolved ticket's trace.
+- Lenis was already initialising (a wheel tick eased over ~500 ms on the live site); its stylesheet was missing and is now imported.
+
+## 2026-09-25 (second pass)
+
+- Section colours: the page-wide cross-fade is gone. Each section paints its own colour, so the next colour arrives with the section's top edge, hard-edged and tied to scroll; text switches with it.
+- Chart plates never appear empty: the cover clip-reveal is removed, cover charts and all mobile charts render drawn, and desktop case-study charts start building at `top 130%`.
+- Removed the empty band and ruler between the hero strip and Selected work.
+- Stacking panels: incoming panel solid `#003F53`; key figures slide in sideways so they never cross the heading.
+- Hero portrait added (EXIF and GPS stripped before commit); og.png regenerated with it.

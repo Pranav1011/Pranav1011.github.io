@@ -2,22 +2,20 @@
 
 :root {
   /* Palette: Petrol & Brass */
-  --c-ground: #f1f2f0;
+  --c-ground: #f1f2f0; /* paper: fixed, for plates, halos and text on petrol fills */
+  --c-night: #121c23; /* ink as a fill: fixed, for dark surfaces that never change scheme */
+  /* Scheme tokens: the paper scheme. Sections override these below. */
+  --c-page: #f1f2f0;
   --c-ink: #121c23;
   --c-secondary: #545c63;
   --c-rule: #ccd2d6;
   --c-accent: #00566e;
   --c-accent-hover: #003f53;
   --c-accent-tint: #dbebf2;
+  --c-figure: #00566e; /* key figures */
   --c-brass: #a57710; /* chart marks only, never text */
   --c-brass-text: #8a6000;
   --c-code: color-mix(in srgb, var(--c-accent-tint) 50%, var(--c-ground));
-
-  /* Band variants (contrast in docs/DESIGN_LOG.md, art-direction pass) */
-  --c-rule-on-tint: #afc6d1; /* hairlines inside the tint band */
-  --c-accent-on-dark: #7cc4dc; /* 8.87:1 on ink — links, focus, key text on the ink band */
-  --c-secondary-on-dark: #a3adb5; /* 7.57:1 on ink */
-  --c-rule-on-dark: #34424c;
 
   /* Type families (CSS variables set by the Astro Fonts API) */
   --f-sans: var(--font-sans), system-ui, sans-serif;
@@ -67,8 +65,7 @@
   --grid-margin: clamp(20px, 5vw, 80px);
 
   /* Lines and focus */
-  --hairline: 1px solid var(--c-rule);
-  --focus-ring: 0 0 0 2px var(--c-ground), 0 0 0 4px var(--c-accent);
+  /* --hairline and --focus-ring: declared with the schemes at the end of this file. */
 
   /* Motion (Phase 4 mirrors these in the GSAP config) */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -80,4 +77,64 @@
   :root {
     --grid-cols: 12;
   }
+}
+
+/* Section schemes: colour marks sections as well as data. Contrast in docs/DESIGN_PLAN.md.
+   Each section paints its own scheme, so the next colour sweeps in with the section's top
+   edge as you scroll: a hard edge tied to scroll, and text colours switch with it. */
+.scheme-work {
+  --c-page: #003f53; /* deep petrol */
+  --c-ink: #f1f2f0; /* 10.19:1 */
+  --c-secondary: #a3adb5; /* 5.01:1 */
+  --c-accent: #7cc4dc; /* 5.88:1 */
+  --c-accent-hover: #f1f2f0;
+  --c-rule: #2b6072;
+  --c-figure: #e6ca91; /* pale brass, 7.20:1 */
+}
+
+.scheme-brass {
+  --c-page: #f3e7ce; /* brass tint */
+  --c-ink: #121c23; /* 14.09:1 */
+  --c-secondary: #545c63; /* 5.55:1 */
+  --c-accent: #00566e; /* 6.70:1 */
+  --c-accent-hover: #003f53; /* 9.33:1 */
+  --c-rule: #ddcca6;
+  --c-figure: #00566e;
+}
+
+.scheme-ink {
+  --c-page: #121c23;
+  --c-ink: #f1f2f0; /* 15.38:1 */
+  --c-secondary: #a3adb5; /* 7.57:1 */
+  --c-accent: #7cc4dc; /* 8.87:1 */
+  --c-accent-hover: #f1f2f0;
+  --c-rule: #34424c;
+  --c-figure: #7cc4dc;
+}
+
+/* Plates (covers, charts) keep the paper scheme on any section, so they never recolour. */
+.plate {
+  --c-page: #f1f2f0;
+  --c-ink: #121c23;
+  --c-secondary: #545c63;
+  --c-accent: #00566e;
+  --c-accent-hover: #003f53;
+  --c-rule: #ccd2d6;
+  --c-figure: #00566e;
+  color: var(--c-ink);
+}
+
+/* Derived tokens are re-declared wherever the scheme changes, so they pick up its colours. */
+:root,
+.scheme-work,
+.scheme-brass,
+.scheme-ink,
+.plate {
+  --hairline: 1px solid var(--c-rule);
+  --focus-ring: 0 0 0 2px var(--c-page), 0 0 0 4px var(--c-accent);
+}
+
+[class*='scheme-'] {
+  background: var(--c-page);
+  color: var(--c-ink);
 }

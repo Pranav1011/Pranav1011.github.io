@@ -11,7 +11,8 @@ const caseStudy = `/work/${p.slug}/`;
 const headingId = `work-${p.slug}`;
 ---
 
-<article class="work-row" aria-labelledby={headingId}>
+<article class="work-row" aria-labelledby={headingId} data-panel>
+  <div class="work-row__inner">
   <div class="work-row__readout">
     {
       p.metric && (
@@ -22,8 +23,9 @@ const headingId = `work-${p.slug}`;
       )
     }
     <p class="work-row__year tnum">{p.year}</p>
-    <div class="work-row__cover"><Cover project={Astro.props.project} /></div>
   </div>
+
+  <div class="work-row__cover"><Cover project={Astro.props.project} /></div>
 
   <div class="work-row__body">
     <h3 id={headingId}>
@@ -51,23 +53,23 @@ const headingId = `work-${p.slug}`;
       {p.links.demo && <li><a href={p.links.demo}>Live demo<span class="visually-hidden">: {p.title}</span></a></li>}
     </ul>
   </div>
+  </div>
 </article>
 
 <style>
   .work-row {
-    display: grid;
-    grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
-    column-gap: var(--grid-gutter);
-    padding-block: var(--s-12);
     border-bottom: var(--hairline);
   }
 
-  .work-row__readout,
-  .work-row__body {
-    grid-column: 1 / -1;
+  .work-row__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'readout' 'cover' 'body';
+    padding-block: var(--s-12);
   }
 
   .work-row__readout {
+    grid-area: readout;
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: start;
@@ -76,7 +78,11 @@ const headingId = `work-${p.slug}`;
   }
 
   .work-row__cover {
-    grid-column: 1 / -1;
+    grid-area: cover;
+  }
+
+  .work-row__body {
+    grid-area: body;
   }
 
   .work-row__value {
@@ -86,7 +92,7 @@ const headingId = `work-${p.slug}`;
     line-height: 0.95;
     font-weight: 560;
     letter-spacing: -0.015em;
-    color: var(--c-accent);
+    color: var(--c-figure);
     white-space: nowrap;
   }
 
@@ -95,7 +101,7 @@ const headingId = `work-${p.slug}`;
     margin-top: var(--s-3);
     font-size: var(--t-meta);
     color: var(--c-secondary);
-    max-width: 20ch;
+    max-width: 24ch;
   }
 
   .work-row__year {
@@ -104,6 +110,7 @@ const headingId = `work-${p.slug}`;
   }
 
   h3 {
+    margin-top: var(--s-6);
     font-size: var(--t-h3);
     max-width: 36ch;
   }
@@ -182,28 +189,67 @@ const headingId = `work-${p.slug}`;
     font-weight: 500;
   }
 
-  @media (min-width: 768px) {
+  @media (min-width: 768px) and (max-width: 1023px) {
     .work-row__mechanisms {
       grid-template-columns: repeat(3, 1fr);
       column-gap: var(--grid-gutter);
     }
   }
 
-  /* Readout gets its own column only when it's wide enough for a 5rem figure. */
+  /* Desktop: the cover takes half the panel; the key figure and text take the other half. */
   @media (min-width: 1024px) {
+    .work-row__inner {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas: 'cover readout' 'cover body';
+      grid-template-rows: auto 1fr;
+      column-gap: clamp(2rem, 1rem + 2.5vw, 4rem);
+      align-items: start;
+      padding-block: var(--s-16);
+    }
+
+    .work-row__cover {
+      align-self: center;
+    }
+
     .work-row__readout {
-      grid-column: 1 / 5;
-      grid-template-columns: 1fr;
-      align-content: start;
+      grid-template-columns: auto auto;
+      justify-content: space-between;
       margin-bottom: 0;
     }
 
-    .work-row__year {
-      margin-top: var(--s-3);
+    .work-row__mechanisms {
+      margin-top: var(--s-4);
+      gap: var(--s-3);
     }
 
-    .work-row__body {
-      grid-column: 5 / -1;
+    .work-row__mechanisms > div {
+      display: grid;
+      grid-template-columns: 9.5rem 1fr;
+      gap: var(--s-4);
+    }
+
+    .work-row__mechanisms dd {
+      margin: 0;
+    }
+  }
+
+  /* Stacking panels (desktop, motion allowed): each project pins while the next slides up
+     over it. Only once motion/panels.ts has run (html.panels): it sets --stick so a panel
+     taller than the viewport pins by its bottom edge. Otherwise, a plain list. */
+  @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+    :global(html.panels) .work-row {
+      position: sticky;
+      top: var(--stick, 0px);
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      background: var(--c-page);
+      border-bottom: 0;
+      border-top: var(--hairline);
+    }
+
+    :global(html.panels) .work-row__inner {
+      width: 100%;
     }
   }
 </style>

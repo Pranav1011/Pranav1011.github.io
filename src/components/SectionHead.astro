@@ -7,11 +7,13 @@ interface Props {
   title: string;
   /** "sm" for the record sections (Research, Toolkit, Education) so the page has a beat. */
   size?: 'lg' | 'sm';
+  /** Off where the section's own colour already marks the start (Selected work). */
+  ruler?: boolean;
 }
-const { id, title, size = 'lg' } = Astro.props;
+const { id, title, size = 'lg', ruler = true } = Astro.props;
 ---
 
-<Ruler />
+{ruler && <Ruler />}
 <h2 id={id} class:list={['section-title', `section-title--${size}`]}>{title}</h2>
 
 <style>

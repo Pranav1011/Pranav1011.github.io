@@ -25,13 +25,14 @@ links:
 cover:
   src: /media/aurora-console.mp4
   poster: /media/aurora-console-poster.jpg
-  alt: Screen recording of the Aurora operations console. A ticket is opened from the queue, and the run trace shows the agent’s plan, tool calls, guardrail decisions and final reply.
+  alt: Screen recording of the Aurora operations console. With a resolved ticket’s trace on screen, the agent is run on a “Charged twice” ticket from the queue, and its trace scrolls through the plan, tool calls, decision, reply to the customer, and cost and latency.
   kind: video
 status: complete
 ---
 
 import AuroraArchitecture from '../../components/figures/AuroraArchitecture.astro';
 import AuroraResults from '../../components/figures/AuroraResults.astro';
+import TraceFigure from '../../components/TraceFigure.astro';
 
 {/* src (frontmatter): Customer-agentic ai/README.md "Evaluation results"; eval_results via `make eval` */}
 
@@ -110,9 +111,11 @@ I built the eval harness before I trusted any result. Run with a scripted stand-
 
 The harness paid for itself on its first run. It flagged two missed escalations: address-change tickets were being routed as "where's my order" because the intent classifier didn't match "update my shipping address." The guardrails were right; the routing was wrong.
 
-The local model surfaced a sharper failure. On a double-charge ticket with no order number, Llama 3.1 8B guessed one and looked up that same order 8 times in a row (9 tool calls in all) until the iteration cap stopped it at 50.5 seconds; its reply went out at 62.1 seconds. I added a loop breaker that stops on an identical repeated call, or a third call to the same tool without progress, and hands the ticket to a human. On the same ticket it now catches the repeat at 25.1 seconds and escalates, with the reply out at 34.8 seconds. Those are the two logged runs drawn at the top of the home page; an earlier run recorded in the repo’s error analysis took 69.4 seconds before the fix and 40.5 after.
+The local model surfaced a sharper failure. On a double-charge ticket with no order number, Llama 3.1 8B guessed one and looked up that same order 8 times in a row (9 tool calls in all) until the iteration cap stopped it at 50.5 seconds; its reply went out at 62.1 seconds. I added a loop breaker that stops on an identical repeated call, or a third call to the same tool without progress, and hands the ticket to a human. On the same ticket it now catches the repeat at 25.1 seconds and escalates, with the reply out at 34.8 seconds. Figure 3 draws those two logged runs; an earlier run recorded in the repo’s error analysis took 69.4 seconds before the fix and 40.5 after.
 
 {/* src: data/traces/88ced744d9d1.json (before), 6f491c4bd4a0.json (after); ERROR_ANALYSIS.md F1, F3, TCK-000004 table (the 69.4 s / 40.5 s run) */}
+
+<TraceFigure n={3} />
 
 **A reply that leaked another customer’s order.** In that same logged run, the order number Llama guessed belonged to a different customer, and its reply described that order. No action was taken, so the action-safety score stayed at 100%: the harness only scored actions. I added a separate reply-scope score, checking that every order, account id and email in a reply belongs to the ticket’s customer, plus two tickets built to tempt the leak. Before any fix, Llama kept replies in scope on 0 of those 2. I added a reply check that blocks an out-of-scope reply, even on tickets already handed to a human, and Llama went to 2 of 2. Then I closed the gap at the source: inside a ticket, the order lookup now only returns the customer’s own orders, and anything else looks like it doesn’t exist.
 

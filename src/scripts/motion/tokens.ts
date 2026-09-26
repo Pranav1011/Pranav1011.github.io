@@ -8,3 +8,5 @@ export const HEADLINE = { duration: 0.42, stagger: 0.06 } as const;
 export const TRACE_PLAYBACK = 2.8;
 /** Where scroll reveals start: element top reaches 82% of the viewport. */
 export const REVEAL_START = 'top 82%';
+/** Chart build-in starts when the plate's top is 30% of a viewport below the screen. */
+export const CHART_START = 'top 130%';

@@ -16,10 +16,12 @@ const featured = await getFeatured();
   <main id="main">
     <Hero />
 
-    <section class="band band--tint" aria-labelledby="work">
+    <section class="band scheme-work" aria-labelledby="work">
       <div class="container">
-        <SectionHead id="work" title="Selected work" />
-        {featured.map((project) => <WorkRow project={project} />)}
+        <SectionHead id="work" title="Selected work" ruler={false} />
+        <div class="stack">
+          {featured.map((project) => <WorkRow project={project} />)}
+        </div>
         <AlsoBuilt />
       </div>
     </section>
@@ -30,10 +32,12 @@ const featured = await getFeatured();
 </BaseLayout>
 
 <style>
-  .band--tint {
-    --c-rule: var(--c-rule-on-tint);
-    --hairline: 1px solid var(--c-rule-on-tint);
-    background: var(--c-accent-tint);
-    padding-block: var(--s-section) var(--s-section-lg);
+  /* The band's colour marks the start, so it opens with the heading, not a gap. */
+  .band {
+    padding-block: var(--s-12) var(--s-section-lg);
+  }
+
+  .band :global(#work) {
+    margin-top: 0;
   }
 </style>

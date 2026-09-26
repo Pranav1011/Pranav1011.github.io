@@ -1,6 +1,6 @@
 # Design plan
 
-**Concept: the run sheet.** The site reads like a well-kept engineering record: a race engineer's timing sheet crossed with an experiment log. It's a neutral drafting-paper ground with ink type, and structure comes from hairline rules and tick marks rather than boxes. Colour appears only where data says something. The one memorable element is an instrument, a real trace drawn from project data, in the hero.
+**Concept: the run sheet.** The site reads like a well-kept engineering record: a race engineer's timing sheet crossed with an experiment log. It's a neutral drafting-paper ground with ink type, and structure comes from hairline rules and tick marks rather than boxes. Colour marks sections as well as data: Selected work sits on deep petrol, Experience on a brass tint, the close on ink, and everything else on paper. Inside a section, colour still appears only where data says something. The hero pairs the positioning with a portrait; the Aurora trace instrument now lives in its case study ("What broke", Fig. 3).
 
 ---
 
@@ -25,6 +25,21 @@ Changes from the previous draft:
 - Code blocks use Petrol tint at 50% mix with Ground (`color-mix(in oklch, #DBEBF2 50%, #F1F2F0)`), which keeps Ink at more than 14 : 1.
 
 **Why petrol:** it's drafting ink. On an engineering drawing, the working lines are graphite and the dimension that matters is inked. Petrol plays that role here. It lands only on the measured result, the link you can follow, and the path the agent actually took. It is deep and desaturated, reads as considered rather than "brand blue", and has no relation to the dark-mode neon palettes. Brass is the second pen: the reference line you're measuring against, or the thing that went wrong.
+
+### Section colours (added 2026-09-25)
+
+Colour now marks sections as well as data. Each section is a scheme: a page colour plus its own text, secondary, link, rule and key-figure colours (`tokens.css`). Covers and charts sit on a paper plate (`.plate`), so they keep the paper scheme on any section and never need recolouring.
+
+| Section | Page | Text | Secondary | Links | Key figures |
+|---|---|---|---|---|---|
+| Hero, Research/Toolkit/Education, case studies | Paper `#F1F2F0` | Ink 15.38 | `#545C63` 6.06 | Petrol `#00566E` 7.32 | Petrol 7.32 |
+| **Selected work** | Deep petrol `#003F53` | Paper 10.19 | `#A3ADB5` 5.01 | `#7CC4DC` 5.88 | **Pale brass `#E6CA91` 7.20** |
+| **Experience** | **Brass tint `#F3E7CE`** | Ink 14.09 | `#545C63` 5.55 | Petrol 6.70 (hover `#003F53` 9.33) | Petrol 6.70 |
+| CTA and footer | Ink `#121C23` | Paper 15.38 | `#A3ADB5` 7.57 | `#7CC4DC` 8.87 | `#7CC4DC` 8.87 |
+
+All ratios are WCAG 2.x against that section's page colour; every text pair passes AA (4.5 : 1). Brass text `#8A6000` is 4.56 : 1 on the brass tint, so it stays in charts, which sit on paper plates. Rules on deep petrol (`#2B6072`) and the brass tint (`#DDCCA6`) are decorative hairlines only.
+
+**How the colour changes.** Each section paints its own colour, so the next section's colour sweeps in with its top edge as you scroll: a hard edge tied 1:1 to scroll, with no blended in-between colours, and the text colours arrive with it, so every pixel stays at the AA ratios above. Reduced motion and mobile behave the same way. (A page-wide cross-fade was tried on 2026-09-25 and dropped: mid-fade, text and background passed through similar greys.)
 
 ### Colour-vision check
 
@@ -186,11 +201,11 @@ On mobile the run sheet becomes a compact definition list under the title, prose
 
 ## 4. Principles
 
-1. **Colour is data.** Petrol is the drafting ink: the measured result that matters, and anything you can follow. Brass is the reference line or the thing that failed, in charts only. Everything else is ink and graphite on paper. If colour doesn't encode something, it isn't there.
+1. **Colour is data, and marks sections.** Petrol is the drafting ink: the measured result that matters, and anything you can follow. Brass is the reference line or the thing that failed, in charts only. Section colour (deep petrol, brass tint, ink) says where you are on the page; inside a section, if colour doesn't encode something, it isn't there.
 2. **No number travels alone.** Every figure carries its unit and its comparison (baseline, n, or dataset), set typographically attached to it.
 3. **Rules, not boxes.** Structure comes from hairlines and ruler ticks. No cards, no shadows, no rounded containers.
-4. **One instrument per page.** The home page has the trace. Each case study has one primary figure. Everything else stays quiet so those carry weight.
-5. **Motion is measurement.** Things draw along an axis, left to right, the way data arrives. Nothing floats up, fades in, or bounces.
+4. **One instrument per page.** The home page has the stacked project panels. Each case study has one primary figure; the Aurora trace is Fig. 3 of its case study. Everything else stays quiet so those carry weight.
+5. **Motion is measurement, plus a few set pieces on desktop.** Charts draw along an axis, left to right, the way data arrives. Nothing bounces. From 2026-09-25, desktop (1024 px and up, motion allowed) adds: Selected work as stacking panels (each pins for about one viewport while the next slides over it; this overrides the brief's no-pinning rule on desktop only), key figures sliding in sideways with their panel, the incoming panel fully opaque (solid `#003F53`) and the outgoing one dimmed, headline lines drifting and fading past the hero, slight parallax on the hero photo, and Lenis smooth scrolling. Mobile keeps the simple reveals with no pinning; reduced motion shows everything static. Section colours always meet at a hard edge. Chart plates never appear empty: cover charts and every chart on mobile render drawn, and case-study charts on desktop start building while the plate is still 30% of a viewport below the screen.
 
 ## 5. Self-critique and revisions
 
@@ -204,7 +219,7 @@ On mobile the run sheet becomes a compact definition list under the title, prose
 | Serif body could read as "editorial blog". | Serif is limited to long prose (case studies, About). The home page is sans, so it scans like a spec sheet. |
 | A hero with a generic abstract graphic. | The hero figure is a real trace from Aurora's run data, with a caption naming the ticket. Nobody else can have this graphic. |
 
-## 6. Hero instrument (static first)
+## 6. Aurora trace instrument (static first; now Fig. 3 of the Aurora case study)
 
 **Data source (confirmed, 2026-09-24):**
 - Aurora's `data/traces/` has 59 real run traces with timestamped events of type `intent`, `plan`, `tool_call`, `guard`, `decision`, `escalation` and `reply`.
