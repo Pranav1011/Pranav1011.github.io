@@ -32,8 +32,27 @@ status: active
 ---
 
 import Figure from '../../components/Figure.astro';
+import OverviewVideo from '../../components/OverviewVideo.astro';
 
 {/* src (frontmatter): regista/README.md "What it does", "Results (Phase 2)"; eval/reports/phase2_results.json skillcorner.questions 1175, matches 20, accuracy 0.9277, categories.false_premise.acc 0.6646; model qwen3.5:9b; pyproject.toml (kloppy, duckdb); README Architecture (MCP tools, Ollama, TypeScript viewer). Cover: screenshot of the live GitHub Pages demo. */}
+
+<OverviewVideo
+  src="/media/regista-overview.mp4"
+  poster="/media/regista-overview-poster.jpg"
+  width={1280}
+  height={720}
+  lines={[
+    'Which shape did each team play, and when did it change?',
+    'A replay built from player tracking alone. Formations are read as it plays, close calls flagged.',
+    'It flags tactical moments as they happen, using only data up to that moment.',
+    'Ask the analyst. Every number is checked against Regista’s tool outputs; citations seek the replay. 97.3% passed it in evaluation.',
+    '92.8% of 1,175 questions answered correctly, on 20 held-out matches. qwen3.5:9b, local via Ollama; SkillCorner open data.',
+    'Lookups 100%. Declines what it can’t answer 100%. Reworded questions 95.1%. Rejects a false premise 66.5%, the weakest.',
+  ]}
+  credit="Music: original score. Tracking data: Metrica Sports sample data."
+/>
+
+{/* src (video): brag run on the Regista repo; claims ledger in the local brag output (every number from eval/reports/phase2_results.json: accuracy, questions, matches, number_grounding, categories lookup / unanswerable / paraphrase (answerable) / false_premise; footage is the live demo on Metrica sample game 3). Video re-encoded to 1280x720 to match the other overview videos. */}
 
 ## TL;DR
 
