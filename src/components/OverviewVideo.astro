@@ -10,10 +10,8 @@ interface Props {
   /** Plain-text lines shown on screen, in order. */
   lines: string[];
   credit?: string;
-  /** A short note shown directly under the video, e.g. where the recording is out of date. */
-  note?: string;
 }
-const { src, poster, width, height, lines, credit, note } = Astro.props;
+const { src, poster, width, height, lines, credit } = Astro.props;
 ---
 
 <figure class="overview">
@@ -30,7 +28,6 @@ const { src, poster, width, height, lines, credit, note } = Astro.props;
   >
     <source src={src} type="video/mp4" />
   </video>
-  {note && <p class="overview__note">{note}</p>}
   <details class="overview__lines">
     <summary>On-screen text</summary>
     <ol>{lines.map((line) => <li>{line}</li>)}</ol>
@@ -80,13 +77,6 @@ const { src, poster, width, height, lines, credit, note } = Astro.props;
     padding-left: 1.2em;
     display: grid;
     gap: var(--s-1);
-  }
-
-  .overview__note {
-    max-width: 68ch;
-    margin-top: var(--s-3);
-    font-size: var(--t-small);
-    color: var(--c-secondary);
   }
 
   .overview__credit {

@@ -15,8 +15,8 @@ mechanisms:
   - label: Answers from data
     detail: Replies are built from the race data it retrieves.
   - label: Fewer, clearer tools
-    detail: I regrouped the 79 tools into 8 without removing anything, and a test proves it. Measured and tested, not yet switched on in the live agent.
-result: The consolidated tool definitions are 85% smaller, from 13,487 to 2,014 tokens, and a test proves all 79 original capabilities are still reachable.
+    detail: I built an 8-tool set covering all 79 originals, with a test proving nothing was lost. It is measured and tested, not yet live; the agent still binds 92 tools.
+result: The tested 8-tool set has 85% smaller definitions, from 13,487 to 2,014 tokens, and a test proves all 79 original capabilities are still reachable.
 metric:
   value: "−85%"
   label: smaller tool definitions
@@ -26,7 +26,7 @@ links:
 cover:
   src: /media/f1ria-loop.mp4
   poster: /media/f1ria-loop-poster.jpg
-  alt: Animation of 79 tiles, one for each of the agent's original tools, collapsing into the 8 consolidated tools that cover them, labelled race_analysis, driver_stat, standings, compare, whatif, get_available_sessions, get_database_schema and query_f1_sql.
+  alt: Animation of 79 tiles, one for each of the agent's original tools, collapsing into the 8 tools of the consolidated set (measured and tested, not yet live), labelled race_analysis, driver_stat, standings, compare, whatif, get_available_sessions, get_database_schema and query_f1_sql (registered as query_f1_database).
   kind: video
 status: active
 ---
@@ -43,25 +43,23 @@ import OverviewVideo from '../../components/OverviewVideo.astro';
   width={1280}
   height={720}
   lines={[
-    'Ask seven seasons of Formula 1 anything: 2018–2024 race data.',
-    'A real question: “Compare Verstappen and Norris’s tire degradation in the 2024 Singapore GP.” It picks the right tool for it: race_analysis, then get_tire_degradation.',
-    'And answers from the race data: real lap times, 2024 Singapore GP, hard tyres, laps 31–62.',
-    '79 tools: it had grown to one for every kind of question. Grouped into eight, and every one of the 79 still works.',
-    '85% smaller tool definitions (13,487 to 2,014 tokens). Nothing lost.',
+    'Ask seven seasons of Formula 1 anything. 2018–2024 race data.',
+    'A real question, typo and all. It fixes the names, then plans across all 92 live tools. Auto-corrected: verstapen → Max Verstappen. Understood as: Max Verstappen vs Lando Norris at Singapore 2024.',
+    'And answers from the race data: real FastF1 lap times, 2024 Singapore GP, hard tyres, laps 31–62.',
+    'Data down? It says so at once. Names what it can’t reach, before any model call.',
+    '79 race-data tools, one for every kind of question, all bound live today. Grouped into eight in a tested build: measured and tested, not yet live.',
+    '85% smaller tool definitions, measured (13,487 to 2,014 tokens). Rollout next.',
   ]}
-  credit="Music: Sascha Ende (ende.app), CC BY 4.0."
-  note="Recorded before release: the eight-tool set shown is measured and tested, but the live agent still binds the full 92-tool registry."
+  credit="Music: Sascha Ende (ende.app), CC BY 4.0. Click: Kenney (kenney.nl), CC0."
 />
 
-{/* src (video note): CLAIMS.md row "full 92 tools" (79 TimescaleDB + 8 Neo4j + 5 vector) and scope note; README "Not yet bound at runtime" */}
-
-{/* src (video): brag run on the F1 RIA repo; ledger in its local brag output (README question, consolidated_tools.py, tests/test_tools/test_consolidated.py, eval/results/consolidation.json; the chart from FastF1 data for that race) */}
+{/* src (video): brag run on this repo (re-cut 2026-11-11, checked against main fdfb07c); ledger in the local brag output: README "What it does" (2018–2024, typo-tolerant entity resolution); QueryPreprocessor output on the typo'd question, tests/test_preprocessing/test_fuzzy_matcher.py; CLAIMS.md "full 92 tools" row; FastF1 2024 Singapore GP lap times; README "No data services, no model calls", agent/graph.py preflight, ENGINEERING_LOG "Preflight before any LLM call"; timescale_tools.py (79), consolidated_tools.py, test_consolidated.py; eval/results/consolidation.json (13,487 → 2,014, 85.1%); "Rollout next" = ENGINEERING_LOG "Not done: binding the 8 consolidated tools at runtime" */}
 
 ## TL;DR
 
 - **Problem:** a Formula 1 question-answering agent had 79 overlapping tools.
-- **What I did:** regrouped them into 8 clear tools, with a test proving nothing was lost.
-- **Result:** tool definitions 85% smaller (13,487 → 2,014 tokens), all 79 capabilities intact. Measured and tested; the live agent still binds the full set, and switching it over is next.
+- **What I did:** built an 8-tool set that covers all 79, with a test proving nothing was lost. It is measured and tested, not yet live: the agent still binds the full 92.
+- **Result:** tool definitions 85% smaller (13,487 → 2,014 tokens), all 79 capabilities intact. Switching the live agent over is next.
 
 ## The problem
 
@@ -81,7 +79,7 @@ As features grew, so did the tool list. By the time I measured it, the agent had
 
 {/* src: backend/eval/measure_consolidation.py; consolidation.json */}
 
-**Consolidate by intent, not by table.** The 79 tools collapsed naturally into a few questions people actually ask: race analysis, driver stats, standings, comparisons and what-if scenarios. I built eight intent-level tools on those lines: five parameterized dispatchers plus three standalone tools. Each dispatcher routes to the original underlying function and filters arguments to that function's signature, so none of the originals had to change.
+**Consolidate by intent, not by table.** The 79 tools collapsed naturally into a few questions people actually ask: race analysis, driver stats, standings, comparisons and what-if scenarios. I built eight intent-level tools on those lines: five parameterized dispatchers plus three standalone tools. Each dispatcher routes to the original underlying function and filters arguments to that function's signature, so none of the originals had to change. The set is measured and tested but not yet live: the running agent still binds all 92 tools.
 
 {/* src: backend/agent/tools/consolidated_tools.py; test_dispatch_routes_and_filters_args; README "Measured result" (5 dispatchers + 3 standalone) */}
 
