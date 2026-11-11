@@ -15,8 +15,8 @@ mechanisms:
   - label: Answers from data
     detail: Replies are built from the race data it retrieves.
   - label: Fewer, clearer tools
-    detail: I regrouped the 79 tools into 8 without removing anything, and a test proves it.
-result: The tool definitions are 85% smaller, from 13,487 to 2,014 tokens, and all 79 original capabilities still work.
+    detail: I regrouped the 79 tools into 8 without removing anything, and a test proves it. Measured and tested, not yet switched on in the live agent.
+result: The consolidated tool definitions are 85% smaller, from 13,487 to 2,014 tokens, and a test proves all 79 original capabilities are still reachable.
 metric:
   value: "−85%"
   label: smaller tool definitions
@@ -26,7 +26,7 @@ links:
 cover:
   src: /media/f1ria-loop.mp4
   poster: /media/f1ria-loop-poster.jpg
-  alt: Animation of 79 tiles, one for each of the agent's original tools, collapsing into the 8 tools they now sit under, labelled race_analysis, driver_stat, standings, compare, whatif, get_available_sessions, get_database_schema and query_f1_sql.
+  alt: Animation of 79 tiles, one for each of the agent's original tools, collapsing into the 8 consolidated tools that cover them, labelled race_analysis, driver_stat, standings, compare, whatif, get_available_sessions, get_database_schema and query_f1_sql.
   kind: video
 status: active
 ---
@@ -35,7 +35,7 @@ import F1Architecture from '../../components/figures/F1Architecture.astro';
 import F1Results from '../../components/figures/F1Results.astro';
 import OverviewVideo from '../../components/OverviewVideo.astro';
 
-{/* src (frontmatter): backend/eval/results/consolidation.json; backend/tests/test_tools/test_consolidated.py */}
+{/* src (frontmatter): backend/eval/results/consolidation.json; backend/tests/test_tools/test_consolidated.py; not bound at runtime: CLAIMS.md row "full 92 tools" + scope note, README "Not yet bound at runtime" */}
 
 <OverviewVideo
   src="/media/f1ria-overview.mp4"
@@ -58,7 +58,7 @@ import OverviewVideo from '../../components/OverviewVideo.astro';
 
 - **Problem:** a Formula 1 question-answering agent had 79 overlapping tools.
 - **What I did:** regrouped them into 8 clear tools, with a test proving nothing was lost.
-- **Result:** tool definitions 85% smaller (13,487 → 2,014 tokens), all 79 capabilities intact.
+- **Result:** tool definitions 85% smaller (13,487 → 2,014 tokens), all 79 capabilities intact. Measured and tested; the live agent still binds the full set, and switching it over is next.
 
 ## The problem
 
@@ -78,21 +78,21 @@ As features grew, so did the tool list. By the time I measured it, the agent had
 
 {/* src: backend/eval/measure_consolidation.py; consolidation.json */}
 
-**Consolidate by intent, not by table.** The 79 tools collapsed naturally into a few questions people actually ask: race analysis, driver stats, standings, comparisons and what-if scenarios. I built eight parameterized dispatchers on those lines. Each one routes to the original underlying function and filters arguments to that function's signature, so none of the originals had to change.
+**Consolidate by intent, not by table.** The 79 tools collapsed naturally into a few questions people actually ask: race analysis, driver stats, standings, comparisons and what-if scenarios. I built eight intent-level tools on those lines: five parameterized dispatchers plus three standalone tools. Each dispatcher routes to the original underlying function and filters arguments to that function's signature, so none of the originals had to change.
 
-{/* src: backend/agent/tools/consolidated_tools.py; test_dispatch_routes_and_filters_args */}
+{/* src: backend/agent/tools/consolidated_tools.py; test_dispatch_routes_and_filters_args; README "Measured result" (5 dispatchers + 3 standalone) */}
 
 **A guarded escape hatch.** For questions the dispatchers don't cover, the agent falls back to text-to-SQL that is validated as read-only before it runs. The model gets flexibility without write access to the database.
 
 {/* src: backend/agent/validation.py; tests/test_tools/test_sql_validation.py */}
 
-**Grounding.** A query-understanding step parses each question into entities, sub-questions and a HyDE-style hypothetical answer describing what a complete response should contain. The plan is built from that, and answers are built from the race data and telemetry it retrieves.
+**Grounding.** A query-understanding step parses each question into entities, sub-questions and a HyDE-style hypothetical answer describing what a complete response should contain. The plan is built from that, and answers are built from the race data and telemetry it retrieves. When the data isn’t there, it says so and names what failed instead of guessing; with no database reachable, that notice comes back at once, before any model call.
 
-{/* src: HyDE — agent/prompts/understand.py:21, agent/nodes/understand.py:139 (main). NOTE: hypothetical_answer is generated but not yet passed to vector search; see docs/SOURCES.md */}
+{/* src: no-data path + preflight: README "No data, no answer", "No data services, no model calls"; ENGINEERING_LOG.md 2026-11-11 "Preflight before any LLM call". HyDE — agent/prompts/understand.py:21, agent/nodes/understand.py:139 (main). NOTE: hypothetical_answer is generated but not yet passed to vector search; see docs/SOURCES.md */}
 
-**The rest of the system.** The agent runs on LangGraph behind FastAPI, with a multi-provider LLM router (Groq's Llama 3.3 70B, falling back to Gemini, then a local Ollama model). It serves sub-second responses on million-row datasets, and a Next.js front end adapts its layout to the question: speed traces for telemetry, timelines for strategy, side-by-side views for comparisons.
+**The rest of the system.** The agent runs on LangGraph behind FastAPI, with a multi-provider LLM router: OpenAI, Groq, DeepSeek or Gemini when a key is set, falling back to a local Llama 3.1 8B through Ollama, which is the default and needs no key. A Next.js chat front end streams the answer and opens a chart beside it when there is something to plot.
 
-{/* src: README Tech Stack, Features (private: SOURCES.md for latency) */}
+{/* src: README Architecture (router order), Quick start ("No API keys are needed"; llama3.1:8b), "Charts beside the chat"; ENGINEERING_LOG.md 2026-11-11 "One default model". "Sub-second on million-row datasets" dropped 2026-11-11: never benchmarked and no longer in the repo README */}
 
 ## Results
 
@@ -103,7 +103,7 @@ As features grew, so did the tool list. By the time I measured it, the agent had
 | Underlying capabilities reachable | 79 | 79 |
 | Test suite | 57 passing | 63 passing |
 
-{/* src: consolidation.json; CLAIMS.md (public in F1 RIA) rows 1–3, 6 */}
+{/* src: consolidation.json; CLAIMS.md (public in F1 RIA) rows 1–3, 6 (test counts at the time of the change; the backend suite is now 179 passing + 1 DB-dependent, CLAIMS.md 2026-11-11) */}
 
 <F1Results n={2} />
 
@@ -113,6 +113,6 @@ The zero-loss claim is enforced by a test, not asserted: `test_every_timescale_t
 
 ## What's next
 
-The consolidation covers the TimescaleDB tools, which were 88% of the original token cost. The 13 Neo4j and vector tools are next. The bigger open question is accuracy: fewer, better-named tools should improve tool selection, and I want to prove that with a labelled question set scored end to end, rather than assume it.
+The consolidated set is built and tested, but the live agent still binds the full 92 tools (79 TimescaleDB, 8 Neo4j, 5 vector search). Switching the binding is next: it touches the execute step and the planner’s tool names, and needs the databases running to validate answers end to end. The consolidation covers the TimescaleDB tools, which were 88% of the original token cost; the 13 Neo4j and vector tools come after. The bigger open question is accuracy: fewer, better-named tools should improve tool selection, and I want to prove that with a labelled question set scored end to end, rather than assume it.
 
-{/* src: CLAIMS.md (public in F1 RIA) scope note */}
+{/* src: CLAIMS.md (public in F1 RIA) scope note and "full 92 tools" row; README "Not yet bound at runtime" */}

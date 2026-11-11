@@ -397,14 +397,15 @@
     "laps": 53854
   },
   "backtest": {
-    "races_backtested": 59,
+    "races_backtested": 57,
     "n_sims_per_plan": 2000,
     "agreement_definition": "same stop count and every pit lap within +/-3",
-    "agreement_rate_pct": 6.8,
-    "stop_count_agreement_pct": 49.2,
-    "median_pit_lap_offset": 8,
-    "mean_pit_lap_offset": 7.4,
+    "agreement_rate_pct": 12.3,
+    "stop_count_agreement_pct": 56.1,
+    "median_pit_lap_offset": 6,
+    "mean_pit_lap_offset": 6.6,
     "offset_note": "sim pits later than the field (positive) \u2014 the unmodelled undercut/track-position effect makes real teams stop earlier",
-    "resid_sigma_s": 1.457
+    "resid_sigma_s": 1.457,
+    "circuit_inputs": "in-sample (all races, including the target)"
   }
 }

@@ -80,9 +80,9 @@ Watch a lap-time chart and tyre wear is almost invisible. As the car burns fuel 
 - driver, as a random intercept per driver-season
 - tyre wear, as its own linear and quadratic curve per compound
 
-It converged on the full data and on every cross-validation fold.
+It converged on the full data and on every cross-validation fold. Everything reproduces from a fresh clone: the cleaned laps are committed, and 30 tests run in CI on every push.
 
-{/* src: README Tier 2 */}
+{/* src: README Tier 2; README Reproduce ("re-run on a fresh clone") and Tests (30, run in CI on every push) */}
 
 <PitWallPipeline n={1} />
 
@@ -94,9 +94,9 @@ It converged on the full data and on every cross-validation fold.
 
 {/* src: README Tier 2 "Baseline", "Validation" */}
 
-**Strategy simulator.** For a given race and stint plan, the simulator adds up the degradation cost and draws the random parts from real data: pit-lane loss from each circuit's actual in and out laps, safety-car probability and timing from each circuit's history, and lap-time noise from the model's residuals. It runs 2,000 simulations per plan across one- and two-stop strategies and returns the fastest expected plan with its P5–P95 band.
+**Strategy simulator.** For a given race and stint plan, the simulator adds up the degradation cost and draws the random parts from real data: pit-lane loss from each circuit's actual in and out laps (medians from 19.8 s at Belgium to 35.4 s at Canada), safety-car probability and timing from each circuit's history, and lap-time noise from the model's residuals. It runs 2,000 simulations per plan across one- and two-stop strategies and returns the fastest expected plan with its P5–P95 band.
 
-{/* src: README Tier 3 */}
+{/* src: README Tier 3 (pit-loss medians 19.8–35.4 s, pit_loss_median_s_by_circuit in results/backtest.json) */}
 
 ## Results
 
@@ -111,12 +111,14 @@ It converged on the full data and on every cross-validation fold.
 
 <PitWallAccuracy n={3} />
 
-**Backtest against the field (59 races).** The simulator never sees the real pit laps. It picks the same number of stops as the teams about half the time (49.2%). Its pit laps land on average 7.4 laps later than the teams', and that gap is the interesting result. The simulator finds the pace-optimal window, while real teams pit earlier to undercut rivals and protect track position. The expected-time curve around the optimum is shallow, a few seconds across a wide window, so in practice track position decides the lap.
+**Backtest against the field (57 races).** The simulator never sees the real pit laps. It picks the same number of stops as the teams in 32 of 57 races (56.1%), and matches the stop count with every pit lap within three laps in 7 (12.3%). Where the stop counts match, its pit laps land on average 6.6 laps later than the teams', and that gap is the interesting result. The simulator finds the pace-optimal window, while real teams pit earlier to undercut rivals and protect track position. The expected-time curve around the optimum is shallow, a few seconds across a wide window, so in practice track position decides the lap.
 
-{/* src: README "Backtest vs the field"; results/backtest.json */}
+The circuit inputs (pit-lane loss, safety-car history) are built from every race, including the one being tested. A held-out run that rebuilds them without the target race gives the same 56.1% stop-count agreement, with a mean offset of 6.0 laps.
+
+{/* src: README "Results at a glance", "Backtest vs the field (57 races)", "What is and isn't in-sample"; results/backtest.json (32/57, 7/57, mean offset 6.6); results/backtest_holdout.json (56.1%, strict 5/57, mean offset 6.0) */}
 
 ## What's next
 
-The biggest gap is an undercut and track-position model, which would close most of the 7.4-lap offset. After that: a traffic model, and per-driver degradation slopes instead of one curve per compound.
+The biggest gap is an undercut and track-position model, which would close most of the 6.6-lap offset. After that: a traffic model, and per-driver degradation slopes instead of one curve per compound.
 
 {/* src: README Limitations */}

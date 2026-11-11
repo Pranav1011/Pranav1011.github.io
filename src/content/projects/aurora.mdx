@@ -83,25 +83,25 @@ I wanted to build the version of this that a support team could actually turn on
 2. Policy-gated writes: a deterministic engine approves or blocks every consequential action
 3. A loop breaker that stops repeated or non-progressing tool calls
 4. A per-ticket cost ceiling
-5. Reply grounding, so the answer can only cite facts that came back from a tool
+5. Reply checks: the answer can only cite facts that came back from a tool, and can’t claim a refund, cancellation, address change or credit the run never made
 
-{/* src: policy/, nodes.py:85,225-241,262-293,306-309,343-370) */}
+{/* src: policy/, nodes.py:85,225-241,262-293,306-309,343-370; reply action-claim guard: policy/action_claims.py, agent/nodes.py:448 (README Architecture "Guards" table, "action claims" row) */}
 
 **Swappable brains.** The reasoning sits behind one interface. A single environment variable switches between a deterministic mock (for reproducible evals), a local Llama 3.1 8B through Ollama, and Claude. The loop, tools, guardrails, evals and UI never change.
 
 {/* src: README "Three interchangeable brains" */}
 
-**Production plumbing.** Tickets run through an async FastAPI job queue backed by Redis/RQ, with retries, timeouts and a dead-letter queue. Idempotency keys make every consequential write exactly-once, so a duplicate delivery never issues a second refund. A job orphaned by a killed worker resumes on restart without double-acting. On an I/O-bound workload the worker pool reaches 3.69× throughput at four workers (8.2 → 30.3 tickets/s).
+**Production plumbing.** Tickets run through an async FastAPI job queue backed by Redis/RQ, with retries, timeouts and a dead-letter queue. Idempotency keys make every consequential write exactly-once, so a duplicate delivery never issues a second refund. A job orphaned by a killed worker resumes on restart without double-acting. On an I/O-bound workload the worker pool reaches 3.5× throughput at four workers (7.7 → 27.0 tickets/s).
 
-{/* src: reliability/idempotency.py, api/queue_redis.py, reliability/reconcile.py, benchmarks/results/concurrency-2026-09-05.json */}
+{/* src: reliability/idempotency.py, api/queue_redis.py, reliability/reconcile.py, benchmarks/results/concurrency-2026-11-11.json (README Reliability table) */}
 
-The same policy-gated tools are exposed through an MCP server, so Claude Desktop can drive them. A React and TypeScript console shows the queue, a replayable run trace for every ticket, and an escalation inbox.
+The same policy-gated tools are exposed through an MCP server, so Claude Desktop can drive them. A React and TypeScript console shows the queue, a replayable run trace for every ticket, and an escalation inbox, and it works at phone width. Closing an escalation takes a note and an operator token, and the close is written into the ticket’s trace.
 
-{/* src: README "The console" */}
+{/* src: README "The console" (Escalations bullet; phone width); Aurora 676599b, e28b1da */}
 
 ## Evaluation
 
-I built the eval harness before I trusted any result. Run with a scripted stand-in model so results are reproducible, it runs a 46-scenario golden set ranging from easy to adversarial: tickets that must be escalated, tickets that try to touch another customer's account, and seven prompt-injection attacks. It scores task success against a deterministic final-state check, tool-trajectory precision and recall, and action safety. Reply quality is scored by an LLM judge that I validated for position bias and consistency before relying on it. It all runs in GitHub Actions CI.
+I built the eval harness before I trusted any result. Run with a scripted stand-in model so results are reproducible, it runs a 46-scenario golden set ranging from easy to adversarial: tickets that must be escalated, tickets that try to touch another customer's account, and seven prompt-injection attacks. It scores task success against a deterministic final-state check, tool-trajectory precision and recall, and action safety. On the scripted model, reply quality is checked by a keyword heuristic, not a model; the judge-validation study (position bias, consistency, 10 hand labels) runs against it to prove the study works, and can be pointed at Claude. The golden set runs in GitHub Actions CI with the 173-test suite.
 
 | Metric | Result |
 |---|---|
@@ -111,7 +111,7 @@ I built the eval harness before I trusted any result. Run with a scripted stand-
 | Reply scope (no other customer’s data in a reply) | 100% |
 | Cost and latency per ticket | ~$0.006, ~320 ms |
 
-{/* src: README "Evaluation results" table; eval_results/latest.json */}
+{/* src: README "Evaluation results" table and "About the judge rows"; eval_results/latest.json (judge_validation human_labeled 10); README Status (173 tests); .github/workflows/ci.yml + tests/test_eval_harness.py::test_harness_scores_the_golden_set */}
 
 **The harder test** is swapping in a weaker brain. A small local model varies from run to run, so I run the same 8 tickets on Llama 3.1 8B five times rather than trusting one run. With the current code it handled 2–3 of 8 correctly per run, took no forbidden actions and put no other customer’s data in a reply, across all 40 ticket runs.
 
