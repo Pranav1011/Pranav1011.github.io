@@ -25,16 +25,17 @@ links:
   repo: https://github.com/Pranav1011/regista
   demo: https://pranav1011.github.io/regista/
 cover:
-  src: /media/regista-cover.jpg
-  alt: The Regista viewer on Metrica sample game 3 at 60:00. Players are drawn on a 2D pitch; beside it, formation cards show 4-4-2 for the home team without the ball, with a runner-up of 4-2-3-1 marked as a close call, two detected pressing changes, and the list of questions for the analyst.
-  kind: image
+  src: /media/regista-loop.mp4
+  poster: /media/regista-loop-poster.jpg
+  alt: The Regista viewer replaying Metrica sample game 3 from 59:50 to 60:09. Players move on a 2D pitch while formation cards show 4-4-2 for the home team without the ball, a close call against 4-2-3-1; at 60:00 a home pressing change appears in the detected-moments list as the replay reaches it.
+  kind: video
 status: active
 ---
 
 import Figure from '../../components/Figure.astro';
 import OverviewVideo from '../../components/OverviewVideo.astro';
 
-{/* src (frontmatter): regista/README.md "What it does", "Results (Phase 2)"; eval/reports/phase2_results.json skillcorner.questions 1175, matches 20, accuracy 0.9277, categories.false_premise.acc 0.6646; model qwen3.5:9b; pyproject.toml (kloppy, duckdb); README Architecture (MCP tools, Ollama, TypeScript viewer). Cover: screenshot of the live GitHub Pages demo. */}
+{/* src (frontmatter): regista/README.md "What it does", "Results (Phase 2)"; eval/reports/phase2_results.json skillcorner.questions 1175, matches 20, accuracy 0.9277, categories.false_premise.acc 0.6646; model qwen3.5:9b; pyproject.toml (kloppy, duckdb); README Architecture (MCP tools, Ollama, TypeScript viewer). Cover: 5-second loop of the live GitHub Pages demo (metrica-3, 59:50 to 60:09), cut from the frame-by-frame capture made for the overview video. */}
 
 <OverviewVideo
   src="/media/regista-overview.mp4"
