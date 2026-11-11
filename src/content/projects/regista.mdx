@@ -1,0 +1,115 @@
+---
+title: Regista
+headline: Football tactics a coach can question, and check
+domain: Football analytics
+slug: regista
+order: 4
+featured: true
+year: 2026
+role: Solo — data, analytics, agent, evaluation
+summary: A match analyst for football coaches. It reads player-tracking data, flags tactical changes, and answers questions with every number checked against the data.
+problem: A coach reviewing a match wants to know what shape each team played and when it changed, without trusting a black box that might invent a number.
+mechanisms:
+  - label: Moments flagged causally
+    detail: Pressing, back-line and line-height changes are flagged using only data up to that moment, never what comes after.
+  - label: Answers checked against data
+    detail: Every number and match time in an answer must appear in the tool outputs, or it isn't marked verified.
+  - label: Citations that seek the replay
+    detail: Each answer cites the time ranges it came from, and clicking one jumps the replay there.
+result: On 1,175 questions about 20 held-out matches, a local 9B model answered 92.8% correctly; it rejected false premises only 66.5% of the time.
+metric:
+  value: "92.8%"
+  label: of 1,175 held-out questions answered correctly
+stack: [Python, kloppy, DuckDB, MCP, Ollama, TypeScript]
+links:
+  repo: https://github.com/Pranav1011/regista
+  demo: https://pranav1011.github.io/regista/
+cover:
+  src: /media/regista-cover.jpg
+  alt: The Regista viewer on Metrica sample game 3 at 60:00. Players are drawn on a 2D pitch; beside it, formation cards show 4-4-2 for the home team without the ball, with a runner-up of 4-2-3-1 marked as a close call, two detected pressing changes, and the list of questions for the analyst.
+  kind: image
+status: active
+---
+
+import Figure from '../../components/Figure.astro';
+
+{/* src (frontmatter): regista/README.md "What it does", "Results (Phase 2)"; eval/reports/phase2_results.json skillcorner.questions 1175, matches 20, accuracy 0.9277, categories.false_premise.acc 0.6646; model qwen3.5:9b; pyproject.toml (kloppy, duckdb); README Architecture (MCP tools, Ollama, TypeScript viewer). Cover: screenshot of the live GitHub Pages demo. */}
+
+## TL;DR
+
+- **Problem:** coaches want tactical answers they can trust, from data they can check.
+- **What I did:** built tactical analytics on open player-tracking data, causal detectors for tactical changes, and a local analyst agent whose answers are checked against the data and cite the moment they came from.
+- **Result:** 92.8% of 1,175 questions about 20 held-out matches answered correctly on a local 9B model, with 97.3% of answers passing the number check. False premises are the weak spot: 66.5% rejected.
+
+{/* src: eval/reports/phase2_results.json (accuracy 0.9277, number_grounding 0.9728, false_premise 0.6646); README "Results (Phase 2)" */}
+
+## The problem
+
+A coach or analyst reviewing a match wants to know what shape each team played, how hard they pressed, and when that changed. Tracking data holds the answer: where every player and the ball were, many times a second. But nobody wants to query raw coordinates, and an AI assistant that answers in fluent prose is only useful if its numbers are real.
+
+So Regista has two jobs. Turn tracking data into tactics a coach recognizes, and answer questions about it in a way that shows its working.
+
+{/* src: README intro ("Coaches and analysts reviewing a match want to know what shape each team played and when it changed, without trusting a black box") */}
+
+## Approach
+
+**One data contract.** Metrica and SkillCorner tracking data are converted into one canonical schema. From positions alone, Regista infers possession and passes, detects each team’s formation in and out of possession, measures team shape (line height, length, width, compactness), builds pass networks and scores passing options with a calibrated pitch-control model. Event labels are used only to score the inference.
+
+{/* src: README "What it does", "Design decisions and limitations" ("Tracking data only"); src/regista/schema.py, src/regista/analytics/ */}
+
+**Honest formations.** A formation call can be close. When the runner-up shape nearly ties the winner, the viewer says so with a “close call” marker instead of pretending to be sure. On the held-out matches, 98.3% of low-confidence formations were flagged that way.
+
+{/* src: phase2_results.json categories.reliability (n 60, acc 0.9833); README Phase 2 table ("Low-confidence formations flagged as close calls"); viewer screenshot */}
+
+**Tactical moments, flagged causally.** Detectors flag back-line, pressing and line-height changes using only the data up to each moment, the way a coach would see them live. They flag a median of 10 moments per held-out match. Nobody has labelled when a press “really” changed, so there is no accuracy figure for them, and I don’t claim one.
+
+{/* src: README "What it does" (Phase 2), "No ground truth for tactical moments"; phase2_results.json moments (median 10, range 2–17, 21 matches) */}
+
+**An analyst that shows its working.** A local model (Qwen 3.5 9B through Ollama) answers questions by calling 11 read-only tools over MCP; every tool result carries the period, frame range and match clock it came from. The model writes the answer but never computes a number. A deterministic check then confirms that every number and match time in the answer appears in that turn’s tool outputs, or the answer is not marked verified. In the browser viewer, each answer’s citations jump the replay to the moment they came from.
+
+{/* src: README Architecture table (11 read-only MCP tools, evidence on every result, grounding check), "Local model, no paid API"; src/regista/agent/grounding.py, mcp_server.py */}
+
+<Figure
+  n={1}
+  caption="The live demo on Metrica sample game 3, the held-out match, at 60:00: formation cards with close calls, the pressing changes detected so far, and the analyst panel. The demo replays tracking data with pre-generated answers; live questions run on a local server and model."
+  source="pranav1011.github.io/regista"
+>
+  <img src="/media/regista-cover.jpg" alt="The Regista viewer: a 2D pitch with players, formation cards, detected moments and the analyst panel." width="1440" height="900" loading="lazy" decoding="async" style="width:100%;height:auto;border-radius:8px" />
+</Figure>
+
+{/* src: README "Live demo", "At runtime there are two paths" (static viewer shows answers pre-generated by agent v1.1) */}
+
+**Frozen, then tested once.** The model, prompt and agent code were frozen on development matches before a single run on the held-out matches, so the test set never shaped the agent.
+
+{/* src: README "Frozen, then tested once"; eval/agent/frozen.json */}
+
+## Results
+
+Tested once on 20 held-out SkillCorner matches, 1,175 questions:
+
+| Question type | Correct |
+|---|---|
+| Lookups, comparisons and “when” questions (185) | 100% |
+| Multi-step (39) | 94.9% |
+| Reworded questions (570) | 95.1% |
+| Unanswerable, declined (xG, player names, score; 100) | 100% |
+| False premise rejected with evidence (161) | 66.5% |
+| **All questions** | **92.8%** |
+
+97.3% of answers passed the number check, 99.5% of citations pointed at recorded frames covering the time asked about, and the median answer took 10.7 s on a laptop.
+
+{/* src: eval/reports/phase2_results.json skillcorner (lookup 100/1.0, comparison 54/1.0, temporal 31/1.0, multi_step 39/0.949, paraphrase (answerable) 570/0.951, unanswerable 100/1.0, false_premise 161/0.665, accuracy 0.928, number_grounding 0.973, citation_validity 0.995, latency_p50 10.69); README Phase 2 block */}
+
+**What the scores missed.** A deterministic audit found 9 of 21 match summaries calling the higher defensive line “deeper”, and the LLM judge had rated most of them 5 out of 5 for faithfulness. Against hand labels, the judge averaged 5.0 where the human labels averaged 4.3. That is why the number check is deterministic code, not a model.
+
+{/* src: phase2_results.json direction_audit (21 summaries, 9 with error), human_agreement.human_unassisted (summary_faithful_judge 5.0, human 4.3); README "What the automatic scores miss" */}
+
+**What the tracking layer found.** Inferring passes from tracking alone exposed a labelling error in the published event file for the held-out game: two players swapped in the second half. Scored against the published labels, pass detection reached an F1 of 0.809; with 210 events re-attributed, 0.914. Calibrated pitch control beat a logistic baseline on 1,253 labelled pass attempts (Brier skill 0.461 against 0.187). For position groups, the role detector only ties a depth-rank baseline (0.731 against 0.724), and I report it as a tie.
+
+{/* src: eval/reports/phase1_results.json (passes v2_published 0.809, v2_corrected 0.914, swap_events 210; pitch_control n_test 1253, skill_platt 0.461, skill_logistic 0.187; roles group_template 0.731, group_depth 0.724, CI -0.006 to +0.020); README "Results (Phase 1)" */}
+
+## What's next
+
+False premises are the weakest category: a third of them still get answered as if true. After that, Phase 3 adds tracking from match video, so Regista no longer depends on open tracking data.
+
+{/* src: phase2_results.json false_premise 0.665; README "Planned: tracking from match video (Phase 3)"; docs/ROADMAP.md */}
